@@ -16,6 +16,7 @@
     "firebase-admin": "^13.8.0",
     "google-auth-library": "^9.0.0",
     "googleapis": "^171.4.0",
+    "ip-address": "9.0.2",
     "jsonwebtoken": "^9.0.1",
     "mongoose": "^7.4.1",
     "multer": "^2.1.1",
@@ -26,5 +27,8 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "overrides": {
+    "ip-address": "9.0.2"
   }
 }
