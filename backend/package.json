@@ -29,6 +29,7 @@
     "nodemon": "^3.0.1"
   },
   "overrides": {
-    "ip-address": "9.0.2"
+    "ip-address": "9.0.2",
+    "socks": "2.7.1"
   }
 }
