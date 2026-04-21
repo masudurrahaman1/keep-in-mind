@@ -36,5 +36,20 @@ export default defineConfig(({mode}) => {
         'Cross-Origin-Embedder-Policy': 'unsafe-none',
       },
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              if (id.includes('firebase')) return 'firebase-vendor';
+              if (id.includes('fabric')) return 'fabric-vendor';
+              if (id.includes('tiptap') || id.includes('prosemirror')) return 'editor-vendor';
+              return 'vendor';
+            }
+          }
+        }
+      },
+      chunkSizeWarningLimit: 1000,
+    },
   };
 });

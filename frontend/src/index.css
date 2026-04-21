@@ -200,9 +200,14 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-[data-theme="light"] .glass,
+[data-theme="light"] .glass {
+  background: #FFFFFF;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+}
+
 @media (prefers-color-scheme: light) {
-  .glass {
+  :root:not([data-theme="dark"]):not([data-theme="amoled"]) .glass {
     background: #FFFFFF;
     border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
@@ -240,9 +245,15 @@ body {
   z-index: 0;
 }
 
-[data-theme="light"] .bg-mesh::after,
+[data-theme="light"] .bg-mesh::after {
+  background:
+    radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+}
+
 @media (prefers-color-scheme: light) {
-  .bg-mesh::after {
+  :root:not([data-theme="dark"]):not([data-theme="amoled"]) .bg-mesh::after {
     background:
       radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
       radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
