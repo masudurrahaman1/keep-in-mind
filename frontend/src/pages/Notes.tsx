@@ -1,0 +1,404 @@
+import { useState, useEffect, useMemo } from 'react';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { cn } from '../components/Sidebar';
+import { useAuth } from '../context/AuthContext';
+import { syncNotesToGoogleDrive } from '../services/driveService';
+import SpeedDial from '../components/SpeedDial';
+import NoteContextMenu from '../components/NoteContextMenu';
+
+const initialNotes = [
+  // ... (keeping the sample notes as fallback)
+  {
+    id: 1,
+    title: 'Grocery List',
+    content: '- Milk\n- Bread\n- Eggs\n- Avocados',
+    color: 'bg-primary/10 border-primary/20 hover:border-primary/50 text-on-surface',
+    textColor: 'text-primary',
+    date: '2 hours ago',
+    type: 'list',
+    category: 'Personal'
+  },
+  {
+    id: 2,
+    title: 'Project Ideas',
+    content: '1. AI powered note taking app\n2. Real-time collaboration\n3. Markdown support out of the box.',
+    color: 'bg-tertiary/10 border-tertiary/20 hover:border-tertiary/50 text-on-surface',
+    textColor: 'text-tertiary',
+    date: 'Yesterday',
+    type: 'text',
+    category: 'Work'
+  }
+];
+
+export default function Notes() {
+  const { user, token, googleAccessToken } = useAuth();
+  const navigate = useNavigate();
+  const [contextMenu, setContextMenu] = useState<{ note: any; x: number; y: number } | null>(null);
+  
+  // Storage key is unique to the user if signed in
+  const storageKey = user ? `keep-in-mind-notes-${user._id}` : 'keep-in-mind-notes-guest';
+
+  const [notes, setNotes] = useState(() => {
+    const saved = localStorage.getItem(storageKey);
+    return saved ? JSON.parse(saved) : initialNotes;
+  });
+
+  // Auto-Sync to Google Drive
+  useEffect(() => {
+    const isAutoSyncEnabled = localStorage.getItem('keep-in-mind-auto-sync') === 'true';
+    if (!isAutoSyncEnabled || !user || !token || !googleAccessToken) return;
+
+    const syncTimeout = setTimeout(async () => {
+      try {
+        const syncableNotes = notes;
+        if (syncableNotes.length === 0) return;
+        console.log('🔄 Auto-syncing to Google Drive...');
+        await syncNotesToGoogleDrive(syncableNotes, googleAccessToken, token);
+        
+        const now = new Date().toLocaleString();
+        localStorage.setItem(`keep-in-mind-last-sync-${user._id}`, now);
+      } catch (err) {
+        console.error('Auto-sync failed:', err);
+      }
+    }, 3000); // 3-second debounce
+
+    return () => clearTimeout(syncTimeout);
+  }, [notes, user, token, googleAccessToken]);
+
+  const [viewMode] = useState<'grid' | 'list'>('grid');
+  const [filterActive, setFilterActive] = useState('All');
+  const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+
+  // Persist notes whenever they change
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(notes));
+  }, [notes, storageKey]);
+
+  const filters = ['All', ...(() => {
+    const saved = localStorage.getItem('keep-in-mind-labels');
+    return saved ? JSON.parse(saved) : ['Personal', 'Work', 'Ideas', 'Urgent'];
+  })()];
+
+  const filteredNotes = useMemo(() => {
+    const result = notes.filter(note => {
+      // Exclude archived notes from main view
+      if (note.archived) return false;
+
+      const matchesSearch = !searchQuery || 
+        note.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        note.content.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesFilter = filterActive === 'All' || note.category === filterActive;
+      return matchesSearch && matchesFilter;
+    });
+
+    return result.sort((a, b) => {
+      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+      return b.id - a.id;
+    });
+  }, [notes, searchQuery, filterActive]);
+  const handleSaveNote = (savedNote: any) => {
+    if (savedNote.isNew || !savedNote.id) {
+      setNotes([{
+        ...savedNote,
+        id: Date.now(),
+        isNew: false,
+        date: 'Just now',
+        type: savedNote.type || 'text'
+      }, ...notes]);
+    } else {
+      setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
+    }
+  };
+
+  const handleDeleteNote = (noteId: number) => {
+    setNotes(notes.filter(n => n.id !== noteId));
+    setContextMenu(null);
+  };
+
+  const handleDuplicate = (note: any) => {
+    const copy = { ...note, id: Date.now(), title: `${note.title} (copy)`, date: 'Just now' };
+    setNotes(prev => [copy, ...prev]);
+    setContextMenu(null);
+  };
+
+  const handlePin = (note: any) => {
+    const updated = { ...note, pinned: !note.pinned };
+    setNotes(prev => prev.map(n => n.id === note.id ? updated : n));
+    setContextMenu(null);
+  };
+
+  const handleAddLabel = (note: any, label: string) => {
+    const updated = { ...note, category: label };
+    setNotes(prev => prev.map(n => n.id === note.id ? updated : n));
+  };
+
+  const handleArchive = (note: any) => {
+    const nowArchived = !note.archived;
+    setNotes(prev => prev.map(n => n.id === note.id ? { ...n, archived: nowArchived } : n));
+    setContextMenu(null);
+  };
+
+  const base64ToFile = async (base64Data: string, filename: string) => {
+    try {
+      const res = await fetch(base64Data);
+      const blob = await res.blob();
+      return new File([blob], filename, { type: 'image/png' });
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const handleShare = async (note: any) => {
+    setContextMenu(null);
+    const categoryText = note.category ? `[${note.category}] ` : '';
+    const shareText = `${categoryText}${note.title}\n\n${note.content || ''}`;
+    
+    try {
+      // 1. Always copy text to clipboard as baseline
+      if (!note.type || note.type === 'text' || note.type === 'list') {
+        await navigator.clipboard.writeText(shareText);
+      }
+
+      // 2. Prepare sharing data
+      const shareData: any = { title: note.title, text: shareText, url: window.location.href };
+
+      // 3. Handle Drawing/Image Sharing
+      if (note.type === 'drawing' && note.content?.startsWith('data:')) {
+        const file = await base64ToFile(note.content, `${note.title || 'drawing'}.png`);
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          shareData.files = [file];
+          // For drawings, the text content is secondary (it's often just empty or meta)
+          shareData.text = note.title ? `${categoryText}${note.title}` : 'Shared drawing';
+        }
+      }
+
+      // 4. Trigger Native Share
+      if (navigator.share) {
+        await navigator.share(shareData);
+      }
+    } catch (err) { 
+      console.log('Share interaction completed'); 
+    }
+  };
+
+  const handleHide = (note: any) => {
+    setNotes(prev => prev.filter(n => n.id !== note.id)); // Temporary hide for this session
+    setContextMenu(null);
+  };
+
+  const openNoteForEdit = (note: any) => {
+    setContextMenu(null);
+    if (note.type === 'drawing') navigate(`/drawing/${note.id}`);
+    else navigate(`/editor/${note.id}`);
+  };
+
+  return (
+    <div className="max-w-7xl mx-auto w-full flex flex-col h-full relative z-10">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 md:mb-8 gap-4">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-heading font-extrabold text-on-surface tracking-tight">
+          My <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Notes</span>
+        </h1>
+        
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 backdrop-blur-md bg-on-surface/5 p-1.5 rounded-full border border-on-surface/5 shadow-sm transition-colors shrink-0">
+          {filters.map(filter => (
+            <motion.button
+              whileTap={{ scale: 0.95 }}
+              key={filter}
+              onClick={() => setFilterActive(filter)}
+              className={cn(
+                "px-3 sm:px-5 py-2 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap transition-all duration-300 min-h-[36px]",
+                filterActive === filter
+                  ? "bg-primary text-white shadow-lg shadow-primary/30"
+                  : "text-on-surface hover:bg-surface-container-high/50"
+              )}
+            >
+              {filter}
+            </motion.button>
+          ))}
+          <div className="w-px h-6 bg-outline-variant/30 mx-2 hidden sm:block"></div>
+          <button 
+            className="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high/50 rounded-full transition-colors ml-1"
+            title="Filter options"
+          >
+            <Settings2 size={20} />
+          </button>
+        </div>
+      </div>
+
+      <div className={cn(
+        "grid gap-4 md:gap-6",
+        viewMode === 'grid'
+          ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-max"
+          : "grid-cols-1 max-w-3xl"
+      )}>
+        <AnimatePresence>
+          {filteredNotes.map((note) => {
+            const isDrawing = note.type === 'drawing';
+            const isList = note.type === 'list';
+            let listItems: any[] = [];
+            if (isList && note.content) {
+              try {
+                const parsed = JSON.parse(note.content);
+                if (Array.isArray(parsed)) listItems = parsed;
+              } catch {
+                // Old plain-text format: "- Milk\n- Bread\n..."
+                listItems = note.content.split('\n')
+                  .filter((l: string) => l.trim())
+                  .map((line: string, i: number) => ({
+                    id: i,
+                    text: line.replace(/^-\s*/, '').trim(),
+                    checked: false,
+                  }));
+              }
+            }
+
+            return (
+              <motion.div
+                layoutId={`note-${note.id}`}
+                key={note.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                whileHover={{ scale: 1.02, y: -4 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                onClick={() => {
+                  if (isDrawing) navigate(`/drawing/${note.id}`);
+                  else navigate(`/editor/${note.id}`);
+                }}
+                className={cn(
+                  "group cursor-pointer rounded-[2rem] p-6 border backdrop-blur-xl transition-all relative break-inside-avoid shadow-sm overflow-hidden",
+                  note.color
+                )}
+              >
+                <div className="flex justify-between items-start mb-4 relative z-10">
+                  <h3 className="font-heading font-bold text-xl leading-snug line-clamp-2 pr-8 text-on-surface group-hover:text-primary transition-colors flex items-center gap-2">
+                    {note.pinned && <Pin size={16} className="text-primary fill-primary" />}
+                    {note.title}
+                  </h3>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                      setContextMenu({ note, x: rect.left, y: rect.bottom + 4 });
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-on-surface/10 rounded-full transition-all absolute -top-1 -right-1 text-on-surface-variant group-hover:text-on-surface"
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                </div>
+
+                {/* Drawing Thumbnail */}
+                {isDrawing && note.content && note.content.startsWith('data:') ? (
+                  <img
+                    src={note.content}
+                    alt="Drawing"
+                    className="w-full rounded-xl object-contain max-h-40 bg-white/50"
+                  />
+                ) : isList ? (
+                  /* List Preview */
+                  <div className="space-y-1.5 relative z-10">
+                    {listItems.slice(0, 4).map((item: any) => (
+                      <div key={item.id} className="flex items-center gap-2 text-sm text-on-surface-variant">
+                        <div className={cn(
+                          "w-4 h-4 rounded border-2 shrink-0 flex items-center justify-center",
+                          item.checked ? "border-primary bg-primary/20" : "border-on-surface/30"
+                        )}>
+                          {item.checked && <CheckSquare size={10} className="text-primary" />}
+                        </div>
+                        <span className={cn("truncate", item.checked && "line-through opacity-50")}>{item.text || '—'}</span>
+                      </div>
+                    ))}
+                    {listItems.length > 4 && (
+                      <p className="text-xs text-on-surface-variant/50 pl-6">+{listItems.length - 4} more</p>
+                    )}
+                  </div>
+                ) : (
+                  <p className="text-sm text-on-surface-variant/90 line-clamp-5 whitespace-pre-wrap leading-relaxed relative z-10 font-medium">
+                    {note.content?.replace(/<[^>]*>/g, '')}
+                  </p>
+                )}
+
+                <div className="mt-6 flex items-center justify-between opacity-60 text-on-surface-variant relative z-10">
+                  <span className="text-xs font-bold tracking-wider uppercase">{note.date}</span>
+                  <div className="flex items-center gap-3">
+                    {note.category && (
+                      <div className="flex items-center gap-1 text-[10px] bg-on-surface/5 px-2 py-0.5 rounded-full border border-on-surface/5 font-bold uppercase tracking-tight">
+                        <Tag size={10} /> {note.category}
+                      </div>
+                    )}
+                    <div className={cn("flex items-center gap-2", note.textColor)}>
+                      {isList && <CheckSquare size={16} strokeWidth={2.5} />}
+                      {isDrawing && <PenLine size={16} strokeWidth={2.5} />}
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+
+        {filteredNotes.length === 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="col-span-full py-24 flex flex-col items-center justify-center text-center px-4"
+          >
+            <div className="w-24 h-24 glass-panel rounded-full flex items-center justify-center mb-8 shadow-lg shadow-primary/5">
+              {searchQuery ? <Search size={40} className="text-primary/50" /> : <FileText size={40} className="text-primary/50" />}
+            </div>
+            <h2 className="text-3xl font-heading font-bold text-on-surface mb-4">
+              {searchQuery ? "No results found" : "It's empty here"}
+            </h2>
+            <p className="max-w-md mx-auto text-base text-on-surface-variant mb-10 leading-relaxed">
+              {searchQuery 
+                ? `We couldn't find any notes matching "${searchQuery}". Try using different keywords.`
+                : "Capture your ideas, lists, and thoughts. Experience absolute clarity by creating your first note."}
+            </p>
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/editor')}
+              className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 transition-all"
+            >
+              <Plus size={24} strokeWidth={3} />
+              <span className="text-lg">Create Note</span>
+            </motion.button>
+          </motion.div>
+        )}
+
+      </div>
+
+      {/* Speed Dial FAB */}
+      <SpeedDial onAdd={(type) => {
+        if (type === 'audio' || type === 'image') {
+          return;
+        }
+        if (type === 'drawing') {
+          navigate('/drawing');
+        } else {
+          navigate('/editor');
+        }
+      }} />
+
+      {/* Note Context Menu */}
+      <AnimatePresence>
+        {contextMenu && (
+          <NoteContextMenu
+            note={contextMenu.note}
+            position={{ x: contextMenu.x, y: contextMenu.y }}
+            labels={filters.filter(f => f !== 'All')}
+            onClose={() => setContextMenu(null)}
+            onEdit={() => openNoteForEdit(contextMenu.note)}
+            onDelete={() => handleDeleteNote(contextMenu.note.id)}
+            onDuplicate={() => handleDuplicate(contextMenu.note)}
+            onArchive={() => handleArchive(contextMenu.note)}
+            onPin={() => handlePin(contextMenu.note)}
+            onAddLabel={(label) => handleAddLabel(contextMenu.note, label)}
+            onShare={() => handleShare(contextMenu.note)}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}

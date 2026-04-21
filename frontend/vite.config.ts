@@ -1,0 +1,40 @@
+import tailwindcss from '@tailwindcss/vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import {defineConfig, loadEnv} from 'vite';
+import basicSsl from '@vitejs/plugin-basic-ssl';
+
+export default defineConfig(({mode}) => {
+  const env = loadEnv(mode, '.', '');
+  return {
+    plugins: [react(), tailwindcss(), basicSsl()],
+    define: {
+      'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+    },
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, '.'),
+      },
+    },
+    server: {
+      https: true,
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        }
+      },
+      // HMR is disabled in AI Studio via DISABLE_HMR env var.
+      // Do not modify — file watching is disabled to prevent flickering during agent edits.
+      hmr: process.env.DISABLE_HMR !== 'true',
+
+      // Fix: Firebase Google Auth popup is blocked by the default COOP header.
+      // Setting to 'unsafe-none' allows the popup to post a message back to the opener.
+      headers: {
+        'Cross-Origin-Opener-Policy':   'unsafe-none',
+        'Cross-Origin-Embedder-Policy': 'unsafe-none',
+      },
+    },
+  };
+});

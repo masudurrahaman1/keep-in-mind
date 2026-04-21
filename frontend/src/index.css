@@ -1,0 +1,299 @@
+@import "tailwindcss";
+
+@theme {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-outfit: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-primary: var(--primary);
+  --color-primary-container: var(--primary-container);
+  --color-on-primary: var(--on-primary);
+  --color-on-primary-container: var(--on-primary-container);
+  
+  --color-surface: var(--surface);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  --color-error: var(--error);
+  --color-on-error: var(--on-error);
+  --color-error-container: var(--error-container);
+  --color-on-error-container: var(--on-error-container);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-container: var(--secondary-container);
+  --color-on-secondary: var(--on-secondary);
+  --color-on-secondary-container: var(--on-secondary-container);
+
+  --color-tertiary: var(--tertiary);
+  --color-tertiary-container: var(--tertiary-container);
+  --color-on-tertiary: var(--on-tertiary);
+  --color-on-tertiary-container: var(--on-tertiary-container);
+}
+
+/* ── Light Mode (default) ───────────────────────────────────── */
+:root,
+[data-theme="light"] {
+  --primary: #435B9D;
+  --primary-container: #DEE1FF;
+  --on-primary: #FFFFFF;
+  --on-primary-container: #111A37;
+  
+  --surface: #F9F9FF;
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F1F3FB;
+  --surface-container: #E3E6F0;
+  --surface-container-high: #D5D9E5;
+  --surface-container-highest: #C7CBD9;
+  
+  --on-surface: #191C20;
+  --on-surface-variant: #44474E;
+  --outline: #74777F;
+  --outline-variant: #C4C6D0;
+
+  --error: #BA1A1A;
+  --on-error: #FFFFFF;
+  --error-container: #FFDAD6;
+  --on-error-container: #410002;
+
+  --secondary: #585E71;
+  --secondary-container: #DCE2F9;
+  --on-secondary: #FFFFFF;
+  --on-secondary-container: #151B2C;
+
+  --on-secondary-container: #141B2C;
+
+  --tertiary: #715570;
+  --tertiary-container: #FBD7F8;
+  --on-tertiary: #FFFFFF;
+  --on-tertiary-container: #291329;
+}
+
+/* ── Dark Mode — System & Explicit ─────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --primary: #B9C3FF;
+    --primary-container: #2A4283;
+    --on-primary: #112A6A;
+    --on-primary-container: #DEE1FF;
+    
+    --surface: #111318;
+    --surface-container-lowest: #0C0E13;
+    --surface-container-low: #191C20;
+    --surface-container: #1D2024;
+    --surface-container-high: #282A2F;
+    --surface-container-highest: #33353A;
+    
+    --on-surface: #E2E2E9;
+    --on-surface-variant: #C4C6D0;
+    --outline: #8E9099;
+    --outline-variant: #44474E;
+
+    --error: #FFB4AB;
+    --on-error: #690005;
+    --error-container: #93000A;
+    --on-error-container: #FFDAD6;
+
+    --secondary: #C0C6DD;
+    --secondary-container: #3F4759;
+    --on-secondary: #2A3142;
+    --on-secondary-container: #DCE2F9;
+
+    --tertiary: #E3BADA;
+    --tertiary-container: #5A3D58;
+    --on-tertiary: #43273F;
+    --on-tertiary-container: #FFD7F7;
+  }
+}
+
+[data-theme="dark"] {
+  --primary: #B9C3FF;
+  --primary-container: #2A4283;
+  --on-primary: #112A6A;
+  --on-primary-container: #DEE1FF;
+  
+  --surface: #111318;
+  --surface-container-lowest: #0C0E13;
+  --surface-container-low: #191C20;
+  --surface-container: #1D2024;
+  --surface-container-high: #282A2F;
+  --surface-container-highest: #33353A;
+  
+  --on-surface: #E2E2E9;
+  --on-surface-variant: #C4C6D0;
+  --outline: #8E9099;
+  --outline-variant: #44474E;
+
+  --error: #FFB4AB;
+  --on-error: #690005;
+  --error-container: #93000A;
+  --on-error-container: #FFDAD6;
+
+  --secondary: #C0C6DD;
+  --secondary-container: #3F4759;
+  --on-secondary: #2A3142;
+  --on-secondary-container: #DCE2F9;
+
+  --tertiary: #E3BADA;
+  --tertiary-container: #5A3D58;
+  --on-tertiary: #43273F;
+  --on-tertiary-container: #FFD7F7;
+}
+
+/* ── AMOLED Mode — Pure Black ─────────────────────────────── */
+[data-theme="amoled"] {
+  --primary: #CBD2FF;
+  --primary-container: #112A6A;
+  --on-primary: #000000;
+  --on-primary-container: #DEE1FF;
+  
+  --surface: #000000;
+  --surface-container-lowest: #000000;
+  --surface-container-low: #0A0A0A;
+  --surface-container: #121212;
+  --surface-container-high: #1E1E1E;
+  --surface-container-highest: #282828;
+  
+  --on-surface: #FFFFFF;
+  --on-surface-variant: #BCC3D6;
+  --outline: #5C5E66;
+  --outline-variant: #2F3036;
+
+  --error: #FFB4AB;
+  --on-error: #690005;
+  --error-container: #93000A;
+  --on-error-container: #FFDAD6;
+
+  --secondary: #C0C6DD;
+  --secondary-container: #3F4759;
+  --on-secondary: #000000;
+  --on-secondary-container: #DCE2F9;
+
+  --tertiary: #E3BADA;
+  --tertiary-container: #5A3D58;
+  --on-tertiary: #000000;
+  --on-tertiary-container: #FFD7F7;
+}
+
+body {
+  font-family: var(--font-inter);
+  background-color: var(--surface);
+  color: var(--on-surface);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: manipulation;
+  overflow-x: hidden;
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* ── Glassmorphism ──────────────────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="light"] .glass,
+@media (prefers-color-scheme: light) {
+  .glass {
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+  }
+}
+
+.glass-panel {
+  @apply bg-surface-container-low/80 backdrop-blur-xl border border-outline-variant/30 shadow-sm transition-all duration-300;
+}
+
+.dark .glass-panel,
+[data-theme="dark"] .glass-panel {
+  @apply bg-surface-container-low/60 border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.5)];
+}
+
+[data-theme="amoled"] .glass-panel {
+  @apply bg-surface-container-low/40 border-white/10 shadow-none;
+}
+
+/* ── Background mesh gradient ───────────────────────────────── */
+.bg-mesh {
+  position: relative;
+  overflow: hidden;
+}
+
+.bg-mesh::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(circle at 10% 20%, rgba(129, 140, 248, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.1) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-theme="light"] .bg-mesh::after,
+@media (prefers-color-scheme: light) {
+  .bg-mesh::after {
+    background:
+      radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
+      radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+  }
+}
+
+[data-theme="amoled"] .bg-mesh::after {
+  background: none; /* True Black: disable mesh */
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: var(--font-outfit) !important;
+}
+
+/* Hide scrollbar */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ── Custom Animations ───────────────────────────────────────── */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(10deg); }
+  50% { transform: rotate(-10deg); }
+  75% { transform: rotate(5deg); }
+}
+
+.animate-wiggle {
+  animation: wiggle 0.5s ease-in-out;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+[data-theme="light"] .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
