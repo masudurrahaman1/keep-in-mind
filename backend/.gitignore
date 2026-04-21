@@ -1,4 +1,5 @@
-echo "node_modules
+node_modules/
 .env
-dist
-backend/serviceAccountKey.json" > .gitignore
+dist/
+serviceAccountKey.json
+*.log
