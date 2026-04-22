@@ -178,15 +178,6 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
           </>
         )}
 
-        {/* Global Logo - Hidden on mobile deep pages */}
-        <div className={clsx(
-          "hidden sm:flex items-center gap-2 ml-1",
-          (currentPath === '/settings' || currentPath.startsWith('/drawing')) && "sm:hidden lg:flex"
-        )}>
-           <div className="text-lg font-black tracking-tight flex items-center gap-1.5 drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]">
-              <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-tertiary to-secondary">Keep In Mind</span>
-            </div>
-        </div>
       </div>
 
       {/* Center: Title (mobile) or Search bar (tablet+) */}
