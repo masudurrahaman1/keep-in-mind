@@ -16,8 +16,8 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-google-access-token', 'google-access-token']
 }));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '5GB' }));
+app.use(express.urlencoded({ limit: '5GB', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);
