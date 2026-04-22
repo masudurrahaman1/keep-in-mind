@@ -688,32 +688,33 @@ export default function Drawing() {
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
-            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3 px-4 py-2 glass-panel rounded-xl translate-z-0"
+            className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 sm:gap-3 px-2 sm:px-4 py-2 glass-panel rounded-xl translate-z-0 max-w-[95vw] w-max"
           >
             {/* Tool Icon Indicator */}
-            <div className="flex items-center gap-2 pr-3 border-r border-on-surface/10">
-              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <div className="flex items-center gap-1 sm:gap-2 pr-1 sm:pr-3 border-r border-on-surface/10 shrink-0">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 {(() => {
                   const activeT = TOOLS.find(t => t.id === tool);
                   const Icon = activeT?.icon || MousePointer2;
-                  return <Icon size={14} />;
+                  return <Icon size={12} className="sm:w-[14px]" />;
                 })()}
               </div>
-              <span className="text-[10px] font-bold text-on-surface uppercase tracking-tight">{TOOLS.find(t => t.id === tool)?.label}</span>
+              <span className="text-[10px] font-bold text-on-surface uppercase tracking-tight hidden sm:block">{TOOLS.find(t => t.id === tool)?.label}</span>
             </div>
 
             {/* Contextual Controls */}
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-2 sm:gap-8 overflow-hidden">
               {/* Color Picker (Shown for most except focus/eraser/pan) */}
               {tool !== 'eraser' && tool !== 'pan' && tool !== 'select' && (
-                <div className="flex items-center gap-2 border-r border-on-surface/10 pr-6">
-                  {TOOL_COLORS.slice(0, 6).map(c => (
+                <div className="flex items-center gap-1 sm:gap-2 border-r border-on-surface/10 pr-2 sm:pr-6 shrink-0">
+                  {TOOL_COLORS.slice(0, 6).map((c, i) => (
                     <button
                       key={c}
                       onClick={() => setColor(c)}
                       className={cn(
-                        "w-5 h-5 rounded-full border-2 transition-all hover:scale-125",
-                        color === c ? "border-primary scale-125 shadow-lg" : "border-transparent"
+                        "w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 transition-all hover:scale-125",
+                        color === c ? "border-primary scale-110 sm:scale-125 shadow-lg" : "border-transparent",
+                        i >= 3 && "hidden sm:block"
                       )}
                       style={{ background: c }}
                     />
@@ -750,8 +751,8 @@ export default function Drawing() {
 
               {/* Size Slider (Shown for Pen, Highlighter, Eraser, Line) */}
               {(tool === 'pen' || tool === 'highlighter' || tool === 'eraser' || tool === 'line' || tool === 'text') && (
-                <div className="flex flex-col gap-0.5 w-24">
-                  <div className="flex justify-between text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
+                <div className="flex flex-col gap-0.5 w-16 sm:w-24 shrink-0">
+                  <div className="flex justify-between text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
                     <span>{tool === 'text' ? 'Size' : 'Px'}</span>
                     <span>{brushSize}</span>
                   </div>
@@ -765,8 +766,8 @@ export default function Drawing() {
 
               {/* Opacity Slider (Shown for non-eraser drawing tools) */}
               {(tool === 'pen' || tool === 'highlighter' || tool === 'rect' || tool === 'circle' || tool === 'line' || tool === 'arrow') && (
-                <div className="flex flex-col gap-0.5 w-24">
-                  <div className="flex justify-between text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
+                <div className="flex flex-col gap-0.5 w-16 sm:w-24 shrink-0">
+                  <div className="flex justify-between text-[8px] sm:text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">
                     <span>%</span>
                     <span>{Math.round(opacity * 100)}</span>
                   </div>
