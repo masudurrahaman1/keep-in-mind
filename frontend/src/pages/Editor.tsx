@@ -225,7 +225,7 @@ export default function Editor() {
     return () => clearTimeout(timeout);
   }, [title, color, category, isPinned, isArchived, handleSave]);
 
-  if (!editor && id) return null;
+  if (!editor && paramId) return null;
 
   return (
     <div className={cn(
@@ -309,7 +309,7 @@ export default function Editor() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Note Title"
           className="text-4xl md:text-5xl font-heading font-black bg-transparent border-none outline-none placeholder:opacity-20 mb-8 w-full tracking-tight text-on-surface"
-          autoFocus={!id}
+          autoFocus={!currentId}
         />
         
         <div className="flex-1">
