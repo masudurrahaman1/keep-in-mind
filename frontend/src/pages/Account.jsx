@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'motion/react';
 import { Shield, Key, LogOut, Trash2, Activity, Settings, ChevronRight, CheckSquare, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -75,11 +76,41 @@ export default function Account() {
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const recentActivity = [
-    { id: 1, title: 'Meeting Notes: Design Sync', time: '2 hours ago', color: 'text-primary' },
-    { id: 2, title: 'Grocery List',              time: 'Yesterday',   color: 'text-secondary' },
-    { id: 3, title: 'Book Recommendations',       time: 'Oct 20',      color: 'text-tertiary'  },
-  ];
+  // Load real notes for activity stats
+  const notes = useMemo(() => {
+    const saved = localStorage.getItem(`keep-in-mind-notes-${user?._id || 'guest'}`);
+    return saved ? JSON.parse(saved) : [];
+  }, [user]);
+  
+  const stats = {
+    total: notes.length,
+    activeToday: notes.filter(n => {
+      try {
+        const d = parseISO(n.date);
+        return d.toDateString() === new Date().toDateString();
+      } catch { return false; }
+    }).length
+  };
+  
+  const recentActivity = notes
+    .sort((a, b) => {
+      try {
+        return parseISO(b.date).getTime() - parseISO(a.date).getTime();
+      } catch { return 0; }
+    })
+    .slice(0, 3)
+    .map(n => ({
+      id: n.id,
+      title: n.title,
+      time: (() => {
+        try {
+          const d = parseISO(n.date);
+          if (isNaN(d.getTime())) return n.date;
+          return formatDistanceToNow(d, { addSuffix: true });
+        } catch { return n.date; }
+      })(),
+      color: n.textColor || 'text-primary'
+    }));
 
   const handleLogout = async () => {
     await signOut();
@@ -139,12 +170,12 @@ export default function Account() {
           <SectionCard title="Activity" description="Your recent interactions within Keep In Mind." icon={Activity}>
              <div className="grid grid-cols-2 gap-4 mb-6">
                <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 shadow-sm text-center">
-                  <span className="block text-3xl font-heading font-bold text-primary mb-1">42</span>
+                  <span className="block text-3xl font-heading font-bold text-primary mb-1">{stats.total}</span>
                   <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Total Notes</span>
                </div>
                <div className="bg-surface-container rounded-2xl p-4 border border-outline-variant/20 shadow-sm text-center">
-                  <span className="block text-3xl font-heading font-bold text-secondary mb-1">2h</span>
-                  <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Active Today</span>
+                  <span className="block text-3xl font-heading font-bold text-secondary mb-1">{stats.activeToday}</span>
+                  <span className="text-xs font-semibold text-on-surface-variant uppercase tracking-wider">Created Today</span>
                </div>
              </div>
 

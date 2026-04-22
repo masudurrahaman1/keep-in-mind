@@ -180,7 +180,7 @@ export default function Editor() {
       category,
       pinned: isPinned,
       archived: isArchived,
-      date: 'Just now',
+      date: new Date().toISOString(),
       type: 'text'
     };
 

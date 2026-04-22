@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -16,7 +17,7 @@ const initialNotes = [
     content: '- Milk\n- Bread\n- Eggs\n- Avocados',
     color: 'bg-primary/10 border-primary/20 hover:border-primary/50 text-on-surface',
     textColor: 'text-primary',
-    date: '2 hours ago',
+    date: new Date(Date.now() - 7200000).toISOString(),
     type: 'list',
     category: 'Personal'
   },
@@ -26,7 +27,7 @@ const initialNotes = [
     content: '1. AI powered note taking app\n2. Real-time collaboration\n3. Markdown support out of the box.',
     color: 'bg-tertiary/10 border-tertiary/20 hover:border-tertiary/50 text-on-surface',
     textColor: 'text-tertiary',
-    date: 'Yesterday',
+    date: new Date(Date.now() - 86400000).toISOString(),
     type: 'text',
     category: 'Work'
   }
@@ -104,7 +105,7 @@ export default function Notes() {
         ...savedNote,
         id: Date.now(),
         isNew: false,
-        date: 'Just now',
+        date: new Date().toISOString(),
         type: savedNote.type || 'text'
       }, ...notes]);
     } else {
@@ -118,7 +119,7 @@ export default function Notes() {
   };
 
   const handleDuplicate = (note: any) => {
-    const copy = { ...note, id: Date.now(), title: `${note.title} (copy)`, date: 'Just now' };
+    const copy = { ...note, id: Date.now(), title: `${note.title} (copy)`, date: new Date().toISOString() };
     setNotes(prev => [copy, ...prev]);
     setContextMenu(null);
   };
@@ -321,7 +322,17 @@ export default function Notes() {
                 )}
 
                 <div className="mt-6 flex items-center justify-between opacity-60 text-on-surface-variant relative z-10">
-                  <span className="text-xs font-bold tracking-wider uppercase">{note.date}</span>
+                  <span className="text-xs font-bold tracking-wider uppercase">
+                    {(() => {
+                      try {
+                        const date = parseISO(note.date);
+                        if (isNaN(date.getTime())) return note.date; // Fallback for old string dates
+                        return formatDistanceToNow(date, { addSuffix: true });
+                      } catch {
+                        return note.date;
+                      }
+                    })()}
+                  </span>
                   <div className="flex items-center gap-3">
                     {note.category && (
                       <div className="flex items-center gap-1 text-[10px] bg-on-surface/5 px-2 py-0.5 rounded-full border border-on-surface/5 font-bold uppercase tracking-tight">

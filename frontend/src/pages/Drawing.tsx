@@ -503,7 +503,7 @@ export default function Drawing() {
       ...note, 
       content: dataUrl, 
       canvasData: json, 
-      date: 'Just now',
+      date: new Date().toISOString(),
       type: 'drawing'
     };
     
