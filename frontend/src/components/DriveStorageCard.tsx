@@ -161,10 +161,10 @@ export default function DriveStorageCard() {
             </div>
           </div>
           
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {isConnected && (
               <>
-                <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-bold ring-1 ring-success/20">
+                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-[10px] sm:text-xs font-bold ring-1 ring-success/20">
                   <CheckCircle size={14} />
                   Connected
                 </div>
@@ -175,12 +175,6 @@ export default function DriveStorageCard() {
                   title="Refresh"
                 >
                   <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-                </button>
-                <button
-                  onClick={clearGoogleToken}
-                  className="px-4 py-2 rounded-xl bg-error/10 hover:bg-error/20 text-error text-xs font-bold transition-all border border-error/10"
-                >
-                  Disconnect
                 </button>
               </>
             )}
