@@ -39,7 +39,8 @@ const COLORS = [
 ];
 
 export default function Editor() {
-  const { id } = useParams();
+  const { id: paramId } = useParams();
+  const [currentId, setCurrentId] = useState<string | number | undefined>(paramId);
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -140,8 +141,8 @@ export default function Editor() {
   // Load existing note
   useEffect(() => {
     const savedNotes = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    if (id) {
-      const existingNote = savedNotes.find((n: any) => n.id === parseInt(id) || n.id === id);
+    if (currentId) {
+      const existingNote = savedNotes.find((n: any) => n.id === parseInt(currentId as string) || n.id === currentId);
       if (existingNote) {
         setTitle(existingNote.title || '');
         if (editor) {
@@ -156,7 +157,7 @@ export default function Editor() {
         navigate('/notes');
       }
     }
-  }, [id, storageKey, navigate, editor]);
+  }, [currentId, storageKey, navigate, editor]);
 
   const handleSave = useCallback(() => {
     if (!editor) return;
@@ -167,8 +168,11 @@ export default function Editor() {
     const savedNotes = JSON.parse(localStorage.getItem(storageKey) || '[]');
     const now = new Date();
     
+    // Use currentId if available, otherwise create a new one
+    const noteId = currentId ? (typeof currentId === 'string' && !isNaN(parseInt(currentId)) ? parseInt(currentId) : currentId) : Date.now();
+    
     const noteData = {
-      id: id ? (isNaN(parseInt(id)) ? id : parseInt(id)) : Date.now(),
+      id: noteId,
       title,
       content: content,
       color: color.value,
@@ -181,17 +185,18 @@ export default function Editor() {
     };
 
     let updatedNotes;
-    if (id) {
+    if (currentId) {
       updatedNotes = savedNotes.map((n: any) => n.id === noteData.id ? noteData : n);
     } else {
       updatedNotes = [noteData, ...savedNotes];
-      window.history.replaceState(null, '', `/editor/${noteData.id}`);
+      setCurrentId(noteId); // Lock the ID so next save updates this note
+      window.history.replaceState(null, '', `/editor/${noteId}`);
     }
 
     localStorage.setItem(storageKey, JSON.stringify(updatedNotes));
     setIsSaving(false);
     setLastSaved(now);
-  }, [title, editor, color, category, isPinned, isArchived, id, storageKey]);
+  }, [title, editor, color, category, isPinned, isArchived, currentId, storageKey]);
 
   // Debounced auto-save for typical content (Tiptap)
   useEffect(() => {
@@ -350,7 +355,7 @@ export default function Editor() {
           <button 
             onClick={() => {
               handleSave();
-              navigate(`/drawing/${id || 'new'}`);
+              navigate(`/drawing/${currentId || 'new'}`);
             }}
             className="p-3 hover:bg-on-surface/5 rounded-full transition-all"
             title="Drawing"
@@ -489,7 +494,7 @@ export default function Editor() {
                   },
                   { icon: <PenTool size={22} />, label: "Doodle", action: () => {
                     handleSave();
-                    navigate(`/drawing/${id || 'new'}`);
+                    navigate(`/drawing/${currentId || 'new'}`);
                   }},
                   { 
                     icon: <TableIcon size={22} />, 
