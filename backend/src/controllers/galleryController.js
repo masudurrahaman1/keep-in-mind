@@ -312,9 +312,13 @@ const getGalleryStorage = async (req, res) => {
       }
     }
 
-    const sizeInMB = (totalBytes / (1024 * 1024)).toFixed(2);
-    console.log(`[Storage] Calculation complete: ${sizeInMB} MB across ${totalFiles} files.`);
-    res.json({ totalSize: sizeInMB, totalFiles });
+    const sizeInMB = totalBytes / (1024 * 1024);
+    const displaySize = sizeInMB > 1024 
+      ? `${(sizeInMB / 1024).toFixed(2)} GB` 
+      : `${sizeInMB.toFixed(2)} MB`;
+
+    console.log(`[Storage] Calculation complete: ${displaySize} across ${totalFiles} files.`);
+    res.json({ totalSize: displaySize, totalFiles });
 
   } catch (error) {
     console.error('[Storage Error] Details:', error);
@@ -357,10 +361,14 @@ const streamMedia = async (req, res) => {
       }
 
       // Fetch the actual thumbnail image bits and pipe them
-      // Drive thumbnailLinks are usually public but can be fickle, so we fetch them server-side
-      const response = await fetch(thumbUrl);
-      const buffer = await response.arrayBuffer();
+      const authHeader = `Bearer ${token}`;
+      const thumbRes = await fetch(thumbUrl, { headers: { Authorization: authHeader } });
       
+      if (!thumbRes.ok) {
+        throw new Error(`Thumbnail fetch failed: ${thumbRes.statusText}`);
+      }
+
+      const buffer = await thumbRes.arrayBuffer();
       res.setHeader('Content-Type', 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.send(Buffer.from(buffer));
