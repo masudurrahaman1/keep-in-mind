@@ -286,11 +286,19 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
 
         {/* Media Logic */}
         <motion.div
-          key={media.fileId}
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 1.05 }}
-          onDoubleClick={toggleFullscreen}
+          key={media._id}
+          initial={{ opacity: 0, scale: 0.9, x: 20 }}
+          animate={{ opacity: 1, scale: 1, x: 0 }}
+          exit={{ opacity: 0, scale: 0.9, x: -20 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          drag={zoom === 1 ? "x" : false}
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={(_, info) => {
+            const threshold = 50;
+            if (info.offset.x < -threshold) onNext();
+            else if (info.offset.x > threshold) onPrev();
+          }}
           className={`relative flex items-center justify-center transition-all duration-500 ${isFullscreen ? 'w-screen h-screen' : 'max-w-full max-h-full'}`}
         >
           {isVideo ? (
@@ -464,18 +472,6 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
                   );
                   (e.currentTarget as any)._initialDist = dist;
                   (e.currentTarget as any)._initialZoom = zoom;
-                } else if (e.touches.length === 1) {
-                  (e.currentTarget as any)._swipeStartX = e.touches[0].clientX;
-                }
-              }}
-              onTouchEnd={(e) => {
-                if ((e.currentTarget as any)._swipeStartX !== undefined && e.changedTouches.length === 1 && zoom === 1) {
-                  const endX = e.changedTouches[0].clientX;
-                  const diff = (e.currentTarget as any)._swipeStartX - endX;
-                  const threshold = 50; // Minimum swipe distance
-                  if (diff > threshold) onNext();
-                  else if (diff < -threshold) onPrev();
-                  (e.currentTarget as any)._swipeStartX = undefined;
                 }
               }}
               onTouchMove={(e) => {
