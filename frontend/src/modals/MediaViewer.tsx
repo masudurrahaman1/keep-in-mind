@@ -294,11 +294,11 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
           className={`relative flex items-center justify-center transition-all duration-500 ${isFullscreen ? 'w-screen h-screen' : 'max-w-full max-h-full'}`}
         >
           {isVideo ? (
-            <div className={`relative group/video overflow-hidden transition-all duration-500 ${isFullscreen ? 'w-screen h-screen rounded-none shadow-none border-none' : 'rounded-3xl shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/5'}`}>
+            <div className={`relative group/video overflow-hidden transition-all duration-500 ${isFullscreen ? 'w-screen h-screen rounded-none shadow-none border-none' : 'shadow-[0_30px_100px_rgba(0,0,0,0.8)] border border-white/5'}`}>
               <video
                 ref={videoRef}
                 src={directLink}
-                className={`w-full h-full transition-all duration-500 ${isFullscreen ? 'object-contain' : 'max-h-[90vh] md:max-h-[85vh] w-auto h-auto rounded-3xl'}`}
+                className={`w-full h-full transition-all duration-500 ${isFullscreen ? 'object-contain' : 'max-h-[90vh] md:max-h-[85vh] w-auto h-auto'}`}
                 controls={false}
                 loop
                 muted={isMuted}
@@ -453,7 +453,7 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
             </div>
           ) : (
             <div 
-              className={`relative group transition-all duration-500 overflow-hidden ${isFullscreen ? 'w-screen h-screen rounded-none' : 'rounded-3xl'}`}
+              className={`relative group transition-all duration-500 overflow-hidden ${isFullscreen ? 'w-screen h-screen rounded-none' : ''}`}
               style={{ transform: `scale(${zoom}) rotate(${rotation}deg)` }}
               onClick={e => e.stopPropagation()}
               onTouchStart={(e) => {
@@ -464,6 +464,18 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
                   );
                   (e.currentTarget as any)._initialDist = dist;
                   (e.currentTarget as any)._initialZoom = zoom;
+                } else if (e.touches.length === 1) {
+                  (e.currentTarget as any)._swipeStartX = e.touches[0].clientX;
+                }
+              }}
+              onTouchEnd={(e) => {
+                if ((e.currentTarget as any)._swipeStartX !== undefined && e.changedTouches.length === 1 && zoom === 1) {
+                  const endX = e.changedTouches[0].clientX;
+                  const diff = (e.currentTarget as any)._swipeStartX - endX;
+                  const threshold = 50; // Minimum swipe distance
+                  if (diff > threshold) onNext();
+                  else if (diff < -threshold) onPrev();
+                  (e.currentTarget as any)._swipeStartX = undefined;
                 }
               }}
               onTouchMove={(e) => {
@@ -482,7 +494,7 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
               <img
                 src={directLink}
                 alt={media.fileName}
-                className={`transition-all duration-500 touch-none ${isFullscreen ? 'w-screen h-screen object-contain rounded-none' : 'max-h-[85vh] w-auto h-auto rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/10'}`}
+                className={`transition-all duration-500 touch-none ${isFullscreen ? 'w-screen h-screen object-contain rounded-none' : 'max-h-[85vh] w-auto h-auto shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/10'}`}
                 onError={handleMediaError}
               />
               
