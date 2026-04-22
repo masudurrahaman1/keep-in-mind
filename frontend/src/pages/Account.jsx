@@ -12,7 +12,7 @@ import TwoFactorModal from '../components/profile/TwoFactorModal';
 
 export default function Account() {
   const navigate = useNavigate();
-  const { user, token, signOut } = useAuth();
+  const { user, token, signOut, updateUser } = useAuth();
   const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
   // Storage key unique to user
@@ -224,6 +224,13 @@ export default function Account() {
               const newOverrides = { name: p.name, phone: p.phone, bio: p.bio, avatar: p.avatar };
               setLocalOverrides(newOverrides);
               localStorage.setItem(profileKey, JSON.stringify(newOverrides));
+              
+              // Update global AuthContext state so Sidebar and Header also update
+              updateUser({
+                name: p.name,
+                avatar: p.avatar
+              });
+
               setIsEditModalOpen(false); 
             }} 
           />

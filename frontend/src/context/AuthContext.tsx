@@ -16,6 +16,7 @@ interface AuthContextType {
   loading: boolean;
   login: (userData: User, token: string, googleToken: string) => void;
   updateGoogleToken: (googleToken: string, userData?: User) => void;
+  updateUser: (userData: Partial<User>) => void;
   clearGoogleToken: () => void;
   signOut: () => void;
 }
@@ -68,6 +69,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => {
+      if (!prev) return null;
+      const updated = { ...prev, ...userData };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   const clearGoogleToken = () => {
     setGoogleAccessToken(null);
     localStorage.removeItem('googleToken');
@@ -97,7 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, googleAccessToken, loading, login, updateGoogleToken, clearGoogleToken, signOut }}>
+    <AuthContext.Provider value={{ user, token, googleAccessToken, loading, login, updateGoogleToken, updateUser, clearGoogleToken, signOut }}>
       {children}
     </AuthContext.Provider>
   );
