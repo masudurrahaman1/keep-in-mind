@@ -283,9 +283,9 @@ export default function Notes() {
                       const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
                       setContextMenu({ note, x: rect.left, y: rect.bottom + 4 });
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-on-surface/10 rounded-full transition-all absolute -top-1 -right-1 text-on-surface-variant group-hover:text-on-surface"
+                    className="p-1.5 bg-on-surface/5 hover:bg-on-surface/10 rounded-full transition-all absolute top-0 right-0 text-on-surface-variant hover:text-primary shadow-sm"
                   >
-                    <MoreHorizontal size={14} />
+                    <MoreHorizontal size={16} />
                   </button>
                 </div>
 
