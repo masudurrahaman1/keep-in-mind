@@ -204,40 +204,50 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
             className="absolute top-0 left-0 right-0 p-4 md:p-8 flex items-center justify-between z-50 bg-gradient-to-b from-black/90 via-black/40 to-transparent"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex flex-col">
-              <div className="flex items-center gap-3">
-                <h2 className="text-white font-heading font-bold text-xl md:text-2xl line-clamp-1 drop-shadow-2xl">{media.fileName}</h2>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
-                  className="p-2 hover:bg-white/10 text-white/40 hover:text-white rounded-xl transition-all"
-                >
-                  <Pencil size={18} />
-                </button>
+            <div className="flex items-center gap-2 md:gap-4">
+              <button
+                onClick={onClose}
+                className="p-2.5 md:p-3 bg-white/10 hover:bg-error/30 text-white rounded-2xl transition-all backdrop-blur-xl border border-white/10 shadow-lg active:scale-90"
+                title="Close"
+              >
+                <X size={24} />
+              </button>
+              
+              <div className="w-px h-6 bg-white/10 mx-1 hidden md:block"></div>
+
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-white font-heading font-bold text-base md:text-2xl line-clamp-1 drop-shadow-2xl max-w-[120px] sm:max-w-md">{media.fileName}</h2>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
+                    className="p-1.5 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-all"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                </div>
+                <p className="text-white/50 text-[9px] md:text-xs font-bold uppercase tracking-widest">
+                  {format(new Date(media.uploadedAt), 'MMM d, yyyy')}
+                </p>
               </div>
-              <p className="text-white/50 text-[10px] md:text-xs font-bold uppercase tracking-widest mt-1">
-                {format(new Date(media.uploadedAt), 'MMMM d, yyyy')} • {(media.size / (1024 * 1024)).toFixed(2)} MB
-              </p>
             </div>
             
             <div className="flex items-center gap-2 md:gap-4">
-              <button onClick={() => window.open(directLink + '&download=true')} className="p-3 bg-white/5 hover:bg-primary text-white rounded-2xl transition-all backdrop-blur-xl border border-white/5">
+              <button 
+                onClick={() => window.open(directLink + '&download=true')} 
+                className="p-2.5 md:p-3 bg-white/5 hover:bg-primary text-white rounded-2xl transition-all backdrop-blur-xl border border-white/5 active:scale-90"
+                title="Download"
+              >
                 <Download size={20} />
               </button>
               <a
                 href={media.fileUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all backdrop-blur-xl border border-white/5 hidden sm:flex items-center gap-2 px-5"
+                className="p-3 bg-white/5 hover:bg-white/10 text-white rounded-2xl transition-all backdrop-blur-xl border border-white/5 hidden lg:flex items-center gap-2 px-5"
               >
                 <ExternalLink size={20} />
-                <span className="text-xs font-bold uppercase tracking-widest">Google Drive</span>
+                <span className="text-xs font-bold uppercase tracking-widest">Drive</span>
               </a>
-              <button
-                onClick={onClose}
-                className="p-3 bg-white/5 hover:bg-error/30 text-white rounded-2xl transition-all backdrop-blur-xl border border-white/5"
-              >
-                <X size={24} />
-              </button>
             </div>
           </motion.div>
         )}
