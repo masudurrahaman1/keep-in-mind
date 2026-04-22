@@ -2,37 +2,28 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
-import { FileText, Sparkles, Shield, Zap, Lock, Mail } from 'lucide-react';
+import { FileText, Zap, Shield, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { loginWithGoogle, loginWithEmail, registerWithEmail, verifyEmailOTP } from '../services/authService';
+import { loginWithGoogle } from '../services/authService';
 
 const features = [
-  { icon: Zap,    label: 'Lightning Fast',  desc: 'Capture thoughts instantly' },
-  { icon: Shield, label: 'Private & Secure', desc: 'Your notes, only yours'    },
-  { icon: Lock,   label: 'Encrypted Sync',   desc: 'Safe across all devices'   },
+  { icon: Zap, label: 'Lightning Fast', desc: 'Capture thoughts instantly' },
+  { icon: Shield, label: 'Private & Secure', desc: 'Your notes, only yours' },
 ];
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-type AuthMode = 'login' | 'register' | 'verify' | 'google-2fa';
-
 export default function Auth() {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const { login }  = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [isLoading, setIsLoading] = useState(false);
   const [errorCode, setErrorCode] = useState('');
-
-  // Form State
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
+  const [is2FAMode, setIs2FAMode] = useState(false);
 
-  // 2FA state for Google login
   const [tfState, setTfState] = useState<{
     pendingToken: string;
     userName: string;
@@ -41,28 +32,26 @@ export default function Auth() {
 
   const from = location.state?.from?.pathname || '/notes';
 
-  // ── Handlers ───────────────────────────────────────────────
-
   const handleGoogleSign = async () => {
     if (isLoading) return;
     setIsLoading(true);
     setErrorCode('');
     try {
-      const result          = await signInWithPopup(auth, googleProvider);
-      const credential      = GoogleAuthProvider.credentialFromResult(result);
+      const result = await signInWithPopup(auth, googleProvider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
       const googleAccessToken = credential?.accessToken;
       if (!googleAccessToken) throw new Error('Failed to obtain Google access token.');
 
       const idToken = await result.user.getIdToken();
-      const data    = await loginWithGoogle(idToken);
+      const data = await loginWithGoogle(idToken);
 
       if (data.twoFactorRequired) {
         setTfState({
           pendingToken: data.pendingToken,
-          userName:     data.user?.name?.split(' ')[0] || 'there',
-          googleToken:  googleAccessToken,
+          userName: data.user?.name?.split(' ')[0] || 'there',
+          googleToken: googleAccessToken,
         });
-        setAuthMode('google-2fa');
+        setIs2FAMode(true);
         return;
       }
 
@@ -77,78 +66,15 @@ export default function Auth() {
     }
   };
 
-  const handleEmailAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isLoading) return;
-    
-    if (authMode === 'register' && (!name || !email || password.length < 6)) {
-      setErrorCode('Please fill all fields. Password must be 6+ chars.');
-      return;
-    }
-    if (authMode === 'login' && (!email || !password)) {
-      setErrorCode('Please provide your email and password.');
-      return;
-    }
-
-    setIsLoading(true);
-    setErrorCode('');
-
-    try {
-      if (authMode === 'register') {
-        await registerWithEmail(name, email, password);
-        setAuthMode('verify');
-      } else {
-        const data = await loginWithEmail(email, password);
-        if (data.twoFactorRequired) {
-          setTfState({
-            pendingToken: data.pendingToken,
-            userName:     data.user?.name?.split(' ')[0] || 'there',
-            googleToken:  '',
-          });
-          setAuthMode('google-2fa');
-          return;
-        }
-        login(data.user, data.token);
-        localStorage.setItem('keep-in-mind-auto-sync', 'true');
-        navigate(from, { replace: true });
-      }
-    } catch (err: any) {
-      if (err.unverified) {
-        setAuthMode('verify');
-        setErrorCode(err.message);
-      } else {
-        setErrorCode(err.message || 'Authentication failed.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyEmail = async () => {
-    if (otpCode.length < 6) { setErrorCode('Enter the full 6-digit code.'); return; }
-    setIsLoading(true);
-    setErrorCode('');
-    try {
-      const data = await verifyEmailOTP(email, otpCode);
-      login(data.user, data.token);
-      localStorage.setItem('keep-in-mind-auto-sync', 'true');
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setErrorCode(err.message || 'Verification failed.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleVerify2FA = async () => {
     if (otpCode.length < 6) { setErrorCode('Enter the full 6-digit code.'); return; }
     setIsLoading(true);
     setErrorCode('');
     try {
-      const res  = await fetch(`${API_BASE}/auth/2fa/login-verify`, {
-        method:  'POST',
+      const res = await fetch(`${API_BASE}/auth/2fa/login-verify`, {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ pendingToken: tfState!.pendingToken, code: otpCode }),
+        body: JSON.stringify({ pendingToken: tfState!.pendingToken, code: otpCode }),
       });
       const data = await res.json();
       if (!res.ok) { setErrorCode(data.message); return; }
@@ -163,233 +89,158 @@ export default function Auth() {
     }
   };
 
-  // ── JSX ──────────────────────────────────────────────────────────────────
   return (
-    <div className="h-screen bg-surface bg-mesh flex items-center justify-center p-4 lg:p-8 relative overflow-hidden">
-      {/* Ambient orbs */}
-      <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-tertiary/10 rounded-full blur-[80px] pointer-events-none" />
+    <div className="min-h-screen w-full bg-surface bg-mesh flex flex-col items-center justify-center p-6 md:p-12 relative overflow-x-hidden">
+      {/* Background Ambient Orbs */}
+      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-secondary/10 rounded-full blur-[140px] pointer-events-none" />
 
-      <AnimatePresence mode="wait">
+      {/* Top Left Branding - Persistent */}
+      <div className="absolute top-8 left-8 flex items-center gap-3 z-50">
+        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
+          <FileText size={20} strokeWidth={2.5} />
+        </div>
+        <span className="text-xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
+      </div>
 
-        {/* ── 2FA & Email Verification Screen ── */}
-        {(authMode === 'verify' || authMode === 'google-2fa') ? (
-          <motion.div
-            key="verify"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1,    y: 0  }}
-            exit={{    opacity: 0, scale: 0.95, y: 20  }}
-            className="w-full max-w-sm relative z-10"
-          >
-            <div className="glass-panel rounded-[2.5rem] p-8 md:p-10 text-center">
-              <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                {authMode === 'verify' ? <Mail size={36} className="text-primary" /> : <Shield size={36} className="text-primary"/>}
-              </div>
+      <div className="w-full max-w-[1100px] flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-24 relative z-10 py-20 lg:py-0">
+        
+        {/* Left Hero Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left"
+        >
+          <h1 className="text-5xl md:text-6xl xl:text-7xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-8">
+            Think it.<br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">Write it.</span><br />
+            Keep it.
+          </h1>
+          
+          <p className="text-on-surface-variant text-lg md:text-xl mb-12 leading-relaxed font-medium opacity-80 max-w-md">
+            Experience a new level of clarity with Keep in Mind. Simple, secure, and always in sync.
+          </p>
 
-              <h2 className="text-2xl font-heading font-extrabold text-on-surface mb-1">
-                {authMode === 'google-2fa' ? 'Two-Step Verification' : 'Verify your email'}
-              </h2>
-              <p className="text-sm text-on-surface-variant mb-2">
-                {authMode === 'google-2fa' 
-                  ? `Welcome back, ${tfState?.userName}!` 
-                  : `We sent a code to ${email}`
-                }
-              </p>
-              <p className="text-sm text-on-surface-variant mb-8">
-                {authMode === 'google-2fa' 
-                  ? 'Enter the 6-digit code from your authenticator app to continue.'
-                  : 'Enter the 6-digit verification code below.'
-                }
-              </p>
-
-              <input
-                type="number"
-                inputMode="numeric"
-                value={otpCode}
-                onChange={e => { setOtpCode(e.target.value.slice(0, 6)); setErrorCode(''); }}
-                placeholder="000000"
-                className="w-full text-center text-4xl font-mono font-bold tracking-[0.4em] py-5 rounded-2xl border-2 border-outline-variant/30 bg-surface-container focus:border-primary focus:outline-none transition-colors text-on-surface mb-3"
-                autoFocus
-                onKeyDown={e => e.key === 'Enter' && (authMode === 'verify' ? handleVerifyEmail() : handleVerify2FA())}
-              />
-
-              {errorCode && (
-                <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className="text-red-500 text-sm mb-3">
-                  {errorCode}
-                </motion.p>
-              )}
-
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={authMode === 'verify' ? handleVerifyEmail : handleVerify2FA}
-                disabled={isLoading || otpCode.length < 6}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary to-secondary text-white font-bold text-base shadow-lg shadow-primary/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 mb-6 min-h-[44px]"
+          <div className="grid grid-cols-1 gap-6 w-full max-w-sm">
+            {features.map(({ icon: Icon, label, desc }, i) => (
+              <motion.div 
+                key={label} 
+                initial={{ opacity: 0, x: -20 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                transition={{ delay: 0.4 + i * 0.1 }} 
+                className="flex items-center gap-4 group"
               >
-                {isLoading ? 'Verifying…' : (authMode === 'verify' ? 'Confirm Email' : 'Verify')}
-              </motion.button>
-
-              <button
-                onClick={() => { setAuthMode('login'); setOtpCode(''); setErrorCode(''); }}
-                className="text-sm text-on-surface-variant hover:text-primary transition-colors min-h-[44px] flex items-center justify-center mx-auto"
-              >
-                ← Back to Login
-              </button>
-            </div>
-          </motion.div>
-        ) : (
-
-          /* ── Main Login / Register Card ── */
-          <motion.div
-            key="login-reg"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{    opacity: 0 }}
-            className="w-full max-w-6xl h-full lg:h-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center relative z-10 overflow-y-auto lg:overflow-visible no-scrollbar py-12 lg:py-0"
-          >
-            {/* Left: Branding */}
-            <motion.div
-              initial={{ opacity: 0, x: -40 }}
-              animate={{ opacity: 1, x: 0  }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden lg:flex flex-col pr-12"
-            >
-              <div className="flex items-center gap-4 mb-8 group cursor-default">
-                <motion.div 
-                  initial={{ rotate: -20, scale: 0 }}
-                  animate={{ rotate: 0, scale: 1 }}
-                  transition={{ type: 'spring', damping: 12, delay: 0.2 }}
-                  className="w-14 h-14 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:rotate-12 transition-transform duration-500"
-                >
-                  <FileText size={28} strokeWidth={2.5} />
-                </motion.div>
-                <span className="text-3xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
-              </div>
-
-              <motion.h1 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-5xl xl:text-6xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-6"
-              >
-                Think it.<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-tertiary to-secondary drop-shadow-sm">Write it.</span><br />
-                Keep it.
-              </motion.h1>
-              
-              <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="text-on-surface-variant text-lg mb-10 leading-relaxed max-w-sm font-medium opacity-80"
-              >
-                The most elegant way to capture your thoughts and sync them across all your devices securely.
-              </motion.p>
-
-              <div className="grid grid-cols-1 gap-6">
-                {features.map(({ icon: Icon, label, desc }, i) => (
-                  <motion.div 
-                    key={label} 
-                    initial={{ opacity: 0, x: -30 }} 
-                    animate={{ opacity: 1, x: 0  }} 
-                    transition={{ delay: 0.6 + i * 0.1, duration: 0.5, ease: 'easeOut' }} 
-                    className="flex items-center gap-5 group"
-                  >
-                    <div className="w-12 h-12 rounded-2xl bg-surface-container-high/50 text-primary flex items-center justify-center shrink-0 border border-outline-variant/20 shadow-sm group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                      <Icon size={22} strokeWidth={2.5} />
-                    </div>
-                    <div>
-                      <p className="font-black text-on-surface text-base tracking-tight">{label}</p>
-                      <p className="text-on-surface-variant text-sm font-medium opacity-70">{desc}</p>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-
-            {/* Right: Auth Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 40, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0,  scale: 1    }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className="w-full max-w-[360px] mx-auto lg:ml-auto lg:mr-0"
-            >
-              <div className="glass-panel rounded-[3.5rem] p-10 sm:p-12 relative overflow-hidden border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)]">
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
-                <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
-
-                {/* Mobile logo */}
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 }}
-                  className="flex flex-col items-center gap-4 mb-10 lg:hidden"
-                >
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-primary/30">
-                    <FileText size={32} strokeWidth={2.5} />
-                  </div>
-                  <span className="text-3xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
-                </motion.div>
-
-                {/* Heading */}
-                <div className="mb-10 relative z-10 text-center">
-                  <motion.h2 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6 }}
-                    className="text-4xl sm:text-5xl font-heading font-black text-on-surface tracking-tighter mb-4"
-                  >
-                    Sign In
-                  </motion.h2>
-                  <motion.p 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.7 }}
-                    className="text-on-surface-variant text-base font-semibold opacity-70 leading-relaxed"
-                  >
-                    Access your workspace with your Google account.
-                  </motion.p>
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all duration-300">
+                  <Icon size={22} strokeWidth={2.5} />
                 </div>
+                <div>
+                  <p className="font-black text-on-surface text-base tracking-tight">{label}</p>
+                  <p className="text-on-surface-variant text-sm font-medium opacity-70">{desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
 
-                {errorCode && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="mb-8 p-4 bg-error/10 border border-error/20 text-error text-sm font-bold rounded-2xl flex items-center gap-3"
-                  >
-                    <div className="w-2 h-2 rounded-full bg-error animate-pulse" />
-                    {errorCode}
-                  </motion.div>
-                )}
+        {/* Right Auth Card */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="w-full max-w-[400px] flex shrink-0"
+        >
+          <div className="w-full bg-white/70 dark:bg-on-surface/[0.05] backdrop-blur-xl rounded-[2rem] p-8 md:p-10 border border-white/40 shadow-2xl shadow-primary/10 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30" />
+            
+            <AnimatePresence mode="wait">
+              {!is2FAMode ? (
+                <motion.div 
+                  key="login"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="mb-10">
+                    <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-4">
+                      Keep In Mind
+                    </span>
+                    <h2 className="text-3xl md:text-4xl font-heading font-black text-on-surface tracking-tighter mb-3">
+                      Sign In
+                    </h2>
+                    <p className="text-on-surface-variant text-sm font-semibold opacity-70">
+                      Sign in to sync your thoughts across all devices.
+                    </p>
+                  </div>
 
-                {/* Google Button */}
-                <div className="relative z-10">
+                  {errorCode && (
+                    <div className="mb-6 p-4 bg-error/10 border border-error/20 text-error text-xs font-bold rounded-xl text-left flex items-center gap-2">
+                      <div className="w-1.5 h-1.5 rounded-full bg-error" />
+                      {errorCode}
+                    </div>
+                  )}
+
                   <motion.button
-                    whileHover={{ scale: 1.02, y: -2 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={handleGoogleSign}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-4 px-8 py-6 bg-surface-container-lowest dark:bg-on-surface/[0.03] text-on-surface font-black rounded-[2.2rem] shadow-xl shadow-primary/10 border border-outline-variant/30 hover:border-primary/50 hover:bg-surface-container transition-all duration-300 disabled:opacity-60 group min-h-[72px]"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-on-surface/10 text-on-surface font-bold rounded-2xl shadow-lg border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 disabled:opacity-50 min-h-[56px]"
                   >
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 group-hover:rotate-[360deg] transition-transform duration-700">
-                      <svg viewBox="0 0 24 24" className="w-6 h-6 shrink-0">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                      </svg>
-                    </div>
-                    <span className="text-lg">Continue with Google</span>
+                    <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
+                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                    <span className="whitespace-nowrap">Continue with Google</span>
                   </motion.button>
-                </div>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="2fa"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <ShieldCheck size={32} className="text-primary" />
+                  </div>
+                  <h2 className="text-2xl font-black text-on-surface mb-2 tracking-tight">Security Code</h2>
+                  <p className="text-xs text-on-surface-variant font-medium mb-8 opacity-70">
+                    Enter the code from your authenticator app to access {tfState?.userName}'s workspace.
+                  </p>
 
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
+                  <input
+                    type="number"
+                    value={otpCode}
+                    onChange={e => { setOtpCode(e.target.value.slice(0, 6)); setErrorCode(''); }}
+                    placeholder="000000"
+                    className="w-full text-center text-3xl font-mono font-bold py-4 rounded-2xl border-2 border-outline-variant/30 bg-surface-container-low focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-on-surface mb-6"
+                    autoFocus
+                  />
 
-      </AnimatePresence>
+                  <motion.button
+                    whileTap={{ scale: 0.98 }}
+                    onClick={handleVerify2FA}
+                    disabled={isLoading || otpCode.length < 6}
+                    className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-bold text-base shadow-lg shadow-primary/20 transition-all disabled:opacity-50 mb-6"
+                  >
+                    {isLoading ? 'Verifying…' : 'Verify & Sign In'}
+                  </motion.button>
+
+                  <button
+                    onClick={() => { setIs2FAMode(false); setOtpCode(''); setErrorCode(''); }}
+                    className="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors"
+                  >
+                    ← Cancel
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 }
