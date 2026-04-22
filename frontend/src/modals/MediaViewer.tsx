@@ -286,7 +286,7 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
               <video
                 ref={videoRef}
                 src={directLink}
-                className={`w-full h-full transition-all duration-500 ${isFullscreen ? 'object-contain' : 'max-h-[90vh] md:max-h-[85vh] w-auto h-auto'}`}
+                className={`transition-all duration-500 ${isFullscreen ? 'w-screen h-screen object-contain' : 'max-h-[85vh] max-w-full w-auto h-auto rounded-lg shadow-2xl'}`}
                 controls={false}
                 loop
                 muted={isMuted}
