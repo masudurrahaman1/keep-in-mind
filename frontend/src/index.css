@@ -76,72 +76,72 @@
 /* ── Dark Mode — System & Explicit ─────────────────────────── */
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary: #B9C3FF;
-    --primary-container: #2A4283;
-    --on-primary: #112A6A;
-    --on-primary-container: #DEE1FF;
+    --primary: #818CF8; /* Soft Indigo */
+    --primary-container: #1E293B;
+    --on-primary: #FFFFFF;
+    --on-primary-container: #E2E8F0;
     
-    --surface: #111318;
-    --surface-container-lowest: #0C0E13;
-    --surface-container-low: #191C20;
-    --surface-container: #1D2024;
-    --surface-container-high: #282A2F;
-    --surface-container-highest: #33353A;
+    --surface: #0B0E14; /* Deep Midnight Slate */
+    --surface-container-lowest: #020617;
+    --surface-container-low: #0F172A;
+    --surface-container: #1E293B;
+    --surface-container-high: #334155;
+    --surface-container-highest: #475569;
     
-    --on-surface: #E2E2E9;
-    --on-surface-variant: #C4C6D0;
-    --outline: #8E9099;
-    --outline-variant: #44474E;
+    --on-surface: #F8FAFC;
+    --on-surface-variant: #94A3B8;
+    --outline: #334155;
+    --outline-variant: #1E293B;
 
-    --error: #FFB4AB;
-    --on-error: #690005;
-    --error-container: #93000A;
-    --on-error-container: #FFDAD6;
+    --error: #FB7185;
+    --on-error: #4C0519;
+    --error-container: #881337;
+    --on-error-container: #FFE4E6;
 
-    --secondary: #C0C6DD;
-    --secondary-container: #3F4759;
-    --on-secondary: #2A3142;
-    --on-secondary-container: #DCE2F9;
+    --secondary: #38BDF8; /* Sky Blue */
+    --secondary-container: #0C4A6E;
+    --on-secondary: #FFFFFF;
+    --on-secondary-container: #E0F2FE;
 
-    --tertiary: #E3BADA;
-    --tertiary-container: #5A3D58;
-    --on-tertiary: #43273F;
-    --on-tertiary-container: #FFD7F7;
+    --tertiary: #C084FC; /* Soft Purple */
+    --tertiary-container: #4C1D95;
+    --on-tertiary: #FFFFFF;
+    --on-tertiary-container: #F5F3FF;
   }
 }
 
 [data-theme="dark"] {
-  --primary: #B9C3FF;
-  --primary-container: #2A4283;
-  --on-primary: #112A6A;
-  --on-primary-container: #DEE1FF;
+  --primary: #818CF8;
+  --primary-container: #1E293B;
+  --on-primary: #FFFFFF;
+  --on-primary-container: #E2E8F0;
   
-  --surface: #111318;
-  --surface-container-lowest: #0C0E13;
-  --surface-container-low: #191C20;
-  --surface-container: #1D2024;
-  --surface-container-high: #282A2F;
-  --surface-container-highest: #33353A;
+  --surface: #0B0E14;
+  --surface-container-lowest: #020617;
+  --surface-container-low: #0F172A;
+  --surface-container: #1E293B;
+  --surface-container-high: #334155;
+  --surface-container-highest: #475569;
   
-  --on-surface: #E2E2E9;
-  --on-surface-variant: #C4C6D0;
-  --outline: #8E9099;
-  --outline-variant: #44474E;
+  --on-surface: #F8FAFC;
+  --on-surface-variant: #94A3B8;
+  --outline: #334155;
+  --outline-variant: #1E293B;
 
-  --error: #FFB4AB;
-  --on-error: #690005;
-  --error-container: #93000A;
-  --on-error-container: #FFDAD6;
+  --error: #FB7185;
+  --on-error: #4C0519;
+  --error-container: #881337;
+  --on-error-container: #FFE4E6;
 
-  --secondary: #C0C6DD;
-  --secondary-container: #3F4759;
-  --on-secondary: #2A3142;
-  --on-secondary-container: #DCE2F9;
+  --secondary: #38BDF8;
+  --secondary-container: #0C4A6E;
+  --on-secondary: #FFFFFF;
+  --on-secondary-container: #E0F2FE;
 
-  --tertiary: #E3BADA;
-  --tertiary-container: #5A3D58;
-  --on-tertiary: #43273F;
-  --on-tertiary-container: #FFD7F7;
+  --tertiary: #C084FC;
+  --tertiary-container: #4C1D95;
+  --on-tertiary: #FFFFFF;
+  --on-tertiary-container: #F5F3FF;
 }
 
 /* ── AMOLED Mode — Pure Black ─────────────────────────────── */
