@@ -122,7 +122,7 @@ export default function MediaCard({
       )}
 
       {/* Hover Overlay Layer */}
-      <div className={`absolute inset-0 z-20 transition-all duration-300 ${isSelectionMode ? 'opacity-0' : 'opacity-0 group-hover:opacity-100'}`}>
+      <div className={`absolute inset-0 z-20 transition-all duration-300 ${isSelectionMode ? 'opacity-0' : (isTrashMode ? 'opacity-100 bg-black/20' : 'opacity-0 group-hover:opacity-100')}`}>
         {/* Top Action Bar */}
         <div className="absolute top-0 inset-x-0 p-1.5 flex justify-between items-start">
           {/* Left: Type Indicator & Rename */}
@@ -136,10 +136,10 @@ export default function MediaCard({
                   e.stopPropagation();
                   onRename(media._id, media.fileName);
                 }}
-                className="p-1 px-1.5 bg-black/60 hover:bg-primary text-white backdrop-blur-xl rounded-lg transition-all border border-white/10"
+                className="p-1.5 px-2 bg-black/60 hover:bg-primary text-white backdrop-blur-xl rounded-lg transition-all border border-white/10"
                 title="Rename"
               >
-                <Pencil size={10} />
+                <Pencil size={12} />
               </button>
             )}
             {isTrashMode && (
@@ -148,10 +148,11 @@ export default function MediaCard({
                   e.stopPropagation();
                   onRestore?.(media._id);
                 }}
-                className="p-1 px-1.5 bg-black/60 hover:bg-secondary text-white backdrop-blur-xl rounded-lg transition-all border border-white/10"
+                className="p-1.5 px-3 bg-secondary text-white backdrop-blur-xl rounded-lg transition-all border border-white/10 shadow-lg flex items-center gap-1.5 hover:scale-105 active:scale-95"
                 title="Restore"
               >
-                <History size={10} />
+                <History size={14} />
+                <span className="text-[10px] font-black uppercase tracking-tighter">Restore</span>
               </button>
             )}
           </div>
@@ -163,10 +164,10 @@ export default function MediaCard({
               if (isTrashMode) onPermanentDelete?.(media._id);
               else onDelete(media._id);
             }}
-            className={`backdrop-blur-xl rounded-full transition-all border border-white/10 shadow-lg flex items-center justify-center ${isTrashMode ? 'bg-error text-white h-7 w-7' : 'bg-error/80 hover:bg-error text-white h-7 w-7'}`}
+            className={`backdrop-blur-xl rounded-full transition-all border border-white/10 shadow-lg flex items-center justify-center hover:scale-110 active:scale-90 ${isTrashMode ? 'bg-error text-white h-9 w-9' : 'bg-error/80 hover:bg-error text-white h-7 w-7'}`}
             title={isTrashMode ? "Delete Permanently" : "Move to Trash"}
           >
-            <Trash2 size={12} />
+            <Trash2 size={isTrashMode ? 16 : 12} />
           </button>
         </div>
 
