@@ -48,7 +48,7 @@ export default function MediaUploadFAB({ onFilesSelect, isLoading }: MediaUpload
         )}
       </AnimatePresence>
 
-      <div className="fixed bottom-8 right-8 z-[70] flex flex-col items-end">
+      <div className="fixed bottom-24 md:bottom-8 right-6 md:right-8 z-[70] flex flex-col items-end">
         <input 
           type="file" 
           ref={fileInputRef} 

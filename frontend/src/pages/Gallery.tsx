@@ -618,7 +618,7 @@ export default function Gallery() {
             initial={{ y: 100, x: '-50%', opacity: 0 }}
             animate={{ y: 0, x: '-50%', opacity: 1 }}
             exit={{ y: 100, x: '-50%', opacity: 0 }}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] min-w-[320px] max-w-[90vw] glass-panel rounded-3xl border border-white/20 shadow-2xl p-4 flex items-center justify-between gap-6"
+            className="fixed bottom-24 md:bottom-8 left-1/2 -translate-x-1/2 z-[100] min-w-[320px] max-w-[90vw] glass-panel rounded-3xl border border-white/20 shadow-2xl p-4 flex items-center justify-between gap-6"
           >
             <div className="flex items-center gap-3 pl-2">
               <div className="w-10 h-10 bg-primary/20 text-primary rounded-2xl flex items-center justify-center font-bold">
