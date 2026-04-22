@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { 
   ArrowLeft, Save, Bold, Italic, List, ListOrdered, 
@@ -23,8 +23,33 @@ import { Strike } from '@tiptap/extension-strike';
 import { Highlight } from '@tiptap/extension-highlight';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
+import { Node, mergeAttributes } from '@tiptap/core';
 import { TaskList } from '@tiptap/extension-task-list';
 import { TaskItem } from '@tiptap/extension-task-item';
+
+const Audio = Node.create({
+  name: 'audio',
+  group: 'block',
+  selectable: true,
+  draggable: true,
+  atom: true,
+
+  addAttributes() {
+    return {
+      src: { default: null },
+      controls: { default: true },
+      class: { default: 'w-full my-4 rounded-xl bg-surface-container' },
+    };
+  },
+
+  parseHTML() {
+    return [{ tag: 'audio' }];
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    return ['audio', mergeAttributes(HTMLAttributes)];
+  },
+});
 
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
@@ -68,6 +93,8 @@ export default function Editor() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const mediaRecorder = useRef<MediaRecorder | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
 
   useEffect(() => {
     // Dismiss keyboard when any panel opens
@@ -129,6 +156,7 @@ export default function Editor() {
       Placeholder.configure({
         placeholder: 'Take a note...',
       }),
+      Audio,
     ],
     content: '',
     editorProps: {
@@ -741,17 +769,58 @@ export default function Editor() {
 
               <div className="flex items-center justify-center gap-8">
                 <button 
-                  onClick={() => setIsRecording(!isRecording)}
+                  onClick={async () => {
+                    if (!isRecording) {
+                      try {
+                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        mediaRecorder.current = new MediaRecorder(stream);
+                        audioChunks.current = [];
+                        
+                        mediaRecorder.current.ondataavailable = (e) => {
+                          if (e.data.size > 0) audioChunks.current.push(e.data);
+                        };
+                        
+                        mediaRecorder.current.start();
+                        setIsRecording(true);
+                        setRecordingTime(0);
+                      } catch (err) {
+                        console.error("Microphone access denied", err);
+                        alert("Please allow microphone access to record audio.");
+                      }
+                    } else {
+                      mediaRecorder.current?.pause();
+                      setIsRecording(false);
+                    }
+                  }}
                   className="w-16 h-16 rounded-full bg-on-surface/5 flex items-center justify-center hover:bg-on-surface/10 transition-all"
                 >
                   {isRecording ? <Pause size={24} className="fill-current" /> : <Play size={24} className="fill-current ml-1" />}
                 </button>
                 <button 
                   onClick={() => {
+                    if (!mediaRecorder.current) return;
+                    
+                    mediaRecorder.current.onstop = () => {
+                      const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        const base64Audio = reader.result as string;
+                        // Insert a real audio element into Tiptap
+                        editor?.chain().focus().insertContent(
+                          `<p><audio controls src="${base64Audio}" class="w-full my-4 rounded-xl bg-surface-container"></audio></p>`
+                        ).run();
+                        handleSave();
+                      };
+                      reader.readAsDataURL(audioBlob);
+                      
+                      // Stop all tracks to release the microphone
+                      mediaRecorder.current?.stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.current.stop();
                     setIsRecording(false);
                     setShowVoicePanel(false);
-                    // Mock audio insertion
-                    editor?.chain().focus().insertContent(`<p><span class="audio-clip italic">Voice recording added...</span></p>`).run();
+                    setRecordingTime(0);
                   }}
                   className="w-20 h-20 rounded-full bg-amber-500 text-white flex items-center justify-center shadow-xl shadow-amber-500/30 hover:scale-110 active:scale-95 transition-all"
                 >
