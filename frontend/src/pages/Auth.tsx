@@ -114,21 +114,21 @@ export default function Auth() {
             The most elegant way to capture your thoughts and sync them across all your devices securely.
           </p>
 
-          <div className="grid grid-cols-1 gap-5 w-full max-w-sm">
+          <div className="flex flex-col gap-6 w-full max-w-sm mx-auto lg:mx-0 items-center lg:items-start">
             {features.map(({ icon: Icon, label, desc }, i) => (
               <motion.div 
                 key={label} 
                 initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }} 
                 transition={{ delay: 0.4 + i * 0.1 }} 
-                className="flex items-center gap-4"
+                className="flex flex-col sm:flex-row items-center lg:items-start gap-4 text-center lg:text-left"
               >
-                <div className="w-10 h-10 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
-                  <Icon size={20} strokeWidth={2.5} />
+                <div className="w-11 h-11 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
+                  <Icon size={22} strokeWidth={2.5} />
                 </div>
                 <div>
                   <p className="font-black text-on-surface text-base tracking-tight">{label}</p>
-                  <p className="text-on-surface-variant text-sm font-medium opacity-70">{desc}</p>
+                  <p className="text-on-surface-variant text-sm font-medium opacity-70 leading-relaxed">{desc}</p>
                 </div>
               </motion.div>
             ))}
