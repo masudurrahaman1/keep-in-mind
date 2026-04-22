@@ -55,7 +55,7 @@ export default function Gallery() {
 
   const fetchStorage = async () => {
     if (!token) return;
-    if (!googleAccessToken || googleAccessToken === 'undefined') {
+    if (!googleAccessToken || googleAccessToken === 'undefined' || googleAccessToken === 'null') {
       // Silently skip if no Google connection, rather than warning
       return;
     }

@@ -8,7 +8,7 @@ import path, { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss(), basicSsl()],
@@ -37,7 +37,7 @@ export default defineConfig(({mode}) => {
       // Fix: Firebase Google Auth popup is blocked by the default COOP header.
       // Setting to 'unsafe-none' allows the popup to post a message back to the opener.
       headers: {
-        'Cross-Origin-Opener-Policy':   'unsafe-none',
+        'Cross-Origin-Opener-Policy': 'unsafe-none',
         'Cross-Origin-Embedder-Policy': 'unsafe-none',
       },
     },

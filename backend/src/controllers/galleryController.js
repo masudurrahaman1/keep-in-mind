@@ -2,6 +2,8 @@ const { google } = require('googleapis');
 const Media = require('../models/Media');
 const User = require('../models/User');
 const { Readable } = require('stream');
+const fs = require('fs');
+const path = require('path');
 
 /**
  * @desc    Upload media to Google Drive and save metadata
@@ -71,9 +73,18 @@ const uploadMedia = async (req, res) => {
 
     // 3. Upload File to Drive
     console.log(`[Upload] Pushing ${file.originalname} to Drive...`);
-    const bufferStream = new Readable();
-    bufferStream.push(file.buffer);
-    bufferStream.push(null);
+    
+    let mediaBody;
+    if (file.buffer) {
+      const bufferStream = new Readable();
+      bufferStream.push(file.buffer);
+      bufferStream.push(null);
+      mediaBody = bufferStream;
+    } else if (file.path) {
+      mediaBody = fs.createReadStream(file.path);
+    } else {
+      throw new Error('No file content found (neither buffer nor path)');
+    }
 
     const driveFileRes = await drive.files.create({
       requestBody: {
@@ -83,7 +94,7 @@ const uploadMedia = async (req, res) => {
       },
       media: {
         mimeType: file.mimetype,
-        body: bufferStream
+        body: mediaBody
       },
       fields: 'id, webContentLink, webViewLink, thumbnailLink'
     });
@@ -112,6 +123,13 @@ const uploadMedia = async (req, res) => {
     await newMedia.save();
     console.log(`[Upload] Success! ID: ${newMedia._id}`);
 
+    // 6. Cleanup temp file
+    if (file.path) {
+      fs.unlink(file.path, (err) => {
+        if (err) console.error('[Upload] Failed to delete temp file:', err);
+      });
+    }
+
     res.status(201).json({
       message: 'Upload successful! 🚀',
       media: newMedia
@@ -119,6 +137,14 @@ const uploadMedia = async (req, res) => {
 
   } catch (error) {
     console.error('[Upload Error] Details:', error);
+    
+    // Cleanup temp file on error
+    if (file && file.path) {
+      fs.unlink(file.path, (err) => {
+        if (err) console.error('[Upload] Failed to delete temp file on error:', err);
+      });
+    }
+
     res.status(500).json({
       message: 'Upload processing failed',
       error: error.message,
@@ -341,9 +367,9 @@ const streamMedia = async (req, res) => {
 
   console.log(`[Stream Request] ID: ${fileId}, Thumbnail: ${thumbnail}`);
 
-  if (!token) {
-    console.warn(`[Stream Error] Missing token for file: ${fileId}`);
-    return res.status(401).json({ message: 'Token required for streaming' });
+  if (!token || token === 'null' || token === 'undefined') {
+    console.warn(`[Stream Error] Missing or invalid token for file: ${fileId}`);
+    return res.status(401).json({ message: 'Valid Google token required for streaming' });
   }
 
   try {
@@ -363,18 +389,15 @@ const streamMedia = async (req, res) => {
         return res.status(404).json({ message: 'Thumbnail not available' });
       }
 
-      // Fetch the actual thumbnail image bits and pipe them
-      const authHeader = `Bearer ${token}`;
-      const thumbRes = await fetch(thumbUrl, { headers: { Authorization: authHeader } });
+      // Fetch the actual thumbnail image bits using the auth client
+      const thumbRes = await auth.request({
+        url: thumbUrl,
+        responseType: 'arraybuffer'
+      });
 
-      if (!thumbRes.ok) {
-        throw new Error(`Thumbnail fetch failed: ${thumbRes.statusText}`);
-      }
-
-      const buffer = await thumbRes.arrayBuffer();
       res.setHeader('Content-Type', 'image/jpeg');
       res.setHeader('Cache-Control', 'public, max-age=86400');
-      res.send(Buffer.from(buffer));
+      res.send(Buffer.from(thumbRes.data));
       return;
     }
 

@@ -48,7 +48,7 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const directLink = (googleAccessToken && googleAccessToken !== 'undefined')
+  const directLink = (googleAccessToken && googleAccessToken !== 'undefined' && googleAccessToken !== 'null')
     ? `${API_BASE}/gallery/stream/${media.fileId}?token=${googleAccessToken}`
     : media.fileUrl; // Fallback to original URL if possible
 

@@ -58,7 +58,10 @@ export default function MediaCard({
     }
   };
   
-  const thumbnailSrc = `${API_BASE}/gallery/stream/${media.fileId}?token=${googleAccessToken}&thumbnail=true`;
+  const isValidToken = googleAccessToken && googleAccessToken !== 'undefined' && googleAccessToken !== 'null';
+  const thumbnailSrc = isValidToken 
+    ? `${API_BASE}/gallery/stream/${media.fileId}?token=${googleAccessToken}&thumbnail=true`
+    : null;
   
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
