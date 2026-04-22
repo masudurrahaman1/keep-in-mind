@@ -32,7 +32,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
     }
   };
 
-  const { token: jwtToken, googleAccessToken, updateGoogleToken } = useAuth();
+  const { token: jwtToken, googleAccessToken, updateGoogleToken, clearGoogleToken } = useAuth();
   const [isLinking, setIsLinking] = useState(false);
 
   const handleConnectGoogle = async () => {
@@ -152,10 +152,13 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
                   </div>
 
                   {isGoogleConnected ? (
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-success/10 text-success text-xs font-bold ring-1 ring-success/20">
-                      <CheckCircle size={14} />
-                      Connected
-                    </div>
+                    <button
+                      type="button"
+                      onClick={clearGoogleToken}
+                      className="px-4 py-2 rounded-xl bg-error/10 hover:bg-error/20 text-error text-xs font-bold transition-all border border-error/10"
+                    >
+                      Disconnect
+                    </button>
                   ) : (
                     <button
                       type="button"
