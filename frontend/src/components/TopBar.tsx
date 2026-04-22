@@ -182,15 +182,8 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
 
       {/* Center: Title (mobile) or Search bar (tablet+) */}
       <div className="flex-1 flex items-center justify-center min-w-0">
-        {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) ? (
+        {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) && (
            <span className="md:hidden text-lg font-heading font-bold text-on-surface truncate px-2">{pageTitle}</span>
-        ) : (
-          <div className="md:hidden text-lg font-black flex items-center justify-center gap-2">
-             <div className="w-9 h-9 bg-gradient-to-br from-primary to-tertiary text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
-               <FileText size={18} strokeWidth={2.5} />
-             </div>
-             <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-tertiary to-secondary">Keep In Mind</span>
-          </div>
         )}
 
         <div className={clsx(
