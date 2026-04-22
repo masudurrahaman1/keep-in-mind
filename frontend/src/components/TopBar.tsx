@@ -183,8 +183,8 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
           "hidden sm:flex items-center gap-2 ml-1",
           (currentPath === '/settings' || currentPath.startsWith('/drawing')) && "sm:hidden lg:flex"
         )}>
-           <div className="text-base font-bold text-primary flex items-center gap-1">
-              Keep <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">In Mind</span>
+           <div className="text-lg font-black tracking-tight flex items-center gap-1.5 drop-shadow-[0_0_8px_rgba(var(--primary-rgb),0.3)]">
+              <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-tertiary to-secondary">Keep In Mind</span>
             </div>
         </div>
       </div>
@@ -194,11 +194,11 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
         {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) ? (
            <span className="md:hidden text-lg font-heading font-bold text-on-surface truncate px-2">{pageTitle}</span>
         ) : (
-          <div className="md:hidden text-base font-bold text-primary flex items-center justify-center gap-1">
-             <div className="w-8 h-8 bg-primary text-on-primary rounded-lg flex items-center justify-center shrink-0">
-               <FileText size={16} />
+          <div className="md:hidden text-lg font-black flex items-center justify-center gap-2">
+             <div className="w-9 h-9 bg-gradient-to-br from-primary to-tertiary text-white rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-primary/20">
+               <FileText size={18} strokeWidth={2.5} />
              </div>
-             Keep <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">In Mind</span>
+             <span className="text-transparent bg-clip-text bg-gradient-to-br from-primary via-tertiary to-secondary">Keep In Mind</span>
           </div>
         )}
 
