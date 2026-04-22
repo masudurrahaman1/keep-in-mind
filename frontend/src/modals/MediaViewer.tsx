@@ -464,28 +464,33 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
                 onError={handleMediaError}
               />
               
-              {/* Image Controls Overlay */}
-              <AnimatePresence>
-                {showControls && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/40 backdrop-blur-2xl rounded-[2rem] border border-white/10 text-white"
-                  >
-                    <button onClick={() => setZoom(prev => Math.max(1, prev - 0.25))} className="p-2 hover:bg-white/10 rounded-full transition-all"><ZoomOut size={20} /></button>
-                    <span className="text-[10px] font-bold min-w-[30px] text-center">{Math.round(zoom * 100)}%</span>
-                    <button onClick={() => setZoom(prev => Math.min(3, prev + 0.25))} className="p-2 hover:bg-white/10 rounded-full transition-all"><ZoomIn size={20} /></button>
-                    <div className="w-px h-6 bg-white/20"></div>
-                    <button onClick={() => setRotation(prev => prev + 90)} className="p-2 hover:bg-white/10 rounded-full transition-all"><RotateIcon size={20} /></button>
-                    <div className="w-px h-6 bg-white/20"></div>
-                    <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-full transition-all"><Maximize2 size={20} /></button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+              {/* Image Controls Overlay removed from here */}
             </div>
           )}
         </motion.div>
+
+        {/* Image Controls Overlay (Moved Outside for better mobile positioning) */}
+        {!isVideo && (
+          <AnimatePresence>
+            {showControls && (
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                className="absolute bottom-8 md:bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 p-4 bg-black/60 backdrop-blur-2xl rounded-[2rem] border border-white/10 text-white z-[60]"
+                onClick={e => e.stopPropagation()}
+              >
+                <button onClick={() => setZoom(prev => Math.max(1, prev - 0.25))} className="p-2 hover:bg-white/10 rounded-full transition-all"><ZoomOut size={20} /></button>
+                <span className="text-[10px] font-bold min-w-[30px] text-center">{Math.round(zoom * 100)}%</span>
+                <button onClick={() => setZoom(prev => Math.min(3, prev + 0.25))} className="p-2 hover:bg-white/10 rounded-full transition-all"><ZoomIn size={20} /></button>
+                <div className="w-px h-6 bg-white/20"></div>
+                <button onClick={() => setRotation(prev => prev + 90)} className="p-2 hover:bg-white/10 rounded-full transition-all"><RotateIcon size={20} /></button>
+                <div className="w-px h-6 bg-white/20"></div>
+                <button onClick={toggleFullscreen} className="p-2 hover:bg-white/10 rounded-full transition-all"><Maximize2 size={20} /></button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
       </div>
       
       {/* Footer Info Prompt */}
