@@ -9,7 +9,7 @@ import { createPortal } from 'react-dom';
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface MediaViewerProps {
   media: any;

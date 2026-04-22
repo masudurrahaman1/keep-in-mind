@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ShieldCheck, ShieldOff, X, Loader2, Copy, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface Props {
   mode: 'setup' | 'disable';

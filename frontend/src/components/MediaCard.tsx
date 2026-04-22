@@ -4,7 +4,7 @@ import { Trash2, Download, Image as ImageIcon, Video, Calendar, HardDrive, Maxim
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface MediaCardProps {
   media: any;

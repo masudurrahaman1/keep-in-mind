@@ -13,7 +13,7 @@ const features = [
   { icon: Lock,   label: 'Encrypted Sync',   desc: 'Safe across all devices'   },
 ];
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 type AuthMode = 'login' | 'register' | 'verify' | 'google-2fa';
 

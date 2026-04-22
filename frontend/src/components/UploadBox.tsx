@@ -10,7 +10,7 @@ interface UploadBoxProps {
   googleAccessToken: string;
 }
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function UploadBox({ onFilesSelect, token, googleAccessToken }: UploadBoxProps) {
   const { signOut } = useAuth();

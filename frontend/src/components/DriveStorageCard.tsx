@@ -7,7 +7,7 @@ import { auth, googleProvider } from '../config/firebase';
 import { linkGoogleAccount } from '../services/authService';
 import { AlertCircle, LogIn } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface StorageData {
   totalBytes: number;

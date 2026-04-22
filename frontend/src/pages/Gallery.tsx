@@ -12,7 +12,7 @@ import UploadProgressCard, { UploadStatus } from '../components/UploadProgressCa
 import UploadActivityCenter from '../components/UploadActivityCenter';
 
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function Gallery() {
   const { token, googleAccessToken, signOut } = useAuth();

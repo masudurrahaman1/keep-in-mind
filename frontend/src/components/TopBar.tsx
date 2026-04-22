@@ -14,7 +14,7 @@ interface TopBarProps {
   onOpenMobileMenu?: () => void;
 }
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, onOpenMobileMenu }: TopBarProps) {
   const { user, token } = useAuth();

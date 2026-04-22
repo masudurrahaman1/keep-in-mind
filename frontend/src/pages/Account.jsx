@@ -12,7 +12,7 @@ import TwoFactorModal from '../components/profile/TwoFactorModal';
 export default function Account() {
   const navigate = useNavigate();
   const { user, token, signOut } = useAuth();
-  const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
+  const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
   // Storage key unique to user
   const profileKey = user ? `keep-in-mind-profile-${user._id}` : 'keep-in-mind-profile-guest';
