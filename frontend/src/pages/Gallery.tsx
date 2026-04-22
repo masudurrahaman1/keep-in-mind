@@ -25,6 +25,8 @@ export default function Gallery() {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'image' | 'video' | 'trash'>('all');
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
+  const [activeCount, setActiveCount] = useState(0);
+  const [trashCount, setTrashCount] = useState(0);
 
   // Batch Selection State
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -97,6 +99,7 @@ export default function Gallery() {
       if (!res.ok) throw new Error('Failed to fetch gallery');
       const data = await res.json();
       setMedia(data);
+      setActiveCount(data.length);
       fetchStorage(); // Refresh storage after fetching media
     } catch (err: any) {
       console.error(err);
@@ -128,6 +131,7 @@ export default function Gallery() {
       if (!res.ok) throw new Error('Failed to fetch trash');
       const data = await res.json();
       setMedia(data);
+      setTrashCount(data.length);
     } catch (err: any) {
       console.error(err);
     } finally {
@@ -137,6 +141,7 @@ export default function Gallery() {
 
   const handleUploadSuccess = (newItem: any) => {
     setMedia(prev => [newItem, ...prev]);
+    setActiveCount(prev => prev + 1);
     fetchStorage(); // Refresh storage
   };
 
@@ -229,6 +234,8 @@ export default function Gallery() {
       });
       if (!res.ok) throw new Error('Delete failed');
       setMedia(prev => prev.filter(m => m._id !== id));
+      setActiveCount(prev => prev - 1);
+      setTrashCount(prev => prev + 1);
       fetchStorage();
     } catch (err) {
       console.error('Delete failed', err);
@@ -243,6 +250,8 @@ export default function Gallery() {
       });
       if (!res.ok) throw new Error('Restore failed');
       setMedia(prev => prev.filter(m => m._id !== id));
+      setTrashCount(prev => prev - 1);
+      setActiveCount(prev => prev + 1);
       fetchStorage();
     } catch (err) {
       console.error('Restore failed', err);
@@ -268,6 +277,7 @@ export default function Gallery() {
         ));
         
         setMedia(prev => prev.filter(m => !idsToDelete.includes(m._id)));
+        setTrashCount(prev => prev - idsToDelete.length);
         fetchStorage();
       } catch (err) {
         console.error('Permanent delete failed', err);
@@ -314,6 +324,8 @@ export default function Gallery() {
       ));
 
       setMedia(prev => prev.filter(m => !selectedIds.has(m._id)));
+      setActiveCount(prev => prev - idsToMove.length);
+      setTrashCount(prev => prev + idsToMove.length);
       setSelectedIds(new Set());
       setIsSelectionMode(false);
       fetchStorage();
@@ -460,7 +472,7 @@ export default function Gallery() {
             onClick={() => setFilterType('all')}
             className={`px-3 sm:px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap min-h-[36px] ${filterType === 'all' ? 'bg-primary text-white' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'}`}
           >
-            All ({media.length})
+            All ({activeCount})
           </button>
           <button 
             onClick={() => setFilterType('image')}
@@ -483,7 +495,7 @@ export default function Gallery() {
             className={`px-3 sm:px-4 py-2 rounded-2xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap min-h-[36px] ${filterType === 'trash' ? 'bg-error text-white' : 'bg-surface-container text-error/60 hover:bg-error/10'}`}
           >
             <History size={13} />
-            Trash
+            Trash ({trashCount})
           </button>
           
           <AnimatePresence>
