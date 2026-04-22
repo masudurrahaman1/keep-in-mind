@@ -329,10 +329,10 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
-                    className="absolute inset-0 flex items-center justify-center bg-black/30 backdrop-blur-[2px] pointer-events-none"
+                    className="absolute inset-0 flex items-center justify-center bg-black/10 backdrop-blur-[1px] pointer-events-none"
                   >
-                    <div className="p-10 bg-white shadow-2xl rounded-full text-black">
-                      <Play size={64} fill="currentColor" />
+                    <div className="p-6 bg-white shadow-2xl rounded-full text-black">
+                      <Play size={32} fill="currentColor" />
                     </div>
                   </motion.div>
                 )}
