@@ -126,10 +126,17 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
 
   const toggleFullscreen = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    if (!containerRef.current) return;
+
+    const elem = containerRef.current as any;
     if (!document.fullscreenElement) {
-      containerRef.current?.requestFullscreen();
+      if (elem.requestFullscreen) elem.requestFullscreen();
+      else if (elem.webkitRequestFullscreen) elem.webkitRequestFullscreen();
+      else if (elem.msRequestFullscreen) elem.msRequestFullscreen();
     } else {
-      document.exitFullscreen();
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if ((document as any).webkitExitFullscreen) (document as any).webkitExitFullscreen();
+      else if ((document as any).msExitFullscreen) (document as any).msExitFullscreen();
     }
   };
 
