@@ -245,7 +245,7 @@ export default function Auth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{    opacity: 0 }}
-            className="w-full max-w-4xl grid grid-cols-1 lg:grid-cols-2 gap-8 items-center relative z-10"
+            className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center relative z-10"
           >
             {/* Left: Branding */}
             <motion.div
@@ -312,21 +312,21 @@ export default function Auth() {
               initial={{ opacity: 0, y: 40, scale: 0.98 }}
               animate={{ opacity: 1, y: 0,  scale: 1    }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className="w-full max-w-md mx-auto"
+              className="w-full max-w-[420px] mx-auto lg:ml-auto lg:mr-0"
             >
-              <div className="glass-panel rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-14 relative overflow-hidden border-white/20 shadow-2xl">
+              <div className="glass-panel rounded-[3.5rem] p-10 sm:p-14 relative overflow-hidden border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)]">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
-                <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
-                <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
+                <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
+                <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
 
                 {/* Mobile logo */}
                 <motion.div 
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-col items-center gap-4 mb-10 lg:hidden"
+                  className="flex flex-col items-center gap-5 mb-12 lg:hidden"
                 >
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-primary/30">
+                  <div className="w-16 h-16 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-primary/30">
                     <FileText size={32} strokeWidth={2.5} />
                   </div>
                   <span className="text-3xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
