@@ -26,6 +26,8 @@ export default function Gallery() {
   const [filterType, setFilterType] = useState<'all' | 'image' | 'video' | 'trash'>('all');
   const [selectedMediaIndex, setSelectedMediaIndex] = useState<number | null>(null);
   const [activeCount, setActiveCount] = useState(0);
+  const [imageCount, setImageCount] = useState(0);
+  const [videoCount, setVideoCount] = useState(0);
   const [trashCount, setTrashCount] = useState(0);
 
   // Batch Selection State
@@ -100,6 +102,8 @@ export default function Gallery() {
       const data = await res.json();
       setMedia(data);
       setActiveCount(data.length);
+      setImageCount(data.filter((m: any) => m.fileType.startsWith('image/')).length);
+      setVideoCount(data.filter((m: any) => m.fileType.startsWith('video/')).length);
       fetchStorage(); // Refresh storage after fetching media
     } catch (err: any) {
       console.error(err);
@@ -142,6 +146,8 @@ export default function Gallery() {
   const handleUploadSuccess = (newItem: any) => {
     setMedia(prev => [newItem, ...prev]);
     setActiveCount(prev => prev + 1);
+    if (newItem.fileType.startsWith('image/')) setImageCount(prev => prev + 1);
+    else if (newItem.fileType.startsWith('video/')) setVideoCount(prev => prev + 1);
     fetchStorage(); // Refresh storage
   };
 
@@ -233,8 +239,11 @@ export default function Gallery() {
         }
       });
       if (!res.ok) throw new Error('Delete failed');
+      const deletedItem = media.find(m => m._id === id);
       setMedia(prev => prev.filter(m => m._id !== id));
       setActiveCount(prev => prev - 1);
+      if (deletedItem?.fileType.startsWith('image/')) setImageCount(prev => prev - 1);
+      else if (deletedItem?.fileType.startsWith('video/')) setVideoCount(prev => prev - 1);
       setTrashCount(prev => prev + 1);
       fetchStorage();
     } catch (err) {
@@ -249,9 +258,12 @@ export default function Gallery() {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) throw new Error('Restore failed');
+      const restoredItem = media.find(m => m._id === id);
       setMedia(prev => prev.filter(m => m._id !== id));
       setTrashCount(prev => prev - 1);
       setActiveCount(prev => prev + 1);
+      if (restoredItem?.fileType.startsWith('image/')) setImageCount(prev => prev + 1);
+      else if (restoredItem?.fileType.startsWith('video/')) setVideoCount(prev => prev + 1);
       fetchStorage();
     } catch (err) {
       console.error('Restore failed', err);
@@ -478,13 +490,13 @@ export default function Gallery() {
             onClick={() => setFilterType('image')}
             className={`px-3 sm:px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap min-h-[36px] ${filterType === 'image' ? 'bg-secondary text-white' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'}`}
           >
-            Images
+            Images ({imageCount})
           </button>
           <button 
             onClick={() => setFilterType('video')}
             className={`px-3 sm:px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap min-h-[36px] ${filterType === 'video' ? 'bg-tertiary text-on-tertiary-container' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'}`}
           >
-            Videos
+            Videos ({videoCount})
           </button>
           <button 
             onClick={() => {
