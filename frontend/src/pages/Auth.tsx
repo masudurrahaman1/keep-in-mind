@@ -90,49 +90,49 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface bg-mesh flex flex-col items-center justify-center p-6 md:p-12 relative overflow-x-hidden">
-      {/* Background Ambient Orbs */}
-      <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-5%] w-[45%] h-[45%] bg-secondary/10 rounded-full blur-[140px] pointer-events-none" />
+    <div className="min-h-screen w-full bg-surface bg-mesh flex flex-col relative overflow-x-hidden overflow-y-auto lg:overflow-hidden">
+      {/* Background Ambient Orbs - Subtle */}
+      <div className="absolute top-[-5%] left-[-2%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute bottom-[-5%] right-[-2%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Top Left Branding - Persistent */}
-      <div className="absolute top-8 left-8 flex items-center gap-3 z-50">
-        <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-          <FileText size={20} strokeWidth={2.5} />
+      {/* Top Left Branding - Fixed Position */}
+      <div className="absolute top-10 left-10 flex items-center gap-4 z-50">
+        <div className="w-11 h-11 bg-gradient-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg">
+          <FileText size={22} strokeWidth={2.5} />
         </div>
-        <span className="text-xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
+        <span className="text-2xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
       </div>
 
-      <div className="w-full max-w-[1100px] flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-24 relative z-10 py-20 lg:py-0">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 w-full max-w-[1200px] mx-auto p-6 pt-32 lg:pt-0 relative z-10">
         
         {/* Left Hero Section */}
         <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.8 }}
           className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left"
         >
-          <h1 className="text-5xl md:text-6xl xl:text-7xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-8">
+          <h1 className="text-4xl md:text-5xl xl:text-6xl font-heading font-black text-on-surface leading-[1.15] tracking-tighter mb-6">
             Think it.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary drop-shadow-sm">Write it.</span><br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Write it.</span><br />
             Keep it.
           </h1>
           
-          <p className="text-on-surface-variant text-lg md:text-xl mb-12 leading-relaxed font-medium opacity-80 max-w-md">
-            Experience a new level of clarity with Keep in Mind. Simple, secure, and always in sync.
+          <p className="text-on-surface-variant text-lg md:text-xl mb-10 leading-relaxed font-medium opacity-80 max-w-md">
+            The most elegant way to capture your thoughts and sync them across all your devices securely.
           </p>
 
-          <div className="grid grid-cols-1 gap-6 w-full max-w-sm">
+          <div className="grid grid-cols-1 gap-5 w-full max-w-sm">
             {features.map(({ icon: Icon, label, desc }, i) => (
               <motion.div 
                 key={label} 
                 initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }} 
                 transition={{ delay: 0.4 + i * 0.1 }} 
-                className="flex items-center gap-4 group"
+                className="flex items-center gap-4"
               >
-                <div className="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/10 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                  <Icon size={22} strokeWidth={2.5} />
+                <div className="w-10 h-10 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
+                  <Icon size={20} strokeWidth={2.5} />
                 </div>
                 <div>
                   <p className="font-black text-on-surface text-base tracking-tight">{label}</p>
@@ -145,14 +145,12 @@ export default function Auth() {
 
         {/* Right Auth Card */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full max-w-[400px] flex shrink-0"
+          className="w-full max-w-[460px] flex shrink-0"
         >
-          <div className="w-full bg-white/70 dark:bg-on-surface/[0.05] backdrop-blur-xl rounded-[2rem] p-8 md:p-10 border border-white/40 shadow-2xl shadow-primary/10 text-center relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/30 via-secondary/30 to-primary/30" />
-            
+          <div className="w-full bg-white/60 dark:bg-on-surface/[0.03] backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/30 shadow-xl text-center">
             <AnimatePresence mode="wait">
               {!is2FAMode ? (
                 <motion.div 
@@ -162,30 +160,30 @@ export default function Auth() {
                   exit={{ opacity: 0 }}
                 >
                   <div className="mb-10">
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-black uppercase tracking-widest mb-4">
-                      Keep In Mind
-                    </span>
-                    <h2 className="text-3xl md:text-4xl font-heading font-black text-on-surface tracking-tighter mb-3">
+                    <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                      <FileText size={28} className="text-primary" />
+                    </div>
+                    <h2 className="text-3xl md:text-4xl font-heading font-black text-on-surface tracking-tighter mb-4">
                       Sign In
                     </h2>
-                    <p className="text-on-surface-variant text-sm font-semibold opacity-70">
-                      Sign in to sync your thoughts across all devices.
+                    <p className="text-on-surface-variant text-sm font-semibold opacity-70 leading-relaxed">
+                      Access your Keep in Mind workspace with your Google account.
                     </p>
                   </div>
 
                   {errorCode && (
-                    <div className="mb-6 p-4 bg-error/10 border border-error/20 text-error text-xs font-bold rounded-xl text-left flex items-center gap-2">
+                    <div className="mb-8 p-4 bg-error/10 border border-error/20 text-error text-xs font-bold rounded-2xl text-left flex items-center gap-2">
                       <div className="w-1.5 h-1.5 rounded-full bg-error" />
                       {errorCode}
                     </div>
                   )}
 
                   <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
                     onClick={handleGoogleSign}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-on-surface/10 text-on-surface font-bold rounded-2xl shadow-lg border border-outline-variant/30 hover:border-primary/50 transition-all duration-300 disabled:opacity-50 min-h-[56px]"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-on-surface/10 text-on-surface font-black rounded-2xl shadow-lg border border-outline-variant/30 hover:bg-gray-50 dark:hover:bg-on-surface/20 transition-all duration-300 disabled:opacity-50 min-h-[60px]"
                   >
                     <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -203,12 +201,12 @@ export default function Auth() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <ShieldCheck size={32} className="text-primary" />
+                  <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
+                    <ShieldCheck size={44} className="text-primary" />
                   </div>
-                  <h2 className="text-2xl font-black text-on-surface mb-2 tracking-tight">Security Code</h2>
-                  <p className="text-xs text-on-surface-variant font-medium mb-8 opacity-70">
-                    Enter the code from your authenticator app to access {tfState?.userName}'s workspace.
+                  <h2 className="text-3xl font-black text-on-surface mb-3 tracking-tight">Verify Identity</h2>
+                  <p className="text-sm text-on-surface-variant font-medium mb-10 opacity-70">
+                    Enter the verification code from your authenticator app.
                   </p>
 
                   <input
@@ -216,7 +214,7 @@ export default function Auth() {
                     value={otpCode}
                     onChange={e => { setOtpCode(e.target.value.slice(0, 6)); setErrorCode(''); }}
                     placeholder="000000"
-                    className="w-full text-center text-3xl font-mono font-bold py-4 rounded-2xl border-2 border-outline-variant/30 bg-surface-container-low focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all text-on-surface mb-6"
+                    className="w-full text-center text-4xl font-mono font-bold py-5 rounded-3xl border-2 border-outline-variant/30 bg-surface-container-low focus:border-primary outline-none transition-all text-on-surface mb-8"
                     autoFocus
                   />
 
@@ -224,16 +222,16 @@ export default function Auth() {
                     whileTap={{ scale: 0.98 }}
                     onClick={handleVerify2FA}
                     disabled={isLoading || otpCode.length < 6}
-                    className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-bold text-base shadow-lg shadow-primary/20 transition-all disabled:opacity-50 mb-6"
+                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-primary to-secondary text-white font-black text-lg shadow-xl shadow-primary/20 transition-all disabled:opacity-50 mb-8"
                   >
-                    {isLoading ? 'Verifying…' : 'Verify & Sign In'}
+                    {isLoading ? 'Verifying…' : 'Verify & Continue'}
                   </motion.button>
 
                   <button
                     onClick={() => { setIs2FAMode(false); setOtpCode(''); setErrorCode(''); }}
-                    className="text-xs font-bold text-on-surface-variant hover:text-primary transition-colors"
+                    className="text-sm font-bold text-on-surface-variant hover:text-primary transition-colors"
                   >
-                    ← Cancel
+                    ← Back
                   </button>
                 </motion.div>
               )}
