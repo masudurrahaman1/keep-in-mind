@@ -82,7 +82,7 @@ export default function UploadBox({ onFilesSelect, token, googleAccessToken }: U
               {isUploading ? 'Uploading to Cloud...' : isDragActive ? 'Drop it here!' : 'Add to Your Gallery'}
             </h3>
             <p className="text-sm text-on-surface-variant font-medium">
-              Images up to 10MB, Videos up to 50MB
+              Images & Videos up to 5GB
             </p>
           </div>
 
