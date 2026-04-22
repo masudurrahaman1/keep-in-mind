@@ -85,7 +85,7 @@ export default function EditProfileModal({ profile, onClose, onSave }) {
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="fixed inset-x-4 sm:inset-x-auto top-1/4 sm:top-1/2 sm:-translate-y-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-md z-50 glass-panel rounded-[2rem] overflow-hidden shadow-2xl flex flex-col"
+        className="fixed inset-x-4 sm:inset-x-auto top-1/2 -translate-y-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-md z-50 glass-panel rounded-[2rem] overflow-hidden shadow-2xl flex flex-col"
       >
         <div className="flex justify-between items-center px-6 py-4 border-b border-white/5 bg-on-surface/5">
           <h2 className="text-xl font-heading font-bold text-on-surface tracking-tight">Edit Profile</h2>
