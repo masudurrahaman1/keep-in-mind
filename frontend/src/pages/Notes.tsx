@@ -362,28 +362,28 @@ export default function Notes() {
 
         {filteredNotes.length === 0 && (
           <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="col-span-full py-24 flex flex-col items-center justify-center text-center px-4"
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="col-span-full py-12 flex flex-col items-center text-center px-4"
           >
-            <div className="w-24 h-24 glass-panel rounded-full flex items-center justify-center mb-8 shadow-lg shadow-primary/5">
-              {searchQuery ? <Search size={40} className="text-primary/50" /> : <FileText size={40} className="text-primary/50" />}
+            <div className="w-16 h-16 glass-panel rounded-full flex items-center justify-center mb-4 shadow-lg shadow-primary/5">
+              {searchQuery ? <Search size={32} className="text-primary/50" /> : <FileText size={32} className="text-primary/50" />}
             </div>
-            <h2 className="text-3xl font-heading font-bold text-on-surface mb-4">
+            <h2 className="text-2xl font-heading font-bold text-on-surface mb-2">
               {searchQuery ? "No results found" : "It's empty here"}
             </h2>
-            <p className="max-w-md mx-auto text-base text-on-surface-variant mb-10 leading-relaxed">
+            <p className="max-w-xs mx-auto text-sm text-on-surface-variant mb-6 leading-relaxed">
               {searchQuery 
-                ? `We couldn't find any notes matching "${searchQuery}". Try using different keywords.`
-                : "Capture your ideas, lists, and thoughts. Experience absolute clarity by creating your first note."}
+                ? `We couldn't find any notes matching "${searchQuery}".`
+                : "Capture your ideas, lists, and thoughts by creating your first note."}
             </p>
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/editor')}
-              className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-2xl font-bold shadow-xl shadow-primary/20 transition-all"
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-bold shadow-xl shadow-primary/20 transition-all"
             >
-              <Plus size={24} strokeWidth={3} />
-              <span className="text-lg">Create Note</span>
+              <Plus size={20} strokeWidth={3} />
+              <span className="text-base">Create Note</span>
             </motion.button>
           </motion.div>
         )}
