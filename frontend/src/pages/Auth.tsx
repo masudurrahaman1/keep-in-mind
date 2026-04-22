@@ -245,16 +245,16 @@ export default function Auth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{    opacity: 0 }}
-            className="w-full max-w-6xl h-full lg:h-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center relative z-10 overflow-y-auto lg:overflow-visible no-scrollbar py-8 lg:py-0"
+            className="w-full max-w-6xl h-full lg:h-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center relative z-10 overflow-y-auto lg:overflow-visible no-scrollbar py-12 lg:py-0"
           >
             {/* Left: Branding */}
             <motion.div
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0  }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden lg:flex flex-col pr-8"
+              className="hidden lg:flex flex-col pr-12"
             >
-              <div className="flex items-center gap-4 mb-10 group cursor-default">
+              <div className="flex items-center gap-4 mb-8 group cursor-default">
                 <motion.div 
                   initial={{ rotate: -20, scale: 0 }}
                   animate={{ rotate: 0, scale: 1 }}
@@ -312,9 +312,9 @@ export default function Auth() {
               initial={{ opacity: 0, y: 40, scale: 0.98 }}
               animate={{ opacity: 1, y: 0,  scale: 1    }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
-              className="w-full max-w-[420px] mx-auto lg:ml-auto lg:mr-0"
+              className="w-full max-w-[360px] mx-auto lg:ml-auto lg:mr-0"
             >
-              <div className="glass-panel rounded-[3.5rem] p-10 sm:p-14 relative overflow-hidden border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)]">
+              <div className="glass-panel rounded-[3.5rem] p-10 sm:p-12 relative overflow-hidden border-white/20 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.3)]">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                 <div className="absolute -top-32 -right-32 w-80 h-80 bg-primary/10 rounded-full blur-[100px] pointer-events-none" />
                 <div className="absolute -bottom-32 -left-32 w-80 h-80 bg-secondary/10 rounded-full blur-[100px] pointer-events-none" />
@@ -324,7 +324,7 @@ export default function Auth() {
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="flex flex-col items-center gap-5 mb-12 lg:hidden"
+                  className="flex flex-col items-center gap-4 mb-10 lg:hidden"
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-[1.8rem] flex items-center justify-center shadow-2xl shadow-primary/30">
                     <FileText size={32} strokeWidth={2.5} />
