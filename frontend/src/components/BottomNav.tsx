@@ -13,7 +13,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface border-t border-surface-variant px-4 py-2 z-50 safe-area-bottom">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-surface/80 backdrop-blur-2xl border-t border-white/5 px-4 py-2 z-50 safe-area-bottom shadow-[0_-8px_30px_rgba(0,0,0,0.05)]">
       <ul className="flex items-center justify-between">
         {links.map((item) => {
           const isProfile = item.path === '/account';
@@ -38,9 +38,9 @@ export default function BottomNav() {
               <Link
                 to={item.path}
                 className={cn(
-                  'flex flex-col items-center justify-center w-12 h-12 rounded-xl transition-colors',
+                  'flex flex-col items-center justify-center w-16 h-12 rounded-2xl transition-all duration-300',
                   active 
-                    ? 'text-primary bg-primary-container/30' 
+                    ? 'text-primary bg-primary/10 shadow-sm' 
                     : 'text-on-surface-variant hover:bg-surface-container'
                 )}
               >

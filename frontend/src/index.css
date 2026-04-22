@@ -40,39 +40,37 @@
 /* ── Light Mode (default) ───────────────────────────────────── */
 :root,
 [data-theme="light"] {
-  --primary: #435B9D;
-  --primary-container: #DEE1FF;
+  --primary: #5142E6; /* More vibrant Indigo */
+  --primary-container: #E0E0FF;
   --on-primary: #FFFFFF;
-  --on-primary-container: #111A37;
+  --on-primary-container: #00006E;
   
-  --surface: #F9F9FF;
+  --surface: #F8F9FF;
   --surface-container-lowest: #FFFFFF;
   --surface-container-low: #F1F3FB;
-  --surface-container: #E3E6F0;
-  --surface-container-high: #D5D9E5;
-  --surface-container-highest: #C7CBD9;
+  --surface-container: #E8EBF5;
+  --surface-container-high: #DDE1F0;
+  --surface-container-highest: #D2D6E6;
   
-  --on-surface: #191C20;
-  --on-surface-variant: #44474E;
-  --outline: #74777F;
-  --outline-variant: #C4C6D0;
+  --on-surface: #10121D;
+  --on-surface-variant: #404452;
+  --outline: #72778E;
+  --outline-variant: #C2C6DC;
 
-  --error: #BA1A1A;
+  --error: #FF3B30;
   --on-error: #FFFFFF;
   --error-container: #FFDAD6;
   --on-error-container: #410002;
 
-  --secondary: #585E71;
-  --secondary-container: #DCE2F9;
+  --secondary: #007AFF; /* Vibrant Blue */
+  --secondary-container: #D1E9FF;
   --on-secondary: #FFFFFF;
-  --on-secondary-container: #151B2C;
+  --on-secondary-container: #001D33;
 
-  --on-secondary-container: #141B2C;
-
-  --tertiary: #715570;
-  --tertiary-container: #FBD7F8;
+  --tertiary: #AF52DE; /* Vibrant Purple */
+  --tertiary-container: #F5E6FF;
   --on-tertiary: #FFFFFF;
-  --on-tertiary-container: #291329;
+  --on-tertiary-container: #2B0052;
 }
 
 /* ── Dark Mode — System & Explicit ─────────────────────────── */
@@ -238,26 +236,33 @@ body {
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
   background:
-    radial-gradient(circle at 10% 20%, rgba(129, 140, 248, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(52, 211, 153, 0.1) 0%, transparent 60%);
+    radial-gradient(circle at 5% 10%, rgba(139, 92, 246, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 95% 90%, rgba(59, 130, 246, 0.25) 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 55%);
   pointer-events: none;
   z-index: 0;
+  filter: blur(80px);
 }
 
 [data-theme="light"] .bg-mesh::after {
   background:
-    radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+    radial-gradient(circle at 5% 10%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 95% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 55%);
 }
 
 @media (prefers-color-scheme: light) {
   :root:not([data-theme="dark"]):not([data-theme="amoled"]) .bg-mesh::after {
     background:
-      radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.05) 0%, transparent 40%),
-      radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 60%);
+      radial-gradient(circle at 5% 10%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 95% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
+      radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
+      radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 55%);
   }
 }
 
@@ -307,4 +312,12 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.text-vibrant {
+  @apply text-transparent bg-clip-text bg-gradient-to-r from-primary via-tertiary to-secondary;
+}
+
+.card-hover-effect {
+  @apply transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1;
 }
