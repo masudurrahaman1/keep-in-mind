@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag } from 'lucide-react';
+import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
@@ -316,9 +316,19 @@ export default function Notes() {
                     )}
                   </div>
                 ) : (
-                  <p className="text-sm text-on-surface-variant/90 line-clamp-5 whitespace-pre-wrap leading-relaxed relative z-10 font-medium">
-                    {note.content?.replace(/<[^>]*>/g, '')}
-                  </p>
+                  <div className="relative z-10">
+                    {note.content?.includes('<audio') && (
+                      <div className="flex items-center gap-2 mb-2 p-3 bg-primary/5 rounded-xl border border-primary/10 text-primary">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                          <Mic size={14} />
+                        </div>
+                        <span className="text-xs font-black uppercase tracking-wider">Voice Note</span>
+                      </div>
+                    )}
+                    <p className="text-sm text-on-surface-variant/90 line-clamp-5 whitespace-pre-wrap leading-relaxed font-medium">
+                      {note.content?.replace(/<[^>]*>/g, '')}
+                    </p>
+                  </div>
                 )}
 
                 <div className="mt-6 flex items-center justify-between opacity-60 text-on-surface-variant relative z-10">
