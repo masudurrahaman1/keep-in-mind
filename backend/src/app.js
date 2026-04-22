@@ -16,6 +16,12 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'x-google-access-token', 'google-access-token']
 }));
+
+// Test Route to verify proxy connection
+app.get('/api/test', (req, res) => {
+  res.json({ message: 'Backend Proxy is Working! ✅', port: 5000 });
+});
+
 app.use(express.json({ limit: '5gb' }));
 app.use(express.urlencoded({ limit: '5gb', extended: true }));
 
