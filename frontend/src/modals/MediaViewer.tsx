@@ -456,11 +456,33 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
               className={`relative group transition-all duration-500 overflow-hidden ${isFullscreen ? 'w-screen h-screen rounded-none' : 'rounded-3xl'}`}
               style={{ transform: `scale(${zoom}) rotate(${rotation}deg)` }}
               onClick={e => e.stopPropagation()}
+              onTouchStart={(e) => {
+                if (e.touches.length === 2) {
+                  const dist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                  );
+                  (e.currentTarget as any)._initialDist = dist;
+                  (e.currentTarget as any)._initialZoom = zoom;
+                }
+              }}
+              onTouchMove={(e) => {
+                if (e.touches.length === 2 && (e.currentTarget as any)._initialDist) {
+                  e.preventDefault();
+                  const dist = Math.hypot(
+                    e.touches[0].pageX - e.touches[1].pageX,
+                    e.touches[0].pageY - e.touches[1].pageY
+                  );
+                  const scale = dist / (e.currentTarget as any)._initialDist;
+                  const newZoom = Math.max(1, Math.min(3, (e.currentTarget as any)._initialZoom * scale));
+                  setZoom(newZoom);
+                }
+              }}
             >
               <img
                 src={directLink}
                 alt={media.fileName}
-                className={`transition-all duration-500 ${isFullscreen ? 'w-screen h-screen object-contain rounded-none' : 'max-h-[85vh] w-auto h-auto rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/10'}`}
+                className={`transition-all duration-500 touch-none ${isFullscreen ? 'w-screen h-screen object-contain rounded-none' : 'max-h-[85vh] w-auto h-auto rounded-3xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] border border-white/10'}`}
                 onError={handleMediaError}
               />
               
