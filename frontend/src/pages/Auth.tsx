@@ -56,7 +56,6 @@ export default function Auth() {
       }
 
       login(data.user, data.token, googleAccessToken);
-      localStorage.setItem('keep-in-mind-auto-sync', 'true');
       navigate(from, { replace: true });
     } catch (err: any) {
       if (err?.code === 'auth/popup-closed-by-user') return;
@@ -80,7 +79,6 @@ export default function Auth() {
       if (!res.ok) { setErrorCode(data.message); return; }
 
       login(data.user, data.token, tfState!.googleToken || '');
-      localStorage.setItem('keep-in-mind-auto-sync', 'true');
       navigate(from, { replace: true });
     } catch {
       setErrorCode('Network error. Please try again.');
@@ -90,79 +88,45 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-surface bg-mesh flex flex-col relative overflow-x-hidden overflow-y-auto lg:overflow-hidden">
+    <div className="h-screen w-full bg-surface bg-mesh flex flex-col items-center justify-center p-6 md:p-12 relative overflow-hidden">
       {/* Background Ambient Orbs - Subtle */}
       <div className="absolute top-[-5%] left-[-2%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-5%] right-[-2%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 w-full max-w-[1200px] mx-auto p-6 relative z-10">
+      <div className="w-full max-w-2xl flex flex-col items-center gap-8 relative z-10 text-center">
         
-        {/* Left Hero Section */}
+        {/* Top: Branding Tagline */}
         <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex flex-col items-center"
         >
-          <h1 className="text-4xl md:text-5xl xl:text-6xl font-heading font-black text-on-surface leading-[1.15] tracking-tighter mb-6">
-            Think it.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Write it.</span><br />
-            Keep it.
+          <h1 className="text-4xl md:text-5xl font-heading font-black text-on-surface leading-tight tracking-tighter mb-2">
+            Think it. <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Write it.</span> Keep it.
           </h1>
-          
-          <p className="text-on-surface-variant text-lg md:text-xl mb-10 leading-relaxed font-medium opacity-80 max-w-md">
-            The most elegant way to capture your thoughts and sync them across all your devices securely.
+          <p className="text-on-surface-variant text-sm font-semibold opacity-60">
+            The most elegant way to capture your thoughts securely.
           </p>
-
-          <div className="flex flex-col gap-6 w-full max-w-sm mx-auto lg:mx-0 items-center lg:items-start">
-            {features.map(({ icon: Icon, label, desc }, i) => (
-              <motion.div 
-                key={label} 
-                initial={{ opacity: 0, x: -20 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                transition={{ delay: 0.4 + i * 0.1 }} 
-                className="flex flex-col sm:flex-row items-center lg:items-start gap-4 text-center lg:text-left"
-              >
-                <div className="w-11 h-11 rounded-2xl bg-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/10">
-                  <Icon size={22} strokeWidth={2.5} />
-                </div>
-                <div>
-                  <p className="font-black text-on-surface text-base tracking-tight">{label}</p>
-                  <p className="text-on-surface-variant text-sm font-medium opacity-70 leading-relaxed">{desc}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </motion.div>
 
-        {/* Right Auth Card */}
+        {/* Middle: Sign-In Card */}
         <motion.div 
           initial={{ opacity: 0, scale: 0.98 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="w-full max-w-[460px] flex shrink-0"
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="w-full max-w-[400px]"
         >
-          <div className="w-full bg-white/60 dark:bg-on-surface/[0.03] backdrop-blur-xl rounded-[3rem] p-10 md:p-12 border border-white/30 shadow-xl text-center">
+          <div className="bg-white/60 dark:bg-on-surface/[0.03] backdrop-blur-xl rounded-[2.5rem] p-8 md:p-10 border border-white/30 shadow-xl text-center">
             <AnimatePresence mode="wait">
               {!is2FAMode ? (
-                <motion.div 
-                  key="login"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="mb-10">
-                    <h2 className="text-3xl md:text-4xl font-heading font-black text-on-surface tracking-tighter mb-4">
-                      Sign In
-                    </h2>
-                    <p className="text-on-surface-variant text-sm font-semibold opacity-70 leading-relaxed">
-                      Access your Keep in Mind workspace with your Google account.
-                    </p>
-                  </div>
+                <motion.div key="login" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <h2 className="text-2xl font-black text-on-surface tracking-tight mb-2">Sign In</h2>
+                  <p className="text-on-surface-variant text-xs font-semibold opacity-60 mb-8">
+                    Use your Google account to continue.
+                  </p>
 
                   {errorCode && (
-                    <div className="mb-8 p-4 bg-error/10 border border-error/20 text-error text-xs font-bold rounded-2xl text-left flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-error" />
+                    <div className="mb-6 p-3 bg-error/10 border border-error/20 text-error text-[10px] font-bold rounded-xl flex items-center gap-2">
                       {errorCode}
                     </div>
                   )}
@@ -172,7 +136,7 @@ export default function Auth() {
                     whileTap={{ scale: 0.99 }}
                     onClick={handleGoogleSign}
                     disabled={isLoading}
-                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-on-surface/10 text-on-surface font-black rounded-2xl shadow-lg border border-outline-variant/30 hover:bg-gray-50 dark:hover:bg-on-surface/20 transition-all duration-300 disabled:opacity-50 min-h-[60px]"
+                    className="w-full flex items-center justify-center gap-3 px-6 py-4 bg-white dark:bg-on-surface/10 text-on-surface font-black rounded-2xl shadow-lg border border-outline-variant/30 transition-all disabled:opacity-50 min-h-[56px]"
                   >
                     <svg viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -184,49 +148,39 @@ export default function Auth() {
                   </motion.button>
                 </motion.div>
               ) : (
-                <motion.div 
-                  key="2fa"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <div className="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-8">
-                    <ShieldCheck size={44} className="text-primary" />
-                  </div>
-                  <h2 className="text-3xl font-black text-on-surface mb-3 tracking-tight">Verify Identity</h2>
-                  <p className="text-sm text-on-surface-variant font-medium mb-10 opacity-70">
-                    Enter the verification code from your authenticator app.
-                  </p>
-
+                <motion.div key="2fa" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <ShieldCheck size={40} className="text-primary mx-auto mb-4" />
+                  <h2 className="text-xl font-black text-on-surface mb-2">Verify Identity</h2>
                   <input
                     type="number"
                     value={otpCode}
-                    onChange={e => { setOtpCode(e.target.value.slice(0, 6)); setErrorCode(''); }}
+                    onChange={e => setOtpCode(e.target.value.slice(0, 6))}
                     placeholder="000000"
-                    className="w-full text-center text-4xl font-mono font-bold py-5 rounded-3xl border-2 border-outline-variant/30 bg-surface-container-low focus:border-primary outline-none transition-all text-on-surface mb-8"
+                    className="w-full text-center text-3xl font-mono font-bold py-4 rounded-2xl border-2 border-outline-variant/30 bg-surface-container-low focus:border-primary outline-none transition-all text-on-surface mb-6"
                     autoFocus
                   />
-
-                  <motion.button
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleVerify2FA}
-                    disabled={isLoading || otpCode.length < 6}
-                    className="w-full py-5 rounded-[2rem] bg-gradient-to-r from-primary to-secondary text-white font-black text-lg shadow-xl shadow-primary/20 transition-all disabled:opacity-50 mb-8"
-                  >
-                    {isLoading ? 'Verifying…' : 'Verify & Continue'}
-                  </motion.button>
-
-                  <button
-                    onClick={() => { setIs2FAMode(false); setOtpCode(''); setErrorCode(''); }}
-                    className="text-sm font-bold text-on-surface-variant hover:text-primary transition-colors"
-                  >
-                    ← Back
-                  </button>
+                  <button onClick={handleVerify2FA} disabled={isLoading || otpCode.length < 6} className="w-full py-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white font-bold transition-all disabled:opacity-50">Confirm</button>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
         </motion.div>
+
+        {/* Bottom: Features Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-wrap items-center justify-center gap-8 md:gap-12"
+        >
+          {features.map(({ icon: Icon, label }, i) => (
+            <div key={label} className="flex items-center gap-3 opacity-60">
+              <Icon size={18} className="text-primary" />
+              <span className="text-sm font-bold text-on-surface">{label}</span>
+            </div>
+          ))}
+        </motion.div>
+
       </div>
     </div>
   );
