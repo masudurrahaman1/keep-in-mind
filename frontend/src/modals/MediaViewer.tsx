@@ -351,6 +351,108 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
           )}
         </motion.div>
 
+        {/* Video Controls (Moved Outside to the bottom of the screen) */}
+        {isVideo && (
+          <AnimatePresence>
+            {showControls && (
+              <motion.div 
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 50 }}
+                onClick={e => e.stopPropagation()}
+                className="absolute bottom-8 sm:bottom-12 left-1/2 -translate-x-1/2 w-[90%] sm:max-w-2xl p-4 sm:p-6 bg-black/60 backdrop-blur-2xl rounded-3xl border border-white/10 flex flex-col gap-3 z-50 shadow-2xl"
+              >
+                <div 
+                  className="w-full flex flex-col group/seeker relative pt-2 pb-1" 
+                  onClick={e => e.stopPropagation()} 
+                  onMouseDown={e => e.stopPropagation()}
+                  onMouseMove={handleSeekMouseMove}
+                  onMouseEnter={() => setShowTooltip(true)}
+                  onMouseLeave={() => setShowTooltip(false)}
+                >
+                  {/* Progress Track */}
+                  <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-1 bg-white/20 rounded-full overflow-hidden group-hover/seeker:h-1.5 transition-all duration-200">
+                    <div 
+                      className="h-full bg-red-600 relative" 
+                      style={{ width: `${(duration ? (currentTime / duration) * 100 : 0)}%` }}
+                    />
+                  </div>
+
+                  {/* Scrubber */}
+                  <div 
+                    className="absolute top-1/2 -translate-y-1/2 h-3 w-3 bg-red-600 rounded-full -translate-x-1/2 scale-0 group-hover/seeker:scale-100 transition-transform duration-200 pointer-events-none z-20 border border-white/40"
+                    style={{ left: `${(duration ? (currentTime / duration) * 100 : 0)}%` }}
+                  />
+
+                  <input 
+                    type="range"
+                    min="0"
+                    max={duration || 0}
+                    step="0.1"
+                    value={currentTime}
+                    onChange={handleSeek}
+                    onPointerDown={(e) => { e.stopPropagation(); setIsSeeking(true); }}
+                    onPointerUp={(e) => { e.stopPropagation(); setIsSeeking(false); }}
+                    className="absolute inset-0 w-full h-full opacity-0 z-10 cursor-pointer appearance-none"
+                  />
+
+                  <div className="flex justify-between text-[9px] font-mono font-bold text-white/40 tracking-tighter mt-1 px-1">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4 sm:gap-6">
+                    <button onClick={(e) => { e.stopPropagation(); onPrev(); }} className="text-white/60 hover:text-white transition-all">
+                      <Rewind size={20} />
+                    </button>
+                    <button onClick={togglePlay} className="text-white hover:scale-110 transition-all">
+                      {isPlaying ? <Pause size={28} fill="currentColor" /> : <Play size={28} fill="currentColor" />}
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); onNext(); }} className="text-white/60 hover:text-white transition-all">
+                      <FastForward size={20} />
+                    </button>
+                    
+                    <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
+                    
+                    <div className="hidden sm:flex items-center gap-3">
+                      <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} className="text-white/60 hover:text-white">
+                        {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                      </button>
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="1" 
+                        step="0.01" 
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className="w-16 h-1 accent-white bg-white/10 rounded-full cursor-pointer appearance-none" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <button onClick={() => setShowSpeedMenu(!showSpeedMenu)} className={`px-2 py-0.5 rounded border text-[9px] font-bold transition-all ${showSpeedMenu ? 'bg-primary border-primary text-white' : 'border-white/20 text-white/40'}`}>
+                      {playbackRate}x
+                    </button>
+                    {showSpeedMenu && (
+                      <div className="absolute bottom-full mb-4 right-0 bg-black/80 backdrop-blur-2xl rounded-2xl p-2 border border-white/10 shadow-2xl flex flex-col min-w-[80px]">
+                        {[0.5, 1, 1.5, 2].map(rate => (
+                          <button key={rate} onClick={() => { setPlaybackRate(rate); setShowSpeedMenu(false); }} className={`px-4 py-2 text-[10px] font-bold rounded-lg text-left ${playbackRate === rate ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/10'}`}>
+                            {rate}x
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    <button onClick={toggleFullscreen} className="text-white/60 hover:text-white"><Maximize2 size={18} /></button>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        )}
+
         {/* Image Controls Overlay (Moved Outside for better mobile positioning) */}
         {!isVideo && (
           <AnimatePresence>
