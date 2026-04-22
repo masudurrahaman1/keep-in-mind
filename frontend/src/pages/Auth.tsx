@@ -165,7 +165,7 @@ export default function Auth() {
 
   // ── JSX ──────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-surface bg-mesh flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="h-screen bg-surface bg-mesh flex items-center justify-center p-4 lg:p-8 relative overflow-hidden">
       {/* Ambient orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/15 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-15%] right-[-10%] w-[600px] h-[600px] bg-secondary/15 rounded-full blur-[140px] pointer-events-none" />
@@ -245,7 +245,7 @@ export default function Auth() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{    opacity: 0 }}
-            className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center relative z-10"
+            className="w-full max-w-6xl h-full lg:h-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-center relative z-10 overflow-y-auto lg:overflow-visible no-scrollbar py-8 lg:py-0"
           >
             {/* Left: Branding */}
             <motion.div
@@ -254,7 +254,7 @@ export default function Auth() {
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
               className="hidden lg:flex flex-col pr-8"
             >
-              <div className="flex items-center gap-4 mb-16 group cursor-default">
+              <div className="flex items-center gap-4 mb-10 group cursor-default">
                 <motion.div 
                   initial={{ rotate: -20, scale: 0 }}
                   animate={{ rotate: 0, scale: 1 }}
@@ -270,7 +270,7 @@ export default function Auth() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
-                className="text-6xl xl:text-7xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-8"
+                className="text-5xl xl:text-6xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-6"
               >
                 Think it.<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-tertiary to-secondary drop-shadow-sm">Write it.</span><br />
@@ -281,7 +281,7 @@ export default function Auth() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="text-on-surface-variant text-xl mb-16 leading-relaxed max-w-sm font-medium opacity-80"
+                className="text-on-surface-variant text-lg mb-10 leading-relaxed max-w-sm font-medium opacity-80"
               >
                 The most elegant way to capture your thoughts and sync them across all your devices securely.
               </motion.p>
