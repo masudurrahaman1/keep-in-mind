@@ -252,32 +252,47 @@ export default function Auth() {
               initial={{ opacity: 0, x: -40 }}
               animate={{ opacity: 1, x: 0  }}
               transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="hidden lg:flex flex-col"
+              className="hidden lg:flex flex-col pr-8"
             >
               <div className="flex items-center gap-4 mb-16 group cursor-default">
-                <div className="w-14 h-14 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:rotate-12 transition-transform duration-500">
+                <motion.div 
+                  initial={{ rotate: -20, scale: 0 }}
+                  animate={{ rotate: 0, scale: 1 }}
+                  transition={{ type: 'spring', damping: 12, delay: 0.2 }}
+                  className="w-14 h-14 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-2xl flex items-center justify-center shadow-2xl shadow-primary/40 group-hover:rotate-12 transition-transform duration-500"
+                >
                   <FileText size={28} strokeWidth={2.5} />
-                </div>
+                </motion.div>
                 <span className="text-3xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
               </div>
 
-              <h1 className="text-6xl xl:text-7xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-8">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="text-6xl xl:text-7xl font-heading font-black text-on-surface leading-[1.1] tracking-tighter mb-8"
+              >
                 Think it.<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-tertiary to-secondary drop-shadow-sm">Write it.</span><br />
                 Keep it.
-              </h1>
+              </motion.h1>
               
-              <p className="text-on-surface-variant text-xl mb-16 leading-relaxed max-w-sm font-medium opacity-80">
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="text-on-surface-variant text-xl mb-16 leading-relaxed max-w-sm font-medium opacity-80"
+              >
                 The most elegant way to capture your thoughts and sync them across all your devices securely.
-              </p>
+              </motion.p>
 
               <div className="grid grid-cols-1 gap-6">
                 {features.map(({ icon: Icon, label, desc }, i) => (
                   <motion.div 
                     key={label} 
-                    initial={{ opacity: 0, x: -20 }} 
+                    initial={{ opacity: 0, x: -30 }} 
                     animate={{ opacity: 1, x: 0  }} 
-                    transition={{ delay: 0.3 + i * 0.1, duration: 0.5 }} 
+                    transition={{ delay: 0.6 + i * 0.1, duration: 0.5, ease: 'easeOut' }} 
                     className="flex items-center gap-5 group"
                   >
                     <div className="w-12 h-12 rounded-2xl bg-surface-container-high/50 text-primary flex items-center justify-center shrink-0 border border-outline-variant/20 shadow-sm group-hover:bg-primary group-hover:text-white transition-all duration-300">
@@ -296,30 +311,45 @@ export default function Auth() {
             <motion.div
               initial={{ opacity: 0, y: 40, scale: 0.98 }}
               animate={{ opacity: 1, y: 0,  scale: 1    }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
               className="w-full max-w-md mx-auto"
             >
-              <div className="glass-panel rounded-[3rem] p-10 sm:p-12 md:p-14 relative overflow-hidden border-white/20 shadow-2xl">
+              <div className="glass-panel rounded-[2.5rem] sm:rounded-[3rem] p-8 sm:p-12 md:p-14 relative overflow-hidden border-white/20 shadow-2xl">
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
                 <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
                 <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-secondary/10 rounded-full blur-[80px] pointer-events-none" />
 
                 {/* Mobile logo */}
-                <div className="flex flex-col items-center gap-4 mb-12 lg:hidden">
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="flex flex-col items-center gap-4 mb-10 lg:hidden"
+                >
                   <div className="w-16 h-16 bg-gradient-to-br from-primary via-tertiary to-secondary text-white rounded-[1.5rem] flex items-center justify-center shadow-2xl shadow-primary/30">
                     <FileText size={32} strokeWidth={2.5} />
                   </div>
                   <span className="text-3xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
-                </div>
+                </motion.div>
 
                 {/* Heading */}
-                <div className="mb-12 relative z-10 text-center">
-                  <h2 className="text-4xl sm:text-5xl font-heading font-black text-on-surface tracking-tighter mb-4">
+                <div className="mb-10 relative z-10 text-center">
+                  <motion.h2 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.6 }}
+                    className="text-4xl sm:text-5xl font-heading font-black text-on-surface tracking-tighter mb-4"
+                  >
                     Sign In
-                  </h2>
-                  <p className="text-on-surface-variant text-base font-semibold opacity-70 leading-relaxed">
+                  </motion.h2>
+                  <motion.p 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.7 }}
+                    className="text-on-surface-variant text-base font-semibold opacity-70 leading-relaxed"
+                  >
                     Access your workspace with your Google account.
-                  </p>
+                  </motion.p>
                 </div>
 
                 {errorCode && (
