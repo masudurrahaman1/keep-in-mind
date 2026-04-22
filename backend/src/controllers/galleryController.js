@@ -339,7 +339,10 @@ const streamMedia = async (req, res) => {
   const { fileId } = req.params;
   const { token, thumbnail } = req.query;
 
+  console.log(`[Stream Request] ID: ${fileId}, Thumbnail: ${thumbnail}`);
+
   if (!token) {
+    console.warn(`[Stream Error] Missing token for file: ${fileId}`);
     return res.status(401).json({ message: 'Token required for streaming' });
   }
 
