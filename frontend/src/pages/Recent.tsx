@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { useOutletContext } from 'react-router-dom';
-import { Clock, CheckSquare, Search, FileText, MoreHorizontal, Pin, Tag } from 'lucide-react';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import { useOutletContext, useNavigate } from 'react-router-dom';
+import { Clock, CheckSquare, Search, FileText, MoreHorizontal, Pin, Tag, Mic, PenLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import NoteModal from '../modals/NoteModal';
 import { cn } from '../components/Sidebar';
@@ -38,6 +39,7 @@ const initialNotes = [
 ];
 
 export default function Recent() {
+  const navigate = useNavigate();
   const { user } = useAuth();
   const [selectedNote, setSelectedNote] = useState<any | null>(null);
   
@@ -73,8 +75,8 @@ export default function Recent() {
         ...savedNote,
         id: Date.now(),
         isNew: false,
-        date: 'Just now',
-        type: 'text'
+        date: new Date().toISOString(),
+        type: savedNote.type || 'text'
       }, ...notes]);
     } else {
       setNotes(notes.map(n => n.id === savedNote.id ? savedNote : n));
@@ -147,7 +149,10 @@ export default function Recent() {
               exit={{ opacity: 0, scale: 0.9 }}
               whileHover={{ scale: 1.02, y: -4 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              onClick={() => setSelectedNote(note)}
+              onClick={() => {
+                if (note.type === 'drawing') navigate(`/drawing/${note.id}`);
+                else navigate(`/editor/${note.id}`);
+              }}
               className={cn(
                 "group cursor-pointer rounded-[2rem] p-6 border backdrop-blur-xl transition-all relative break-inside-avoid shadow-sm overflow-hidden",
                 note.color
@@ -169,13 +174,39 @@ export default function Recent() {
                   <MoreHorizontal size={14} />
                 </button>
               </div>
-              <p className="text-sm text-on-surface-variant/90 line-clamp-5 whitespace-pre-wrap leading-relaxed relative z-10 font-medium">
-                {note.content}
-              </p>
+              {/* Drawing Thumbnail */}
+              {note.type === 'drawing' && note.content?.startsWith('data:') ? (
+                <img
+                  src={note.content}
+                  alt="Drawing"
+                  className="w-full rounded-xl object-contain max-h-40 bg-white/50 relative z-10"
+                />
+              ) : (
+                <div className="relative z-10">
+                  {note.content?.includes('<audio') && (
+                    <div className="flex items-center gap-2 mb-2 p-3 bg-primary/5 rounded-xl border border-primary/10 text-primary">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center animate-pulse">
+                        <Mic size={14} />
+                      </div>
+                      <span className="text-xs font-black uppercase tracking-wider">Voice Note</span>
+                    </div>
+                  )}
+                  <p className="text-sm text-on-surface-variant/90 line-clamp-5 whitespace-pre-wrap leading-relaxed font-medium">
+                    {note.content?.replace(/<[^>]*>/g, '')}
+                  </p>
+                </div>
+              )}
               
               <div className="mt-6 flex items-center justify-between opacity-60 text-on-surface-variant relative z-10">
                 <span className="text-xs font-bold tracking-wider uppercase flex items-center gap-1.5">
-                  <Clock size={12} strokeWidth={2.5} /> {note.date}
+                  <Clock size={12} strokeWidth={2.5} />
+                  {(() => {
+                    try {
+                      const d = parseISO(note.date);
+                      if (isNaN(d.getTime())) return note.date;
+                      return formatDistanceToNow(d, { addSuffix: true });
+                    } catch { return note.date; }
+                  })()}
                 </span>
                 <div className="flex items-center gap-3">
                   {note.category && (
@@ -185,6 +216,7 @@ export default function Recent() {
                   )}
                   <div className={cn("flex items-center gap-2", note.textColor)}>
                     {note.type === 'list' && <CheckSquare size={16} strokeWidth={2.5} />}
+                    {note.type === 'drawing' && <PenLine size={16} strokeWidth={2.5} />}
                   </div>
                 </div>
               </div>
@@ -222,7 +254,7 @@ export default function Recent() {
             onEdit={() => { setSelectedNote(contextMenu.note); setContextMenu(null); }}
             onDelete={() => handleDeleteNote(contextMenu.note.id)}
             onDuplicate={() => {
-              const copy = { ...contextMenu.note, id: Date.now(), title: `${contextMenu.note.title} (copy)`, date: 'Just now' };
+              const copy = { ...contextMenu.note, id: Date.now(), title: `${contextMenu.note.title} (copy)`, date: new Date().toISOString() };
               setNotes(prev => [copy, ...prev]);
               setContextMenu(null);
             }}
