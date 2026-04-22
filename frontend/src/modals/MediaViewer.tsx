@@ -256,33 +256,6 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
       {/* Main Content Area */}
       <div className="relative w-full h-full flex items-center justify-center p-4">
         {/* Navigation Controls (On-Screen Buttons) */}
-        <AnimatePresence>
-          {showControls && (
-            <>
-              {/* Previous Button */}
-              <motion.button
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                onClick={(e) => { e.stopPropagation(); onPrev(); }}
-                className="absolute left-4 md:left-8 top-[60%] sm:top-1/2 -translate-y-1/2 z-50 p-3.5 md:p-6 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all backdrop-blur-xl border border-white/5 group"
-              >
-                <ChevronLeft size={24} className="md:size-[32px] group-hover:scale-110 transition-transform" />
-              </motion.button>
-
-              {/* Next Button */}
-              <motion.button
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                onClick={(e) => { e.stopPropagation(); onNext(); }}
-                className="absolute right-4 md:right-8 top-[60%] sm:top-1/2 -translate-y-1/2 z-50 p-3.5 md:p-6 bg-white/5 hover:bg-white/10 text-white rounded-full transition-all backdrop-blur-xl border border-white/5 group"
-              >
-                <ChevronRight size={24} className="md:size-[32px] group-hover:scale-110 transition-transform" />
-              </motion.button>
-            </>
-          )}
-        </AnimatePresence>
 
         {/* Media Logic */}
         <motion.div
@@ -412,11 +385,23 @@ export default function MediaViewer({ media, onClose, onNext, onPrev, onRename }
                     {/* Button Row */}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2 sm:gap-6">
-                        <button onClick={() => skip(-10)} className="text-white/60 hover:text-white transition-all p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"><Rewind size={18} /></button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onPrev(); }} 
+                          className="text-white/60 hover:text-white transition-all p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                          title="Previous Video"
+                        >
+                          <Rewind size={18} />
+                        </button>
                         <button onClick={() => togglePlay()} className="text-white hover:scale-125 transition-all p-2 min-w-[36px] min-h-[36px] flex items-center justify-center">
                           {isPlaying ? <Pause size={24} fill="currentColor" /> : <Play size={24} fill="currentColor" />}
                         </button>
-                        <button onClick={() => skip(10)} className="text-white/60 hover:text-white transition-all p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"><FastForward size={18} /></button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); onNext(); }} 
+                          className="text-white/60 hover:text-white transition-all p-2 min-w-[36px] min-h-[36px] flex items-center justify-center"
+                          title="Next Video"
+                        >
+                          <FastForward size={18} />
+                        </button>
                         <div className="w-px h-5 bg-white/10 mx-1 sm:mx-2"></div>
                         <div className="flex items-center gap-1 sm:gap-3">
                           <button onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }} className="text-white/80 p-2 min-w-[36px] min-h-[36px] flex items-center justify-center">
