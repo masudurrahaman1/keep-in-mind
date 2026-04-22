@@ -73,42 +73,6 @@
   --on-tertiary-container: #2B0052;
 }
 
-/* ── Dark Mode — System & Explicit ─────────────────────────── */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --primary: #B9C3FF;
-    --primary-container: #2A4283;
-    --on-primary: #112A6A;
-    --on-primary-container: #DEE1FF;
-    
-    --surface: #111318;
-    --surface-container-lowest: #0C0E13;
-    --surface-container-low: #191C20;
-    --surface-container: #1D2024;
-    --surface-container-high: #282A2F;
-    --surface-container-highest: #33353A;
-    
-    --on-surface: #E2E2E9;
-    --on-surface-variant: #C4C6D0;
-    --outline: #8E9099;
-    --outline-variant: #44474E;
-
-    --error: #FFB4AB;
-    --on-error: #690005;
-    --error-container: #93000A;
-    --on-error-container: #FFDAD6;
-
-    --secondary: #C0C6DD;
-    --secondary-container: #3F4759;
-    --on-secondary: #2A3142;
-    --on-secondary-container: #DCE2F9;
-
-    --tertiary: #E3BADA;
-    --tertiary-container: #5A3D58;
-    --on-tertiary: #43273F;
-    --on-tertiary-container: #FFD7F7;
-  }
-}
 
 [data-theme="dark"] {
   --primary: #B9C3FF;
@@ -204,13 +168,6 @@ body {
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]):not([data-theme="amoled"]) .glass {
-    background: #FFFFFF;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
-  }
-}
 
 .glass-panel {
   @apply bg-surface-container-low/80 backdrop-blur-xl border border-outline-variant/30 shadow-sm transition-all duration-300;
@@ -255,16 +212,6 @@ body {
     radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 55%);
 }
 
-@media (prefers-color-scheme: light) {
-  :root:not([data-theme="dark"]):not([data-theme="amoled"]) .bg-mesh::after {
-    background:
-      radial-gradient(circle at 5% 10%, rgba(139, 92, 246, 0.12) 0%, transparent 45%),
-      radial-gradient(circle at 95% 90%, rgba(59, 130, 246, 0.12) 0%, transparent 45%),
-      radial-gradient(circle at 80% 10%, rgba(236, 72, 153, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 20% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 40%),
-      radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 55%);
-  }
-}
 
 [data-theme="amoled"] .bg-mesh::after {
   background: none; /* True Black: disable mesh */
