@@ -398,7 +398,7 @@ export default function Gallery() {
             Media <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary">Gallery</span>
             {storage && (
               <span className="text-xs bg-primary/10 text-primary px-3 py-1 rounded-full font-bold">
-                {storage.totalSize} MB Used
+                {storage.totalSize} Used
               </span>
             )}
           </h1>
