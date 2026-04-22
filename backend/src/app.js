@@ -22,8 +22,8 @@ app.get('/api/test', (req, res) => {
   res.json({ message: 'Backend Proxy is Working! ✅', port: 5000 });
 });
 
-app.use(express.json({ limit: '5gb' }));
-app.use(express.urlencoded({ limit: '5gb', extended: true }));
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 // Routes
 app.use('/api/auth', authRoutes);

@@ -1,15 +1,17 @@
 const express = require('express');
 const multer = require('multer');
-const { 
-  uploadMedia, 
-  getMediaList, 
+const fs = require('fs');
+const path = require('path');
+const {
+  uploadMedia,
+  getMediaList,
   getTrashedMedia,
-  deleteMedia, 
+  deleteMedia,
   restoreMedia,
   permanentDeleteMedia,
-  getGalleryStorage, 
-  streamMedia, 
-  renameMedia 
+  getGalleryStorage,
+  streamMedia,
+  renameMedia
 } = require('../controllers/galleryController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -19,12 +21,24 @@ const router = express.Router();
 router.get('/stream/:fileId', streamMedia);
 
 // All gallery routes are protected
-// Configure multer for memory storage
-const storage = multer.memoryStorage();
+// Configure multer for disk storage to handle files safely (up to 100MB)
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadPath = path.join(__dirname, '../../temp');
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + '-' + file.originalname);
+  }
+});
+
 const upload = multer({ 
   storage: storage,
   limits: {
-    fileSize: 5 * 1024 * 1024 * 1024 // 5GB limit
+    fileSize: 100 * 1024 * 1024 // 100MB limit
   }
 });
 

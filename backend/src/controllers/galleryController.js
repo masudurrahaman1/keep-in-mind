@@ -59,10 +59,10 @@ const uploadMedia = async (req, res) => {
       console.log(`[Upload] Gallery folder found: ${galleryFolderId}`);
     } else {
       console.log('[Upload] Creating Gallery folder...');
-      const galleryMetadata = { 
-        name: 'Gallery', 
-        parents: [parentFolderId], 
-        mimeType: 'application/vnd.google-apps.folder' 
+      const galleryMetadata = {
+        name: 'Gallery',
+        parents: [parentFolderId],
+        mimeType: 'application/vnd.google-apps.folder'
       };
       const galleryFolder = await drive.files.create({ resource: galleryMetadata, fields: 'id' });
       galleryFolderId = galleryFolder.data.id;
@@ -112,15 +112,15 @@ const uploadMedia = async (req, res) => {
     await newMedia.save();
     console.log(`[Upload] Success! ID: ${newMedia._id}`);
 
-    res.status(201).json({ 
-      message: 'Upload successful! 🚀', 
-      media: newMedia 
+    res.status(201).json({
+      message: 'Upload successful! 🚀',
+      media: newMedia
     });
 
   } catch (error) {
     console.error('[Upload Error] Details:', error);
-    res.status(500).json({ 
-      message: 'Upload processing failed', 
+    res.status(500).json({
+      message: 'Upload processing failed',
       error: error.message,
       data: error.response?.data
     });
@@ -134,7 +134,7 @@ const uploadMedia = async (req, res) => {
  */
 const getMediaList = async (req, res) => {
   try {
-    const media = await Media.find({ 
+    const media = await Media.find({
       userId: req.user._id,
       isTrashed: { $ne: true } // Only active items
     }).sort({ uploadedAt: -1 });
@@ -152,9 +152,9 @@ const getMediaList = async (req, res) => {
  */
 const getTrashedMedia = async (req, res) => {
   try {
-    const media = await Media.find({ 
+    const media = await Media.find({
       userId: req.user._id,
-      isTrashed: true 
+      isTrashed: true
     }).sort({ deletedAt: -1 });
     res.json(media);
   } catch (error) {
@@ -171,7 +171,7 @@ const getTrashedMedia = async (req, res) => {
 const deleteMedia = async (req, res) => {
   try {
     const media = await Media.findOne({ _id: req.params.id, userId: req.user._id });
-    
+
     if (!media) {
       return res.status(404).json({ message: 'Media not found' });
     }
@@ -197,7 +197,7 @@ const deleteMedia = async (req, res) => {
 const restoreMedia = async (req, res) => {
   try {
     const media = await Media.findOne({ _id: req.params.id, userId: req.user._id });
-    
+
     if (!media) {
       return res.status(404).json({ message: 'Media not found' });
     }
@@ -220,11 +220,11 @@ const restoreMedia = async (req, res) => {
  * @access  Private
  */
 const permanentDeleteMedia = async (req, res) => {
-  const googleAccessToken = req.headers['google-access-token']; 
-  
+  const googleAccessToken = req.headers['google-access-token'];
+
   try {
     const media = await Media.findOne({ _id: req.params.id, userId: req.user._id });
-    
+
     if (!media) {
       return res.status(404).json({ message: 'Media not found' });
     }
@@ -233,7 +233,7 @@ const permanentDeleteMedia = async (req, res) => {
       const auth = new google.auth.OAuth2();
       auth.setCredentials({ access_token: googleAccessToken });
       const drive = google.drive({ version: 'v3', auth });
-      
+
       try {
         await drive.files.delete({ fileId: media.fileId });
         console.log(`[Drive] Permanently deleted: ${media.fileId}`);
@@ -313,8 +313,8 @@ const getGalleryStorage = async (req, res) => {
     }
 
     const sizeInMB = totalBytes / (1024 * 1024);
-    const displaySize = sizeInMB > 1024 
-      ? `${(sizeInMB / 1024).toFixed(2)} GB` 
+    const displaySize = sizeInMB > 1024
+      ? `${(sizeInMB / 1024).toFixed(2)} GB`
       : `${sizeInMB.toFixed(2)} MB`;
 
     console.log(`[Storage] Calculation complete: ${displaySize} across ${totalFiles} files.`);
@@ -322,8 +322,8 @@ const getGalleryStorage = async (req, res) => {
 
   } catch (error) {
     console.error('[Storage Error] Details:', error);
-    res.status(500).json({ 
-      message: 'Failed to calculate storage', 
+    res.status(500).json({
+      message: 'Failed to calculate storage',
       error: error.message,
       data: error.response?.data
     });
@@ -357,7 +357,7 @@ const streamMedia = async (req, res) => {
         fileId: fileId,
         fields: 'thumbnailLink'
       });
-      
+
       const thumbUrl = fileData.data.thumbnailLink;
       if (!thumbUrl) {
         return res.status(404).json({ message: 'Thumbnail not available' });
@@ -366,7 +366,7 @@ const streamMedia = async (req, res) => {
       // Fetch the actual thumbnail image bits and pipe them
       const authHeader = `Bearer ${token}`;
       const thumbRes = await fetch(thumbUrl, { headers: { Authorization: authHeader } });
-      
+
       if (!thumbRes.ok) {
         throw new Error(`Thumbnail fetch failed: ${thumbRes.statusText}`);
       }
@@ -391,7 +391,7 @@ const streamMedia = async (req, res) => {
 
     res.setHeader('Content-Type', contentType);
     // Explicitly allow ranges if we were to implement it, for now just pipe
-    res.setHeader('Accept-Ranges', 'bytes'); 
+    res.setHeader('Accept-Ranges', 'bytes');
 
     driveResponse.data
       .on('error', (err) => {
@@ -425,7 +425,7 @@ const renameMedia = async (req, res) => {
 
   try {
     const media = await Media.findOne({ _id: req.params.id, userId: req.user._id });
-    
+
     if (!media) {
       console.error(`[Rename] Media not found for ID: ${req.params.id}`);
       return res.status(404).json({ message: 'Media not found in database' });
@@ -462,22 +462,22 @@ const renameMedia = async (req, res) => {
 
   } catch (error) {
     console.error('[Rename] Critical Error:', error);
-    res.status(500).json({ 
-      message: 'Rename failed during processing', 
+    res.status(500).json({
+      message: 'Rename failed during processing',
       error: error.message,
       stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
 
-module.exports = { 
-  uploadMedia, 
-  getMediaList, 
+module.exports = {
+  uploadMedia,
+  getMediaList,
   getTrashedMedia,
-  deleteMedia, 
+  deleteMedia,
   restoreMedia,
   permanentDeleteMedia,
-  getGalleryStorage, 
-  streamMedia, 
-  renameMedia 
+  getGalleryStorage,
+  streamMedia,
+  renameMedia
 };
