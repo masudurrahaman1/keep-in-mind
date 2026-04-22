@@ -95,15 +95,7 @@ export default function Auth() {
       <div className="absolute top-[-5%] left-[-2%] w-[35%] h-[35%] bg-primary/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute bottom-[-5%] right-[-2%] w-[40%] h-[40%] bg-secondary/5 rounded-full blur-[120px] pointer-events-none" />
 
-      {/* Top Left Branding - Fixed Position */}
-      <div className="absolute top-10 left-10 flex items-center gap-4 z-50">
-        <div className="w-11 h-11 bg-gradient-to-br from-primary to-secondary text-white rounded-xl flex items-center justify-center shadow-lg">
-          <FileText size={22} strokeWidth={2.5} />
-        </div>
-        <span className="text-2xl font-heading font-black text-on-surface tracking-tighter">Keep In Mind</span>
-      </div>
-
-      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 w-full max-w-[1200px] mx-auto p-6 pt-32 lg:pt-0 relative z-10">
+      <div className="flex-1 flex flex-col lg:flex-row items-center justify-center gap-16 lg:gap-20 w-full max-w-[1200px] mx-auto p-6 relative z-10">
         
         {/* Left Hero Section */}
         <motion.div 
@@ -160,9 +152,6 @@ export default function Auth() {
                   exit={{ opacity: 0 }}
                 >
                   <div className="mb-10">
-                    <div className="w-14 h-14 bg-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                      <FileText size={28} className="text-primary" />
-                    </div>
                     <h2 className="text-3xl md:text-4xl font-heading font-black text-on-surface tracking-tighter mb-4">
                       Sign In
                     </h2>
