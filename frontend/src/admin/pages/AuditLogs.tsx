@@ -2,82 +2,26 @@ import { Search, ShieldAlert, UserCog, History, LogIn, Filter, Terminal, Cpu, Gl
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-const INITIAL_LOGS = [
-  {
-    id: 1,
-    title: "Multiple Failed Login Attempts",
-    actor: "system_daemon@keepinmind.in",
-    time: "Oct 24, 14:32:01 UTC",
-    ip: "192.168.1.104",
-    level: "CRITICAL",
-    icon: ShieldAlert,
-    type: "error"
-  },
-  {
-    id: 2,
-    title: "Role Escalation Attempt",
-    actor: "j.doe@keepinmind.in",
-    time: "Oct 24, 13:15:44 UTC",
-    level: "WARNING",
-    icon: UserCog,
-    type: "warning"
-  },
-  {
-    id: 3,
-    title: "Database Backup Completed",
-    actor: "automated_backup_service",
-    time: "Oct 24, 12:00:00 UTC",
-    level: "INFO",
-    icon: History,
-    type: "success"
-  },
-  {
-    id: 4,
-    title: "Successful User Login",
-    actor: "s.smith@keepinmind.in",
-    time: "Oct 24, 09:45:12 UTC",
-    level: "INFO",
-    icon: LogIn,
-    type: "neutral"
-  }
-];
-
-const MOCK_EVENTS = [
-  { title: "API Key Rotated", actor: "admin@keepinmind.in", level: "INFO", icon: History, type: "success" },
-  { title: "Unauthorized Resource Access", actor: "unknown_user", ip: "203.0.113.42", level: "WARNING", icon: ShieldAlert, type: "warning" },
-  { title: "New User Registered", actor: "system_admin", level: "INFO", icon: UserCog, type: "success" },
-  { title: "Invalid Token Signature", actor: "api_gateway", ip: "198.51.100.23", level: "CRITICAL", icon: ShieldAlert, type: "error" },
-  { title: "Scheduled Task Started", actor: "system_cron", level: "INFO", icon: History, type: "neutral" },
-  { title: "Password Reset Requested", actor: "m.chen@keepinmind.in", level: "INFO", icon: UserCog, type: "neutral" },
-];
-
-function generateTimeString() {
-  const date = new Date();
-  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  const month = monthNames[date.getUTCMonth()];
-  const day = date.getUTCDate();
-  const h = String(date.getUTCHours()).padStart(2, '0');
-  const m = String(date.getUTCMinutes()).padStart(2, '0');
-  const s = String(date.getUTCSeconds()).padStart(2, '0');
-  return `${month} ${day}, ${h}:${m}:${s} UTC`;
-}
+import { adminService } from "../lib/api";
 
 export default function AuditLogs() {
-  const [logs, setLogs] = useState(INITIAL_LOGS);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const template = MOCK_EVENTS[Math.floor(Math.random() * MOCK_EVENTS.length)];
-      const newLog = {
-        ...template,
-        id: Math.random(),
-        time: generateTimeString()
-      };
-      setLogs((prevLogs) => [newLog, ...prevLogs].slice(0, 30));
-    }, 4500);
-
-    return () => clearInterval(interval);
+    const loadLogs = async () => {
+      try {
+        const data = await adminService.getActivities();
+        setLogs(data);
+      } catch (err) {
+        console.error("Failed to load audit logs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadLogs();
   }, []);
+
 
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-24 font-sans">
@@ -125,58 +69,74 @@ export default function AuditLogs() {
       </div>
 
       <div className="space-y-4">
-        <AnimatePresence initial={false}>
-          {logs.map((log, index) => (
-             <motion.article 
-               key={log.id} 
-               initial={{ opacity: 0, x: -20 }}
-               animate={{ opacity: 1, x: 0 }}
-               transition={{ duration: 0.3, delay: index * 0.05 }}
-               className="glass p-6 rounded-[24px] border border-outline-variant/30 hover:bg-surface-container/30 transition-all cursor-default group"
-             >
-               <div className="flex items-start justify-between gap-6">
-                 <div className="flex gap-5 flex-1 min-w-0">
-                   <div className={cn(
-                     "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform group-hover:scale-110",
-                     log.type === 'error' ? 'bg-error/20 text-error shadow-error/10' : 
-                     log.type === 'warning' ? 'bg-accent-purple/20 text-accent-purple shadow-accent-purple/10' : 
-                     log.type === 'success' ? 'bg-secondary/20 text-secondary shadow-secondary/10' : 
-                     'bg-surface-container-highest text-on-surface-variant'
-                   )}>
-                     <log.icon className="w-6 h-6" />
-                   </div>
-                   <div className="min-w-0">
-                     <h3 className="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate">{log.title}</h3>
-                     <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
-                        <span className="text-xs font-medium text-on-surface-variant opacity-60 flex items-center gap-1.5">
-                           <UserCog className="w-3.5 h-3.5" />
-                           {log.actor}
-                        </span>
-                        <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-40">{log.time}</span>
-                     </div>
-                   </div>
-                 </div>
-                 <div className="flex flex-col items-end gap-3 shrink-0">
-                   <span className={cn(
-                     "px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border",
-                     log.type === 'error' ? 'bg-error/10 border-error/20 text-error' : 
-                     log.type === 'warning' ? 'bg-accent-purple/10 border-accent-purple/20 text-accent-purple' : 
-                     'bg-surface-container border-outline-variant text-on-surface-variant'
-                   )}>
-                     {log.level}
-                   </span>
-                   {log.ip && (
-                     <div className="flex items-center gap-1.5 px-3 py-1 bg-on-surface/5 rounded-lg border border-outline-variant/30">
-                        <div className="w-1 h-1 rounded-full bg-on-surface-variant animate-pulse" />
-                        <span className="text-[10px] font-bold text-on-surface-variant opacity-50 uppercase tracking-tighter">{log.ip}</span>
-                     </div>
-                   )}
-                 </div>
-               </div>
-             </motion.article>
-          ))}
-        </AnimatePresence>
+        {loading ? (
+           <div className="h-60 flex items-center justify-center">
+             <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+           </div>
+        ) : (
+          <AnimatePresence initial={false}>
+            {logs.map((log, index) => {
+               const Icon = log.title.includes('Login') ? LogIn : 
+                           log.title.includes('Registration') ? UserCog : History;
+               
+               return (
+                <motion.article 
+                  key={log._id} 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="glass p-6 rounded-[24px] border border-outline-variant/30 hover:bg-surface-container/30 transition-all cursor-default group"
+                >
+                  <div className="flex items-start justify-between gap-6">
+                    <div className="flex gap-5 flex-1 min-w-0">
+                      <div className={cn(
+                        "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform group-hover:scale-110",
+                        log.type === 'error' ? 'bg-error/20 text-error shadow-error/10' : 
+                        log.type === 'warning' ? 'bg-accent-purple/20 text-accent-purple shadow-accent-purple/10' : 
+                        log.type === 'success' ? 'bg-secondary/20 text-secondary shadow-secondary/10' : 
+                        'bg-surface-container-highest text-on-surface-variant'
+                      )}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate">{log.title}</h3>
+                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1">
+                           <span className="text-xs font-medium text-on-surface-variant opacity-60 flex items-center gap-1.5">
+                              <UserCog className="w-3.5 h-3.5" />
+                              {log.actor}
+                           </span>
+                           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-40">
+                             {new Date(log.createdAt).toLocaleString()}
+                           </span>
+                        </div>
+                        {log.details && <p className="text-xs text-on-surface-variant/60 mt-2 italic">{log.details}</p>}
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-3 shrink-0">
+                      <span className={cn(
+                        "px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border",
+                        log.type === 'error' ? 'bg-error/10 border-error/20 text-error' : 
+                        log.type === 'warning' ? 'bg-accent-purple/10 border-accent-purple/20 text-accent-purple' : 
+                        'bg-surface-container border-outline-variant text-on-surface-variant'
+                      )}>
+                        {log.level}
+                      </span>
+                    </div>
+                  </div>
+                </motion.article>
+               );
+            })}
+          </AnimatePresence>
+        )}
+        
+        {!loading && logs.length === 0 && (
+          <div className="glass p-20 rounded-[32px] text-center border-dashed border-2 border-outline-variant">
+             <History className="w-12 h-12 mx-auto mb-4 opacity-20" />
+             <p className="text-on-surface-variant font-medium">System activity stream is currently empty.</p>
+          </div>
+        )}
       </div>
+
 
       <div className="mt-10 flex justify-center">
         <motion.button 

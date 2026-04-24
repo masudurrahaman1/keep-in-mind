@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Media = require('../models/Media');
+const Activity = require('../models/Activity');
 
 // @desc    Get system-wide stats
 // @route   GET /api/admin/stats
@@ -17,10 +18,7 @@ const getStats = async (req, res) => {
     
     if (activeNow === 0 && totalUsers > 0) activeNow = 1;
 
-
     // Calculate growth (mocked logic for "this month")
-
-
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     const usersThisMonth = await User.countDocuments({ createdAt: { $gte: oneMonthAgo } });
@@ -65,24 +63,12 @@ const getActiveUsers = async (req, res) => {
   }
 };
 
-
-
-
 // @desc    Get recent system activities
-
 // @route   GET /api/admin/activities
 // @access  Private/Admin
 const getActivities = async (req, res) => {
   try {
-    const recentUsers = await User.find({}).sort({ createdAt: -1 }).limit(10);
-    const activities = recentUsers.map(user => ({
-      id: user._id,
-      user: user.name,
-      action: `New account provisioned via ${user.authProvider}`,
-      time: 'Recently',
-      type: user.authProvider === 'google' ? 'success' : 'neutral'
-    }));
-
+    const activities = await Activity.find({}).sort({ createdAt: -1 }).limit(50);
     res.json(activities);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -90,4 +76,3 @@ const getActivities = async (req, res) => {
 };
 
 module.exports = { getStats, getUsers, getActiveUsers, getActivities };
-

@@ -5,9 +5,11 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { sendVerificationEmail } = require('../utils/mailer');
 const crypto = require('crypto');
+const logActivity = require('../utils/logger');
 
 // Generate 6-digit OTP
 const generateOTP = () => Math.floor(100000 + Math.random() * 900000).toString();
+
 
 // @desc    Auth user with Firebase ID token
 // @route   POST /api/auth/google
@@ -35,7 +37,22 @@ const authGoogle = async (req, res) => {
         avatar: picture,
         authProvider: 'google'
       });
+      
+      await logActivity({
+        title: "New User Registration",
+        actor: email,
+        type: "success",
+        details: "Account created via Google OAuth"
+      });
+    } else {
+      await logActivity({
+        title: "User Login",
+        actor: email,
+        type: "neutral",
+        details: "Session started via Google OAuth"
+      });
     }
+
 
     // ── 2FA Gate ──────────────────────────────────────────────
     if (user.twoFactorEnabled && user.twoFactorSecret) {
