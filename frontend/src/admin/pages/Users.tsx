@@ -119,16 +119,24 @@ export default function Users() {
             </div>
 
             <div className="flex items-center gap-4">
-              <span className={cn(
-                "hidden sm:block text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl border",
-                user.isVerified ? 'text-secondary border-secondary/20 bg-secondary/5' : 'text-on-surface-variant border-outline-variant bg-surface-container'
-              )}>
-                {user.isVerified ? 'Verified' : 'Pending'}
-              </span>
+              <div className="hidden sm:flex flex-col items-end">
+                <span className={cn(
+                  "text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl border",
+                  user.isVerified ? 'text-secondary border-secondary/20 bg-secondary/5' : 'text-on-surface-variant border-outline-variant bg-surface-container'
+                )}>
+                  {user.isVerified ? 'Verified' : 'Pending'}
+                </span>
+                {user.lastActive && (
+                  <span className="text-[9px] font-medium text-on-surface-variant opacity-40 mt-1 uppercase tracking-tighter">
+                    Seen: {new Date(user.lastActive).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
               <button className="p-3 rounded-xl hover:bg-surface-container transition-colors text-on-surface-variant">
                  <MoreVertical className="w-5 h-5" />
               </button>
             </div>
+
           </motion.div>
         ))}
         

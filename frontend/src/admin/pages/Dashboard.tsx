@@ -96,9 +96,9 @@ export default function Dashboard() {
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         {statCards.map((stat, idx) => {
-          const isLink = stat.label === "Active Now";
+          const isLink = stat.label === "Active Now" || stat.label === "Total Users";
           const CardWrapper = isLink ? Link : "div";
-          const wrapperProps = isLink ? { to: "/active-users" } : {};
+          const wrapperProps = isLink ? { to: stat.label === "Active Now" ? "/active-users" : "/users" } : {};
 
           return (
             <motion.div 
@@ -128,6 +128,7 @@ export default function Dashboard() {
             </motion.div>
           );
         })}
+
 
       </motion.section>
 
