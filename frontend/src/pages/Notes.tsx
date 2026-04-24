@@ -1,12 +1,7 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { 
-  Plus, Search, Grid, List as ListIcon, Filter, 
-  Trash2, Archive, Pin, MoreVertical, Star, Clock, 
-  Tag, Palette, CheckCircle2, X, Mic, Play, Square, Pause, ChevronDown, 
-  FileText, PenLine, MoreHorizontal, Settings2, CheckSquare 
-} from 'lucide-react';
+import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag, Mic } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
@@ -15,6 +10,7 @@ import SpeedDial from '../components/SpeedDial';
 import NoteContextMenu from '../components/NoteContextMenu';
 
 const initialNotes = [
+  // ... (keeping the sample notes as fallback)
   {
     id: 1,
     title: 'Grocery List',
@@ -42,13 +38,6 @@ export default function Notes() {
   const navigate = useNavigate();
   const [contextMenu, setContextMenu] = useState<{ note: any; x: number; y: number } | null>(null);
   
-  // Voice Recording States
-  const [showVoicePanel, setShowVoicePanel] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
-
   // Storage key is unique to the user if signed in
   const storageKey = user ? `keep-in-mind-notes-${user._id}` : 'keep-in-mind-notes-guest';
 
@@ -82,24 +71,6 @@ export default function Notes() {
   const [viewMode] = useState<'grid' | 'list'>('grid');
   const [filterActive, setFilterActive] = useState('All');
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
-
-  useEffect(() => {
-    let interval: ReturnType<typeof setTimeout>;
-    if (isRecording) {
-      interval = setInterval(() => {
-        setRecordingTime((prev) => (prev < 300 ? prev + 1 : prev));
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isRecording]);
-
-  const handleSaveNote = (noteData: any) => {
-    const savedNotes = JSON.parse(localStorage.getItem(storageKey) || '[]');
-    const updatedNotes = [noteData, ...savedNotes];
-    localStorage.setItem(storageKey, JSON.stringify(updatedNotes));
-    setNotes(updatedNotes);
-    setFilteredNotes(updatedNotes);
-  };
 
   // Persist notes whenever they change
   useEffect(() => {
@@ -421,36 +392,7 @@ export default function Notes() {
 
       {/* Speed Dial FAB */}
       <SpeedDial onAdd={(type) => {
-        if (type === 'audio') {
-          setShowVoicePanel(true);
-          return;
-        }
-        if (type === 'image') {
-          const input = document.createElement('input');
-          input.type = 'file';
-          input.accept = 'image/*';
-          input.onchange = (e: any) => {
-            const file = e.target.files?.[0];
-            if (file) {
-              const reader = new FileReader();
-              reader.onload = (re) => {
-                const newNote = {
-                  id: Date.now(),
-                  title: '',
-                  content: `<p><img src="${re.target?.result}" /></p>`,
-                  color: 'bg-surface',
-                  category: 'Personal',
-                  pinned: false,
-                  archived: false,
-                  date: new Date().toISOString(),
-                  type: 'text'
-                };
-                handleSaveNote(newNote);
-              };
-              reader.readAsDataURL(file);
-            }
-          };
-          input.click();
+        if (type === 'audio' || type === 'image') {
           return;
         }
         if (type === 'drawing') {
@@ -459,143 +401,6 @@ export default function Notes() {
           navigate('/editor');
         }
       }} />
-
-      {/* ── Voice Panel (Copied from Editor for consistency) ── */}
-      <AnimatePresence>
-        {showVoicePanel && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                if (isRecording) {
-                  mediaRecorder.current?.stop();
-                  setIsRecording(false);
-                }
-                setShowVoicePanel(false);
-              }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[80]"
-            />
-            <motion.div
-              initial={{ translateY: '100%' }}
-              animate={{ translateY: 0 }}
-              exit={{ translateY: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed bottom-0 left-0 right-0 z-[90] bg-surface rounded-t-[2.5rem] shadow-2xl p-8 pb-12 md:max-w-md md:mx-auto border-t border-outline-variant/10 text-center"
-            >
-              <div className="flex items-center justify-between mb-12">
-                <button className="flex items-center gap-1 text-on-surface/40 hover:text-on-surface transition-all font-black uppercase tracking-tighter text-xs">
-                  Voice Note <Mic size={14} className="ml-1" />
-                </button>
-                <button 
-                  onClick={() => setShowVoicePanel(false)}
-                  className="p-2 hover:bg-on-surface/5 rounded-full transition-all"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mb-8">
-                <span className="text-5xl font-black tracking-tighter text-on-surface">
-                  {Math.floor(recordingTime / 60).toString().padStart(2, '0')}:
-                  {(recordingTime % 60).toString().padStart(2, '0')}
-                </span>
-                <span className="text-on-surface/20 text-5xl font-black tracking-tighter"> / 05:00</span>
-              </div>
-
-              {/* Waveform Animation */}
-              <div className="h-24 flex items-center justify-center gap-0.5 mb-12 overflow-hidden px-4">
-                {Array.from({ length: 40 }).map((_, i) => (
-                  <motion.div
-                    key={i}
-                    animate={isRecording ? {
-                      height: [10, Math.random() * 60 + 10, 10],
-                    } : { height: 10 }}
-                    transition={{
-                      duration: 0.5,
-                      repeat: Infinity,
-                      delay: i * 0.05,
-                    }}
-                    className="w-1 bg-primary/20 rounded-full"
-                    style={{ 
-                      opacity: Math.abs(i - 20) / 20 > 0.5 ? 0.3 : 1,
-                      backgroundColor: i === 20 ? '#3b82f6' : 'currentColor'
-                    }}
-                  />
-                ))}
-              </div>
-
-              <div className="flex items-center justify-center gap-8">
-                <button 
-                  onClick={async () => {
-                    if (!isRecording) {
-                      try {
-                        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                        mediaRecorder.current = new MediaRecorder(stream);
-                        audioChunks.current = [];
-                        
-                        mediaRecorder.current.ondataavailable = (e) => {
-                          if (e.data.size > 0) audioChunks.current.push(e.data);
-                        };
-                        
-                        mediaRecorder.current.start();
-                        setIsRecording(true);
-                        setRecordingTime(0);
-                      } catch (err) {
-                        console.error("Microphone access denied", err);
-                        alert("Please allow microphone access to record audio.");
-                      }
-                    } else {
-                      mediaRecorder.current?.pause();
-                      setIsRecording(false);
-                    }
-                  }}
-                  className="w-16 h-16 rounded-full bg-on-surface/5 flex items-center justify-center hover:bg-on-surface/10 transition-all text-primary"
-                >
-                  {isRecording ? <Pause size={24} className="fill-current" /> : <Mic size={24} className="fill-current" />}
-                </button>
-
-                <button 
-                  onClick={() => {
-                    if (!mediaRecorder.current) return;
-                    
-                    mediaRecorder.current.onstop = () => {
-                      const audioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        const base64Audio = reader.result as string;
-                        const newNote = {
-                          id: Date.now(),
-                          title: '',
-                          content: `<p><audio controls src="${base64Audio}"></audio></p>`,
-                          color: 'bg-surface',
-                          category: 'Personal',
-                          pinned: false,
-                          archived: false,
-                          date: new Date().toISOString(),
-                          type: 'text'
-                        };
-                        handleSaveNote(newNote);
-                      };
-                      reader.readAsDataURL(audioBlob);
-                      mediaRecorder.current?.stream.getTracks().forEach(track => track.stop());
-                    };
-                    
-                    mediaRecorder.current.stop();
-                    setIsRecording(false);
-                    setShowVoicePanel(false);
-                    setRecordingTime(0);
-                  }}
-                  className="w-20 h-20 rounded-full bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/30 hover:scale-110 active:scale-95 transition-all"
-                >
-                  <Square size={28} className="fill-current" />
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
 
       {/* Note Context Menu */}
       <AnimatePresence>

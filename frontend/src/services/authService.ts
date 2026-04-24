@@ -1,5 +1,21 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+const handleResponse = async (response: Response) => {
+  const text = await response.text();
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (err) {
+    // If not JSON, use the raw text if available, or status text
+    data = { message: text || response.statusText || 'Unknown server error' };
+  }
+
+  if (!response.ok) {
+    throw data;
+  }
+  return data;
+};
+
 export const loginWithGoogle = async (idToken: string) => {
   const response = await fetch(`${API_URL}/auth/google`, {
     method: 'POST',
@@ -9,12 +25,7 @@ export const loginWithGoogle = async (idToken: string) => {
     body: JSON.stringify({ token: idToken }),
   });
 
-  if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || 'Login failed');
-  }
-
-  return response.json();
+  return handleResponse(response);
 };
 
 export const loginWithEmail = async (email, password) => {
@@ -23,9 +34,8 @@ export const loginWithEmail = async (email, password) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
-  const data = await response.json();
-  if (!response.ok) throw data;
-  return data;
+  
+  return handleResponse(response);
 };
 
 export const registerWithEmail = async (name, email, password) => {
@@ -34,9 +44,8 @@ export const registerWithEmail = async (name, email, password) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name, email, password }),
   });
-  const data = await response.json();
-  if (!response.ok) throw data;
-  return data;
+  
+  return handleResponse(response);
 };
 
 export const verifyEmailOTP = async (email, code) => {
@@ -45,9 +54,8 @@ export const verifyEmailOTP = async (email, code) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, code }),
   });
-  const data = await response.json();
-  if (!response.ok) throw data;
-  return data;
+  
+  return handleResponse(response);
 };
 
 export const linkGoogleAccount = async (idToken: string, jwtToken: string) => {
@@ -60,12 +68,11 @@ export const linkGoogleAccount = async (idToken: string, jwtToken: string) => {
     body: JSON.stringify({ token: idToken }),
   });
 
-  const data = await response.json();
-  if (!response.ok) throw data;
-  return data;
+  return handleResponse(response);
 };
 
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
 };
+
