@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://api.keepinmind.in/admin";
+const BASE = import.meta.env.VITE_API_URL || "https://api.keepinmind.in/api";
+const API_BASE_URL = `${BASE}/admin`;
+
 
 async function fetcher(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("admin_token");
