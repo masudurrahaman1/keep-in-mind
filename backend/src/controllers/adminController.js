@@ -56,13 +56,20 @@ const getUsers = async (req, res) => {
 // @access  Private/Admin
 const getActiveUsers = async (req, res) => {
   try {
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-    const users = await User.find({ updatedAt: { $gte: thirtyMinutesAgo } }).sort({ updatedAt: -1 });
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    let users = await User.find({ updatedAt: { $gte: twentyFourHoursAgo } }).sort({ updatedAt: -1 });
+    
+    // Fallback: If no one in 24h, just show the most recent 5 users total
+    if (users.length === 0) {
+      users = await User.find({}).sort({ updatedAt: -1 }).limit(5);
+    }
+    
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 // @desc    Get recent system activities
 
