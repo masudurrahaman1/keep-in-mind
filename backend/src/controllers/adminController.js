@@ -11,7 +11,15 @@ const getStats = async (req, res) => {
     const localUsers = await User.countDocuments({ authProvider: 'local' });
     const totalMedia = await Media.countDocuments();
 
+    // Active Now: Users updated in the last 30 minutes
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    let activeNow = await User.countDocuments({ updatedAt: { $gte: thirtyMinutesAgo } });
+    
+    // Ensure at least 1 if total users > 0 (assuming the admin/user is currently active)
+    if (activeNow === 0 && totalUsers > 0) activeNow = 1;
+
     // Calculate growth (mocked logic for "this month")
+
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
     const usersThisMonth = await User.countDocuments({ createdAt: { $gte: oneMonthAgo } });
@@ -22,9 +30,10 @@ const getStats = async (req, res) => {
       googleUsers,
       localUsers,
       totalMedia,
-      activeNow: Math.floor(totalUsers * 0.25), // Mocked active percentage
+      activeNow,
       growth: parseFloat(growth)
     });
+
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
