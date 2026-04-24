@@ -11,11 +11,12 @@ const getStats = async (req, res) => {
     const localUsers = await User.countDocuments({ authProvider: 'local' });
     const totalMedia = await Media.countDocuments();
 
-    // Active Now: Users updated in the last 5 minutes (via heartbeat)
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    let activeNow = await User.countDocuments({ updatedAt: { $gte: fiveMinutesAgo } });
+    // Active Now: Users with lastActive in the last 10 minutes (via heartbeat)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    let activeNow = await User.countDocuments({ lastActive: { $gte: tenMinutesAgo } });
     
     if (activeNow === 0 && totalUsers > 0) activeNow = 1;
+
 
     // Calculate growth (mocked logic for "this month")
 
@@ -57,12 +58,13 @@ const getUsers = async (req, res) => {
 const getActiveUsers = async (req, res) => {
   try {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const users = await User.find({ updatedAt: { $gte: tenMinutesAgo } }).sort({ updatedAt: -1 });
+    const users = await User.find({ lastActive: { $gte: tenMinutesAgo } }).sort({ lastActive: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 

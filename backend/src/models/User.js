@@ -47,6 +47,10 @@ const userSchema = new mongoose.Schema({
   galleryFolderId: {
     type: String,
     default: null
+  },
+  lastActive: {
+    type: Date,
+    default: Date.now
   }
 }, {
   timestamps: true

@@ -274,11 +274,14 @@ const linkGoogle = async (req, res) => {
 // @access  Private
 const ping = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
+    const user = await User.findByIdAndUpdate(
+      req.user._id, 
+      { lastActive: new Date() }, 
+      { new: true }
+    );
+    
     if (user) {
-      // Just saving updates the updatedAt timestamp automatically
-      await user.save();
-      res.json({ message: 'Ping successful', lastSeen: user.updatedAt });
+      res.json({ message: 'Ping successful', lastActive: user.lastActive });
     } else {
       res.status(404).json({ message: 'User not found' });
     }
@@ -286,6 +289,7 @@ const ping = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 module.exports = { authGoogle, registerUser, verifyEmail, loginUser, linkGoogle, ping };
 
