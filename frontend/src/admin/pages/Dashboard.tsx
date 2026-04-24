@@ -3,6 +3,8 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { cn } from "../lib/utils";
+
 
 const chartData = [
   { name: "Oct 1", pv: 15 },
