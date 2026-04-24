@@ -75,4 +75,40 @@ const getActivities = async (req, res) => {
   }
 };
 
-module.exports = { getStats, getUsers, getActiveUsers, getActivities };
+// @desc    Get admin profile
+// @route   GET /api/admin/profile
+// @access  Private/Admin
+const getProfile = async (req, res) => {
+  try {
+    // For now, since admin auth is simple, we'll just return the first admin found
+    // In a real app, this would be based on req.user._id from the token
+    const user = await User.findOne({ email: /admin/i }) || await User.findOne({});
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Update admin profile
+// @route   PUT /api/admin/profile
+// @access  Private/Admin
+const updateProfile = async (req, res) => {
+  try {
+    const { id, name, email } = req.body;
+    const user = await User.findById(id);
+    
+    if (user) {
+      user.name = name || user.name;
+      user.email = email || user.email;
+      await user.save();
+      res.json(user);
+    } else {
+      res.status(404).json({ message: 'User not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
+

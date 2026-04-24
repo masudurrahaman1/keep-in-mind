@@ -44,7 +44,19 @@ export const adminService = {
 
   getActiveUsers: async () => {
     return fetcher("/users/active");
+  },
+
+  getProfile: async () => {
+    return fetcher("/profile");
+  },
+
+  updateProfile: async (data: any) => {
+    return fetcher("/profile", {
+      method: "PUT",
+      body: JSON.stringify(data)
+    });
   }
 };
+
 
 

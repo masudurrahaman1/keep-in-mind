@@ -1,6 +1,8 @@
 import { Bell, Palette, Shield as SecurityIcon, HelpCircle, ChevronRight, Edit3, User, Mail, Globe, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { adminService } from "../lib/api";
 
 const container = {
   hidden: { opacity: 0 },
@@ -18,6 +20,48 @@ const item = {
 };
 
 export default function Settings() {
+  const [adminData, setAdminData] = useState({ id: "", name: "", email: "", avatar: "" });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const data = await adminService.getProfile();
+        setAdminData({
+          id: data._id,
+          name: data.name,
+          email: data.email,
+          avatar: data.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop"
+        });
+      } catch (err) {
+        console.error("Failed to load profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []);
+
+  const handleUpdate = async () => {
+    setSaving(true);
+    try {
+      await adminService.updateProfile(adminData);
+      alert("Profile updated successfully!");
+    } catch (err) {
+      console.error("Update failed:", err);
+      alert("Failed to update profile.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) return (
+    <div className="h-[60vh] flex items-center justify-center">
+       <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+    </div>
+  );
+
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-24 font-sans">
       <header>
@@ -47,7 +91,7 @@ export default function Settings() {
             <img
               alt="Profile Picture"
               className="w-32 h-32 rounded-3xl object-cover border-2 border-outline-variant relative z-10 shadow-2xl"
-              src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop"
+              src={adminData.avatar}
             />
             <button className="absolute -bottom-2 -right-2 bg-primary text-on-primary rounded-xl p-2.5 shadow-xl hover:scale-110 active:scale-95 transition-all z-20">
               <Edit3 className="w-4 h-4" />
@@ -64,7 +108,8 @@ export default function Settings() {
                   <input
                     className="w-full glass border-outline-variant rounded-2xl px-5 py-4 text-base font-bold text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                     type="text"
-                    defaultValue="System Admin"
+                    value={adminData.name}
+                    onChange={(e) => setAdminData({ ...adminData, name: e.target.value })}
                   />
                 </div>
               </div>
@@ -77,14 +122,19 @@ export default function Settings() {
                   <input
                     className="w-full glass border-outline-variant rounded-2xl px-5 py-4 text-base font-bold text-on-surface focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                     type="email"
-                    defaultValue="admin@keepinmind.in"
+                    value={adminData.email}
+                    onChange={(e) => setAdminData({ ...adminData, email: e.target.value })}
                   />
                 </div>
               </div>
             </div>
             <div className="flex flex-wrap gap-4">
-              <button className="h-14 bg-primary text-on-primary font-bold px-8 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20">
-                Update Identity
+              <button 
+                onClick={handleUpdate}
+                disabled={saving}
+                className="h-14 bg-primary text-on-primary font-bold px-8 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 disabled:opacity-50"
+              >
+                {saving ? "Updating..." : "Update Identity"}
               </button>
               <button className="h-14 glass text-on-surface font-bold px-8 rounded-2xl hover:bg-surface-container transition-all active:scale-95">
                 Change Master Key
@@ -223,4 +273,3 @@ function Switch({ defaultChecked = false }) {
     </label>
   );
 }
-
