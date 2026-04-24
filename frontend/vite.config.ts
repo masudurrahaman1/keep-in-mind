@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
-        '@admin': path.resolve(__dirname, '../admin panel/src'),
+        '@admin': path.resolve(__dirname, './src/admin'),
+
       },
     },
 
