@@ -51,7 +51,8 @@ export default function Heartbeat() {
     const interval = setInterval(sendPing, 120000);
 
     return () => clearInterval(interval);
-  }, [user, token]);
+  }, [userToken]);
+
 
   return null; // Invisible component
 }
