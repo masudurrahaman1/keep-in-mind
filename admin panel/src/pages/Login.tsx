@@ -47,6 +47,7 @@ export default function Login() {
           onSubmit={(e) => {
             e.preventDefault();
             // In a real app, handle auth here
+            localStorage.setItem("admin_token", "mock_admin_session_token");
             navigate("/");
           }}
         >

@@ -83,7 +83,10 @@ export function Layout({ children }: { children: ReactNode }) {
 
         <div className="p-6 mt-auto">
            <button
-            onClick={() => window.location.href = "/login"}
+            onClick={() => {
+              localStorage.removeItem("admin_token");
+              window.location.href = "/login";
+            }}
             className="w-full flex items-center justify-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 bg-error/10 text-error hover:bg-error hover:text-on-error font-bold shadow-lg shadow-error/5"
           >
             <LogOut className="w-5 h-5" />
@@ -226,7 +229,10 @@ export function Layout({ children }: { children: ReactNode }) {
 
               <div className="p-6 border-t border-outline-variant/30">
                 <button
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => {
+                    localStorage.removeItem("admin_token");
+                    window.location.href = '/login';
+                  }}
                   className="w-full flex items-center justify-center gap-3 px-4 py-4 rounded-xl transition-all bg-error/10 text-error font-bold"
                 >
                   <LogOut className="w-6 h-6" />

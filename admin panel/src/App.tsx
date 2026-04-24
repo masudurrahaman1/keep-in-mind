@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
+import { useEffect, useState } from "react";
 
 // Placeholder imports for pages we are about to create
 import Dashboard from "./pages/Dashboard";
@@ -15,7 +16,27 @@ import ActiveSessions from "./pages/ActiveSessions";
 import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 
+// Simple Protected Route Component
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const token = localStorage.getItem("admin_token");
+  
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    setIsAuthenticated(!!token);
+  }, []);
+
+  if (isAuthenticated === null) return null; // Wait for initial check
+
   return (
     <BrowserRouter>
       <Routes>
@@ -25,24 +46,27 @@ export default function App() {
         <Route
           path="/*"
           element={
-            <Layout>
-              <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/insights" element={<Dashboard />} />
-                <Route path="/users" element={<Users />} />
-                <Route path="/users/new" element={<AddUser />} />
-                <Route path="/search" element={<Search />} />
-                <Route path="/security" element={<Security />} />
-                <Route path="/security/sessions" element={<ActiveSessions />} />
-                <Route path="/settings" element={<Settings />} />
-                <Route path="/help" element={<HelpCenter />} />
-                <Route path="/logs" element={<AuditLogs />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </Layout>
+            <ProtectedRoute>
+              <Layout>
+                <Routes>
+                  <Route path="/" element={<Dashboard />} />
+                  <Route path="/insights" element={<Dashboard />} />
+                  <Route path="/users" element={<Users />} />
+                  <Route path="/users/new" element={<AddUser />} />
+                  <Route path="/search" element={<Search />} />
+                  <Route path="/security" element={<Security />} />
+                  <Route path="/security/sessions" element={<ActiveSessions />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/help" element={<HelpCenter />} />
+                  <Route path="/logs" element={<AuditLogs />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </Layout>
+            </ProtectedRoute>
           }
         />
       </Routes>
     </BrowserRouter>
   );
 }
+
