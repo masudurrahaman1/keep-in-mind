@@ -20,7 +20,7 @@ const item = {
 };
 
 export default function Settings() {
-  const [adminData, setAdminData] = useState({ id: "", name: "", email: "", avatar: "" });
+  const [adminData, setAdminData] = useState({ id: "", _id: "", name: "", email: "", avatar: "" });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -30,11 +30,13 @@ export default function Settings() {
         const data = await adminService.getProfile();
         setAdminData({
           id: data._id,
+          _id: data._id,
           name: data.name,
           email: data.email,
           avatar: data.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop"
         });
       } catch (err) {
+
         console.error("Failed to load profile:", err);
       } finally {
         setLoading(false);

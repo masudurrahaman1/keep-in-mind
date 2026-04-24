@@ -80,35 +80,50 @@ const getActivities = async (req, res) => {
 // @access  Private/Admin
 const getProfile = async (req, res) => {
   try {
-    // For now, since admin auth is simple, we'll just return the first admin found
-    // In a real app, this would be based on req.user._id from the token
     const user = await User.findOne({ email: /admin/i }) || await User.findOne({});
+    if (!user) return res.status(404).json({ message: "No admin user found" });
     res.json(user);
   } catch (error) {
+    console.error("[GetProfile Error]", error);
     res.status(500).json({ message: error.message });
   }
 };
 
-// @desc    Update admin profile
-// @route   PUT /api/admin/profile
-// @access  Private/Admin
 const updateProfile = async (req, res) => {
   try {
-    const { id, name, email } = req.body;
-    const user = await User.findById(id);
+    const { id, _id, name, email } = req.body;
+    const userId = id || _id;
+    
+    console.log("[UpdateProfile Request]", { userId, name, email });
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required for update" });
+    }
+
+    const user = await User.findById(userId);
     
     if (user) {
       user.name = name || user.name;
       user.email = email || user.email;
       await user.save();
+      
+      await logActivity({
+        title: "Admin Profile Updated",
+        actor: user.email,
+        type: "success",
+        details: `Profile updated: ${user.name}`
+      });
+
       res.json(user);
     } else {
-      res.status(404).json({ message: 'User not found' });
+      res.status(404).json({ message: 'User not found in database' });
     }
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("[UpdateProfile Error]", error);
+    res.status(500).json({ message: `Server error: ${error.message}` });
   }
 };
+
 
 module.exports = { getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
 
