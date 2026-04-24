@@ -18,8 +18,10 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
+        '@admin': path.resolve(__dirname, '../admin panel/src'),
       },
     },
+
     server: {
       https: true,
       proxy: {
