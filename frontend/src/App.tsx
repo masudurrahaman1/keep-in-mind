@@ -8,6 +8,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import Heartbeat from './components/Heartbeat';
+
 
 // Standard import for Auth (since it's the initial entry for logged-out users)
 import Auth from './pages/Auth';
@@ -42,7 +44,9 @@ const PageLoader = () => (
 export default function App() {
   return (
     <BrowserRouter>
+      <Heartbeat />
       <Routes>
+
         {/* Public: login page — redirects to /notes if already signed in */}
         <Route
           path="/auth"

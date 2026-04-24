@@ -11,14 +11,14 @@ const getStats = async (req, res) => {
     const localUsers = await User.countDocuments({ authProvider: 'local' });
     const totalMedia = await Media.countDocuments();
 
-    // Active Now: Users updated in the last 30 minutes
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-    let activeNow = await User.countDocuments({ updatedAt: { $gte: thirtyMinutesAgo } });
+    // Active Now: Users updated in the last 5 minutes (via heartbeat)
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    let activeNow = await User.countDocuments({ updatedAt: { $gte: fiveMinutesAgo } });
     
-    // Ensure at least 1 if total users > 0 (assuming the admin/user is currently active)
     if (activeNow === 0 && totalUsers > 0) activeNow = 1;
 
     // Calculate growth (mocked logic for "this month")
+
 
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -56,19 +56,14 @@ const getUsers = async (req, res) => {
 // @access  Private/Admin
 const getActiveUsers = async (req, res) => {
   try {
-    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-    let users = await User.find({ updatedAt: { $gte: twentyFourHoursAgo } }).sort({ updatedAt: -1 });
-    
-    // Fallback: If no one in 24h, just show the most recent 5 users total
-    if (users.length === 0) {
-      users = await User.find({}).sort({ updatedAt: -1 }).limit(5);
-    }
-    
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const users = await User.find({ updatedAt: { $gte: tenMinutesAgo } }).sort({ updatedAt: -1 });
     res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
+
 
 
 // @desc    Get recent system activities
