@@ -40,6 +40,11 @@ export const adminService = {
 
   getUsers: async () => {
     return fetcher("/users");
+  },
+
+  getActiveUsers: async () => {
+    return fetcher("/users/active");
   }
 };
+
 

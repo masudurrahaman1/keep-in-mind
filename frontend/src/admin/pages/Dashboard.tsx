@@ -95,25 +95,40 @@ export default function Dashboard() {
         animate="show"
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {statCards.map((stat, idx) => (
-          <motion.div 
-            key={stat.label}
-            variants={item}
-            className="glass p-8 rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden group"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
-            <div className="flex justify-between items-start mb-6">
-               <div className={stat.bg + " p-4 rounded-2xl " + stat.color}>
-                  <stat.icon className="w-6 h-6" />
-               </div>
-               <span className="text-secondary text-sm font-bold px-3 py-1 bg-secondary/10 rounded-full">{stat.trend}</span>
-            </div>
-            <div>
-              <h3 className="text-label-caps text-on-surface-variant mb-2 opacity-60">{stat.label}</h3>
-              <p className="text-h1 font-bold text-on-surface">{stat.value}</p>
-            </div>
-          </motion.div>
-        ))}
+        {statCards.map((stat, idx) => {
+          const isLink = stat.label === "Active Now";
+          const CardWrapper = isLink ? Link : "div";
+          const wrapperProps = isLink ? { to: "/active-users" } : {};
+
+          return (
+            <motion.div 
+              key={stat.label}
+              variants={item}
+              className="flex"
+            >
+              <CardWrapper 
+                {...wrapperProps}
+                className={cn(
+                  "glass p-8 rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden group w-full",
+                  isLink ? "cursor-pointer" : "cursor-default"
+                )}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
+                <div className="flex justify-between items-start mb-6">
+                   <div className={stat.bg + " p-4 rounded-2xl " + stat.color}>
+                      <stat.icon className="w-6 h-6" />
+                   </div>
+                   <span className="text-secondary text-sm font-bold px-3 py-1 bg-secondary/10 rounded-full">{stat.trend}</span>
+                </div>
+                <div>
+                  <h3 className="text-label-caps text-on-surface-variant mb-2 opacity-60">{stat.label}</h3>
+                  <p className="text-h1 font-bold text-on-surface">{stat.value}</p>
+                </div>
+              </CardWrapper>
+            </motion.div>
+          );
+        })}
+
       </motion.section>
 
 

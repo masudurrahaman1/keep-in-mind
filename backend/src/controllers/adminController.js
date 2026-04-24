@@ -51,7 +51,21 @@ const getUsers = async (req, res) => {
   }
 };
 
+// @desc    Get only active users
+// @route   GET /api/admin/users/active
+// @access  Private/Admin
+const getActiveUsers = async (req, res) => {
+  try {
+    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const users = await User.find({ updatedAt: { $gte: thirtyMinutesAgo } }).sort({ updatedAt: -1 });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get recent system activities
+
 // @route   GET /api/admin/activities
 // @access  Private/Admin
 const getActivities = async (req, res) => {
@@ -71,4 +85,5 @@ const getActivities = async (req, res) => {
   }
 };
 
-module.exports = { getStats, getUsers, getActivities };
+module.exports = { getStats, getUsers, getActiveUsers, getActivities };
+
