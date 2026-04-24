@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { cn } from "../lib/utils";
-
+import { adminService } from "../lib/api";
 
 const chartData = [
   { name: "Oct 1", pv: 15 },
@@ -14,19 +14,6 @@ const chartData = [
   { name: "Oct 20", pv: 70 },
   { name: "Oct 25", pv: 85 },
   { name: "Oct 30", pv: 100 },
-];
-
-const INITIAL_ACTIVITIES = [
-  { id: 1, user: "Sarah Jenkins", action: "Updated Design System", time: "Just now", icon: Laptop, status: "Success", type: "success" },
-  { id: 2, user: "Michael Chen", action: "Failed Login Attempt", time: "5m ago", icon: AlertTriangle, status: "Failed", type: "error" },
-  { id: 3, user: "Emily Wright", action: "Created New Note", time: "12m ago", icon: Smartphone, status: "Success", type: "success" },
-];
-
-const MOCK_NEW_ACTIVITIES = [
-  { user: "System Update", action: "Background Sync", icon: History, status: "Success", type: "success" },
-  { user: "David Harrison", action: "Changed Password", icon: UserCog, status: "Success", type: "success" },
-  { user: "API Gateway", action: "Rate Limit Exceeded", icon: AlertTriangle, status: "Failed", type: "error" },
-  { user: "Sarah Jenkins", action: "Exported Report", icon: FileText, status: "Success", type: "success" },
 ];
 
 const container = {
@@ -45,25 +32,42 @@ const item = {
 };
 
 export default function Dashboard() {
-  const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
+  const [activities, setActivities] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    googleUsers: 0,
+    localUsers: 0,
+    totalMedia: 0,
+    activeNow: 0,
+    growth: 0
+  });
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const template = MOCK_NEW_ACTIVITIES[Math.floor(Math.random() * MOCK_NEW_ACTIVITIES.length)];
-      const newActivity = {
-        ...template,
-        id: Math.random(),
-        time: "Just now",
-      };
-      
-      setActivities((prev) => {
-        const updated = [newActivity, ...prev].slice(0, 5);
-        return updated.map((act, i) => i === 0 ? act : { ...act, time: act.time === "Just now" ? "1m ago" : act.time });
-      });
-    }, 5000);
+    const loadData = async () => {
+      try {
+        const [statsData, activitiesData] = await Promise.all([
+          adminService.getStats(),
+          adminService.getActivities()
+        ]);
+        setStats(statsData);
+        setActivities(activitiesData);
+      } catch (err) {
+        console.error("Failed to load admin data:", err);
+      }
+    };
+
+    loadData();
+    const interval = setInterval(loadData, 15000); // Refresh every 15 seconds
 
     return () => clearInterval(interval);
   }, []);
+
+  const statCards = [
+    { label: "Total Users", value: stats.totalUsers.toLocaleString(), trend: `+${stats.growth}%`, icon: Users, color: "text-primary", bg: "bg-primary/10" },
+    { label: "Storage Assets", value: stats.totalMedia.toLocaleString(), trend: "Sync", icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
+    { label: "Active Now", value: stats.activeNow.toLocaleString(), trend: "Live", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
+  ];
+
 
   return (
     <div className="flex flex-col gap-10 max-w-6xl mx-auto">
@@ -91,11 +95,7 @@ export default function Dashboard() {
         animate="show"
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
-        {[
-          { label: "Total Users", value: "14,208", trend: "+18.4%", icon: Users, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Notes Created", value: "82.5k", trend: "+12.1%", icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Active Now", value: "3,492", trend: "+5.2%", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
-        ].map((stat, idx) => (
+        {statCards.map((stat, idx) => (
           <motion.div 
             key={stat.label}
             variants={item}
@@ -115,6 +115,7 @@ export default function Dashboard() {
           </motion.div>
         ))}
       </motion.section>
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Chart */}
@@ -230,14 +231,14 @@ export default function Dashboard() {
         </div>
         <div className="glass rounded-[32px] overflow-hidden">
           <ul className="divide-y divide-outline-variant">
-            {activities.map((activity) => (
+            {activities.map((activity: any) => (
               <li key={activity.id} className="p-6 flex items-center justify-between hover:bg-surface-container/50 transition-colors group cursor-default">
                 <div className="flex items-center gap-5">
                   <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300 shadow-lg",
                     activity.type === 'error' ? 'bg-error/20 text-error' : 'bg-primary/20 text-primary'
                   )}>
-                    <activity.icon className="w-6 h-6" />
+                    {activity.type === 'success' ? <UserCog className="w-6 h-6" /> : <Laptop className="w-6 h-6" />}
                   </div>
                   <div>
                     <p className="text-base font-bold text-on-surface">{activity.action}</p>
@@ -248,10 +249,11 @@ export default function Dashboard() {
                   "text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl shadow-sm",
                   activity.type === 'error' ? 'text-error bg-error/10 border border-error/20' : 'text-secondary bg-secondary/10 border border-secondary/20'
                 )}>
-                  {activity.status}
+                  {activity.type === 'error' ? 'Failed' : 'Success'}
                 </span>
               </li>
             ))}
+
           </ul>
         </div>
       </motion.section>

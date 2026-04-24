@@ -29,22 +29,15 @@ async function fetcher(endpoint: string, options: RequestInit = {}) {
 
 export const adminService = {
   getStats: async () => {
-    // In production, this would call the real endpoint
-    // return fetcher("/stats");
-    
-    // Mock for now but ready for integration
-    return {
-      totalUsers: 14208,
-      notesCreated: 82500,
-      activeUsers: 3492,
-      growth: 18.4
-    };
+    return fetcher("/stats");
   },
   
   getActivities: async () => {
-    // return fetcher("/activities");
-    return [
-      { id: 1, user: "Sarah Jenkins", action: "Updated Design System", time: "Just now", type: "success" },
-    ];
+    return fetcher("/activities");
+  },
+
+  getUsers: async () => {
+    return fetcher("/users");
   }
 };
+

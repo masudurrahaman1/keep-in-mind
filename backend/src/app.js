@@ -5,6 +5,8 @@ const authRoutes = require('./routes/authRoutes');
 const driveRoutes = require('./routes/driveRoutes');
 const galleryRoutes = require('./routes/galleryRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const adminRoutes = require('./routes/adminRoutes');
+
 
 dotenv.config();
 
@@ -30,6 +32,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/drive', driveRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/admin', adminRoutes);
+
 
 // Health check
 app.get('/health', (req, res) => {
