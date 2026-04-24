@@ -16,6 +16,8 @@ import ActiveSessions from "./pages/ActiveSessions";
 import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 import ActiveUsers from "./pages/ActiveUsers";
+import Heartbeat from "../components/Heartbeat";
+
 
 
 // Simple Protected Route Component
@@ -41,7 +43,9 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <Heartbeat />
       <Routes>
+
         <Route path="/login" element={<Login />} />
         <Route path="/support" element={<Support />} />
         <Route path="/terms" element={<Terms />} />
