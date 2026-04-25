@@ -92,13 +92,13 @@ export default function Dashboard() {
           <motion.h2 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-display-metrics gradient-text mb-2"
+            className="text-4xl md:text-display-metrics gradient-text mb-1"
           >
             Insights
           </motion.h2>
-          <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Real-time system metrics and overview.</p>
+          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
         </div>
-        <div className="flex items-center gap-3 bg-surface-container rounded-2xl p-1.5 border border-outline-variant shadow-inner">
+        <div className="flex items-center gap-1.5 bg-surface-container rounded-2xl p-1 border border-outline-variant shadow-inner overflow-x-auto no-scrollbar">
            {[
              { id: "all", label: "All Time" },
              { id: "daily", label: "Daily" },
@@ -109,7 +109,7 @@ export default function Dashboard() {
                key={tab.id}
                onClick={() => setTimeframe(tab.id as any)}
                className={cn(
-                 "px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95",
+                 "px-3 py-2 md:px-4 md:py-2 rounded-xl text-[11px] md:text-sm font-bold transition-all active:scale-95 whitespace-nowrap",
                  timeframe === tab.id ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "text-on-surface-variant hover:text-on-surface"
                )}
              >
@@ -138,7 +138,7 @@ export default function Dashboard() {
           <motion.div 
             key={stat.label}
             variants={item}
-            className="glass p-8 rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden group"
+            className="glass p-6 md:p-8 rounded-[28px] md:rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden group"
           >
             <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl -mr-16 -mt-16 group-hover:bg-primary/10 transition-colors" />
             <div className="flex justify-between items-start mb-6">

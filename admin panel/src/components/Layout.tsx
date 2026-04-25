@@ -158,7 +158,7 @@ export function Layout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Main Scrollable Content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-6 md:p-10 pb-24 md:pb-10 relative z-10">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-10 pb-24 md:pb-10 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
