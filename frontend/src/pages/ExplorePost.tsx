@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Heart, MessageSquare, Share2, UserCircle2, Send } from 'lucide-react';
 import { motion } from 'motion/react';
 import { feedService } from '../services/feedService';
-import api from '../services/api';
 
 export default function ExplorePost() {
   const { id } = useParams();
@@ -14,13 +13,13 @@ export default function ExplorePost() {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchPost();
+    if (id) fetchPost();
   }, [id]);
 
   const fetchPost = async () => {
     try {
-      const response = await api.get(`/feed/${id}`);
-      setPost(response.data);
+      const data = await feedService.getPost(id as string);
+      setPost(data);
     } catch (err) {
       console.error("Failed to load post", err);
     } finally {
@@ -30,8 +29,8 @@ export default function ExplorePost() {
 
   const handleLike = async () => {
     try {
-      const response = await api.post(`/feed/${id}/like`);
-      setPost({ ...post, likes: response.data.likes, likedBy: response.data.likedBy });
+      const data = await feedService.likePost(id as string);
+      setPost({ ...post, likes: data.likes, likedBy: data.likedBy });
     } catch (err) {
       console.error("Failed to like", err);
       alert("Please login to like posts");
@@ -44,8 +43,8 @@ export default function ExplorePost() {
     
     setSubmitting(true);
     try {
-      const response = await api.post(`/feed/${id}/comments`, { text: commentText });
-      setPost({ ...post, comments: response.data });
+      const data = await feedService.commentPost(id as string, commentText);
+      setPost({ ...post, comments: data });
       setCommentText('');
     } catch (err) {
       console.error("Failed to comment", err);
