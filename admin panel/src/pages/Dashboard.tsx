@@ -49,7 +49,7 @@ export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
-  const [timeframe, setTimeframe] = useState<"daily" | "weekly" | "monthly" | "all">("daily");
+  const [timeframe, setTimeframe] = useState<"daily" | "weekly" | "monthly" | "all">("all");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,10 +100,10 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-3 bg-surface-container rounded-2xl p-1.5 border border-outline-variant shadow-inner">
            {[
+             { id: "all", label: "All Time" },
              { id: "daily", label: "Daily" },
              { id: "weekly", label: "Weekly" },
-             { id: "monthly", label: "Monthly" },
-             { id: "all", label: "All Time" }
+             { id: "monthly", label: "Monthly" }
            ].map((tab) => (
              <button 
                key={tab.id}
