@@ -187,14 +187,27 @@ export default function Explore() {
                         <motion.button 
                           whileTap={{ scale: 0.8 }}
                           onClick={(e) => handleLike(e, post._id)}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${
-                            isLiked ? 'text-error bg-error/10' : 'text-on-surface-variant hover:bg-surface-container'
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all duration-300 ${
+                            isLiked 
+                              ? 'text-error bg-error/10 ring-1 ring-error/30 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
+                              : 'text-on-surface-variant hover:bg-surface-container'
                           }`}
                         >
-                           <Heart 
-                             className={`w-5 h-5 transition-all duration-300 ${isLiked ? 'fill-current scale-110' : 'scale-100'}`} 
-                           />
-                           <span className="text-sm font-bold">{post.likes || 0}</span>
+                           <motion.div
+                             animate={isLiked ? { scale: [1, 1.15, 1] } : { scale: 1 }}
+                             transition={isLiked ? { duration: 0.4, type: "spring", stiffness: 300 } : {}}
+                           >
+                             <Heart 
+                               className={`w-5 h-5 transition-all duration-300 ${
+                                 isLiked 
+                                   ? 'fill-current scale-110 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]' 
+                                   : 'scale-100'
+                               }`} 
+                             />
+                           </motion.div>
+                           <span className={`text-sm font-bold transition-colors ${isLiked ? 'text-error' : ''}`}>
+                             {post.likes || 0}
+                           </span>
                         </motion.button>
                         <button 
                           onClick={(e) => { 

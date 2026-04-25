@@ -164,14 +164,27 @@ export default function ExplorePost() {
               <motion.button 
                 whileTap={{ scale: 0.8 }}
                 onClick={handleLike}
-                className={`flex items-center gap-2 transition-colors ${
-                  isLiked ? 'text-error' : 'text-on-surface-variant hover:text-error'
+                className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 ${
+                  isLiked 
+                    ? 'text-error bg-error/10 ring-1 ring-error/30 shadow-[0_0_15px_rgba(239,68,68,0.15)]' 
+                    : 'text-on-surface-variant hover:bg-surface-container'
                 }`}
               >
-                  <Heart 
-                    className={`w-6 h-6 transition-all duration-300 ${isLiked ? 'fill-current scale-110' : 'scale-100'}`} 
-                  />
-                  <span className="font-bold">{post.likes || 0}</span>
+                  <motion.div
+                    animate={isLiked ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                    transition={isLiked ? { duration: 0.4, type: "spring", stiffness: 300 } : {}}
+                  >
+                    <Heart 
+                      className={`w-6 h-6 transition-all duration-300 ${
+                        isLiked 
+                          ? 'fill-current scale-110 drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]' 
+                          : 'scale-100'
+                      }`} 
+                    />
+                  </motion.div>
+                  <span className={`font-bold transition-colors ${isLiked ? 'text-error' : ''}`}>
+                    {post.likes || 0}
+                  </span>
               </motion.button>
               <button 
                 className="flex items-center gap-2 text-on-surface-variant transition-colors"
