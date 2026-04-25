@@ -84,5 +84,22 @@ export const adminService = {
     return fetcher(`/posts/${id}`, {
       method: "DELETE"
     });
+  },
+
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    
+    const token = localStorage.getItem("admin_token");
+    const response = await fetch(`${API_BASE_URL}/upload-image`, {
+      method: "POST",
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData
+    });
+
+    if (!response.ok) throw new Error("Upload failed");
+    return response.json();
   }
 };
