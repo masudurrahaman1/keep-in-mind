@@ -74,12 +74,21 @@ export const adminService = {
     });
   },
 
+  deleteUser: async (id: string) => {
+    return fetcher(`/users/${id}`, {
+      method: "DELETE"
+    });
+  },
+
+  getUserById: async (id: string) => {
+    return fetcher(`/users/${id}`);
+  },
+
   seed: async () => {
     return fetcher("/seed", {
       method: "POST"
     });
   }
 };
-
 
 

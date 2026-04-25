@@ -59,6 +59,16 @@ export const adminService = {
     return fetcher("/sessions");
   },
 
+  deleteUser: async (id: string) => {
+    return fetcher(`/users/${id}`, {
+      method: "DELETE"
+    });
+  },
+
+  getUserById: async (id: string) => {
+    return fetcher(`/users/${id}`);
+  },
+
   revokeSession: async (id: string) => {
     return fetcher(`/sessions/${id}`, {
       method: "DELETE"

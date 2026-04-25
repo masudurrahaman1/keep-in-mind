@@ -110,11 +110,15 @@ export default function Users() {
             <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
           </div>
         ) : filteredUsers.map((user) => (
-          <motion.div 
+          <Link 
             key={user._id} 
-            variants={item}
-            className="glass p-4 md:p-6 rounded-[20px] md:rounded-[24px] flex items-center gap-4 md:gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-default relative"
+            to={`/users/${user._id}`}
+            className="block"
           >
+            <motion.div 
+              variants={item}
+              className="glass p-4 md:p-6 rounded-[20px] md:rounded-[24px] flex items-center gap-4 md:gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-pointer relative"
+            >
             <div className="relative">
               {user.avatar ? (
                 <img src={user.avatar} alt={user.name} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover shrink-0 border border-outline-variant shadow-lg" />
@@ -179,6 +183,7 @@ export default function Users() {
               </div>
             </div>
           </motion.div>
+          </Link>
         ))}
         
         {filteredUsers.length === 0 && !loading && (

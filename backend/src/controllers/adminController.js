@@ -190,6 +190,26 @@ const seedUsers = async (req, res) => {
 // @desc    Get only active users
 // @route   GET /api/admin/users/active
 // @access  Private/Admin
+const getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
+    // Fetch user's media/notes
+    const media = await Media.find({ user: user._id }).sort({ createdAt: -1 });
+    
+    res.json({
+      ...user._doc,
+      mediaCount: media.length,
+      recentMedia: media.slice(0, 5)
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const getActiveUsers = async (req, res) => {
   try {
     const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
@@ -304,5 +324,4 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser, seedUsers };
-
+module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser, seedUsers, getUserById };
