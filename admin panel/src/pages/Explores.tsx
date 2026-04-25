@@ -8,14 +8,14 @@ import {
   Globe, 
   Plus, 
   X,
-  Megaphone,
+  Compass,
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
 import { adminService } from "../lib/api";
 import { cn } from "../lib/utils";
 
-export default function Community() {
+export default function Explores() {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,15 +71,15 @@ export default function Community() {
     <div className="max-w-6xl mx-auto space-y-10 pb-24 font-sans">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div>
-          <h1 className="text-4xl md:text-display-metrics gradient-text mb-2">Global Discovery</h1>
-          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">Broadcast announcements and inspirations to all users.</p>
+          <h1 className="text-4xl md:text-display-metrics gradient-text mb-2">Explores Management</h1>
+          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">Curate content and inspirations for all users.</p>
         </div>
         <button 
           onClick={() => setIsModalOpen(true)}
           className="h-14 px-8 bg-primary text-on-primary rounded-2xl font-bold flex items-center gap-3 hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
-          Create Broadcast
+          New Exploration
         </button>
       </header>
 
@@ -103,7 +103,7 @@ export default function Community() {
                     <div className="flex justify-between items-start mb-6">
                        <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                             <Megaphone className="w-5 h-5 text-primary" />
+                             <Compass className="w-5 h-5 text-primary" />
                           </div>
                           <div>
                              <h3 className="font-bold text-on-surface">{post.title}</h3>
@@ -147,10 +147,10 @@ export default function Community() {
            ) : (
              <div className="glass p-20 rounded-[40px] text-center border-dashed border-outline-variant">
                 <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mx-auto mb-6">
-                   <Megaphone className="w-10 h-10 opacity-30 text-on-surface-variant" />
+                   <Compass className="w-10 h-10 opacity-30 text-on-surface-variant" />
                 </div>
-                <h2 className="text-2xl font-bold text-on-surface mb-2">Silence in the Feed</h2>
-                <p className="text-on-surface-variant opacity-60">You haven't broadcasted any content to the ecosystem yet.</p>
+                <h2 className="text-2xl font-bold text-on-surface mb-2">Silence in Explores</h2>
+                <p className="text-on-surface-variant opacity-60">You haven't shared any explorations with the ecosystem yet.</p>
              </div>
            )}
         </div>

@@ -15,7 +15,7 @@ import AuditLogs from "./pages/AuditLogs";
 import ActiveSessions from "./pages/ActiveSessions";
 import Terms from "./pages/Terms";
 import UserDetails from "./pages/UserDetails";
-import Community from "./pages/Community";
+import Explores from "./pages/Explores";
 
 // Simple Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -59,7 +59,7 @@ export default function App() {
                   <Route path="/security" element={<Security />} />
                   <Route path="/security/sessions" element={<ActiveSessions />} />
                   <Route path="/settings" element={<Settings />} />
-                  <Route path="/community" element={<Community />} />
+                  <Route path="/explores" element={<Explores />} />
                   <Route path="/help" element={<HelpCenter />} />
                   <Route path="/logs" element={<AuditLogs />} />
                   <Route path="*" element={<Navigate to="/" replace />} />
