@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { FileText, Tag, PlusCircle, Inbox, User } from 'lucide-react';
+import { FileText, Compass, Inbox, User } from 'lucide-react';
 import { cn } from './Sidebar';
 
 export default function BottomNav() {
@@ -7,7 +7,7 @@ export default function BottomNav() {
 
   const links = [
     { path: '/notes', label: 'Notes', icon: FileText },
-    { path: '/labels', label: 'Labels', icon: Tag },
+    { path: '/explore', label: 'Explore', icon: Compass },
     { path: '/gallery', label: 'Spaces', icon: Inbox },
     { path: '/account', label: 'Profile', icon: User },
   ];
