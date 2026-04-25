@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://api.keepinmind.in/api/admin";
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000/api/admin" : "https://api.keepinmind.in/api/admin");
 
 async function fetcher(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("admin_token");
@@ -8,7 +8,12 @@ async function fetcher(endpoint: string, options: RequestInit = {}) {
     ...options.headers,
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  // Add cache-busting for GET requests to ensure fresh data
+  const url = options.method === 'GET' || !options.method 
+    ? `${API_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}_t=${Date.now()}`
+    : `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(url, {
     ...options,
     headers,
   });

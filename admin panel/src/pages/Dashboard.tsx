@@ -48,7 +48,16 @@ const item = {
 export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<any>({
+    totalUsers: 0,
+    activeNow: 0,
+    notesCreated: 0,
+    growth: "0",
+    usersToday: 0,
+    usersWeek: 0,
+    usersMonth: 0,
+    chartData: []
+  });
   const [timeframe, setTimeframe] = useState<"daily" | "weekly" | "monthly" | "all">("all");
 
   useEffect(() => {
@@ -62,7 +71,12 @@ export default function Dashboard() {
         setIsLoading(false);
       }
     };
+    
     fetchData();
+    
+    // Auto-refresh stats every 5 seconds for "Live" feel
+    const statsInterval = setInterval(fetchData, 5000);
+    return () => clearInterval(statsInterval);
   }, []);
 
   useEffect(() => {
@@ -82,8 +96,6 @@ export default function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
-
-  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="flex flex-col gap-10 max-w-6xl mx-auto">
@@ -204,7 +216,7 @@ export default function Dashboard() {
                   strokeWidth={4} 
                   fillOpacity={1} 
                   fill="url(#colorPv)" 
-                  animationDuration={1500}
+                  animationDuration={800}
                 />
               </AreaChart>
             </ResponsiveContainer>

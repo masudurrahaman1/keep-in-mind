@@ -84,51 +84,68 @@ const revokeSession = async (req, res) => {
 // @access  Private/Admin
 const getStats = async (req, res) => {
   try {
-    const totalUsers = await User.countDocuments();
-    const googleUsers = await User.countDocuments({ authProvider: 'google' });
-    const localUsers = await User.countDocuments({ authProvider: 'local' });
-    const totalMedia = await Media.countDocuments();
-    
-    // Time-based user growth
-    const now = new Date();
+    // Time-based user growth boundaries
     const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
     const startOfWeek = new Date(new Date().setDate(new Date().getDate() - 7));
     const startOfMonth = new Date(new Date().setMonth(new Date().getMonth() - 1));
+    // Active Now (2 min heartbeat for more accurate 'live' status)
+    const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 
-    const usersToday = await User.countDocuments({ createdAt: { $gte: startOfToday } });
-    const usersWeek = await User.countDocuments({ createdAt: { $gte: startOfWeek } });
-    const usersMonth = await User.countDocuments({ createdAt: { $gte: startOfMonth } });
+    // Parallelize all count queries
+    const [
+      totalUsers,
+      googleUsers,
+      localUsers,
+      totalMedia,
+      usersToday,
+      usersWeek,
+      usersMonth,
+      activeNowCount,
+      usersPrevWeek
+    ] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ authProvider: 'google' }),
+      User.countDocuments({ authProvider: 'local' }),
+      Media.countDocuments(),
+      User.countDocuments({ createdAt: { $gte: startOfToday } }),
+      User.countDocuments({ createdAt: { $gte: startOfWeek } }),
+      User.countDocuments({ createdAt: { $gte: startOfMonth } }),
+      User.countDocuments({ lastActive: { $gte: twoMinutesAgo } }),
+      User.countDocuments({ createdAt: { $gte: prevStartOfWeek, $lt: startOfWeek } })
+    ]);
 
-    // Active Now (10 min heartbeat)
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    const activeNow = await User.countDocuments({ lastActive: { $gte: tenMinutesAgo } }) || 1;
-    
-    // Growth (last 7 days vs previous 7)
-    const prevStartOfWeek = new Date(new Date().setDate(new Date().getDate() - 14));
-    const usersPrevWeek = await User.countDocuments({ 
-      createdAt: { $gte: prevStartOfWeek, $lt: startOfWeek } 
-    });
-    
-    let growth = 0;
-    if (usersPrevWeek > 0) {
-      growth = ((usersWeek - usersPrevWeek) / usersPrevWeek) * 100;
-    } else if (usersWeek > 0) {
-      growth = 100;
-    }
+    const activeNow = activeNowCount || 0;
 
-    // Chart Data (Last 7 days)
-    const chartData = [];
+    // Optimize Chart Data (Last 7 days)
+    const chartPromises = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
       d.setHours(0, 0, 0, 0);
       const nextD = new Date(d);
       nextD.setDate(nextD.getDate() + 1);
-      const count = await User.countDocuments({ createdAt: { $gte: d, $lt: nextD } });
-      chartData.push({
-        name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        pv: count
-      });
+      
+      chartPromises.push((async () => {
+        const count = await User.countDocuments({ createdAt: { $gte: d, $lt: nextD } });
+        return {
+          name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          pv: count,
+          _timestamp: d.getTime()
+        };
+      })());
+    }
+
+    const chartDataResults = await Promise.all(chartPromises);
+    const chartData = chartDataResults
+      .sort((a, b) => a._timestamp - b._timestamp)
+      .map(({ name, pv }) => ({ name, pv }));
+    
+    // Calculate growth
+    let growth = 0;
+    if (usersPrevWeek > 0) {
+      growth = ((usersWeek - usersPrevWeek) / usersPrevWeek) * 100;
+    } else if (usersWeek > 0) {
+      growth = 100;
     }
 
     res.json({
@@ -139,12 +156,13 @@ const getStats = async (req, res) => {
       usersToday,
       usersWeek,
       usersMonth,
-      activeNow,
+      activeNow, 
       growth: growth.toFixed(1),
       chartData,
-      notesCreated: totalMedia * 3 // Mocked multiplier for "notes" vs "media"
+      notesCreated: totalMedia * 3 
     });
   } catch (error) {
+    console.error("[GetStats Error]", error);
     res.status(500).json({ message: error.message });
   }
 };
