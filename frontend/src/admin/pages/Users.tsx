@@ -60,11 +60,11 @@ export default function Users() {
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-display-metrics gradient-text mb-2"
+            className="text-4xl md:text-display-metrics gradient-text mb-2"
           >
             User Management
           </motion.h1>
-          <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Manage ecosystem access, roles, and security permissions.</p>
+          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">Manage ecosystem access and permissions.</p>
         </div>
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -81,16 +81,20 @@ export default function Users() {
       </header>
 
       {/* Search & Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1 group">
           <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors w-5 h-5 opacity-50" />
           <input 
             type="text" 
-            placeholder="Search by identity or credentials..." 
+            placeholder="Search identity..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full h-14 pl-14 pr-6 glass border-outline-variant rounded-2xl font-medium text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-on-surface-variant/40 shadow-lg"
           />
+        </div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors whitespace-nowrap">Role: All</button>
+           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors whitespace-nowrap">Status: Active</button>
         </div>
       </div>
 
@@ -109,13 +113,13 @@ export default function Users() {
           <motion.div 
             key={user._id} 
             variants={item}
-            className="glass p-6 rounded-[24px] flex items-center gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-default relative"
+            className="glass p-4 md:p-6 rounded-[20px] md:rounded-[24px] flex items-center gap-4 md:gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-default relative"
           >
             <div className="relative">
               {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-14 h-14 rounded-2xl object-cover shrink-0 border border-outline-variant shadow-lg" />
+                <img src={user.avatar} alt={user.name} className="w-12 h-12 md:w-14 md:h-14 rounded-2xl object-cover shrink-0 border border-outline-variant shadow-lg" />
               ) : (
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0 border border-primary/20">
+                <div className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0 border border-primary/20">
                   {user.name.charAt(0)}
                 </div>
               )}
