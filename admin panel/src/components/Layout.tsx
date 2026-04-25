@@ -14,8 +14,6 @@ import {
   LogOut,
   ExternalLink,
   ChevronRight,
-  Sun,
-  Moon
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -149,18 +147,6 @@ export function Layout({ children }: { children: ReactNode }) {
                 <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Live System: Stable</span>
              </div>
 
-             <button
-                onClick={toggleTheme}
-                className="p-2.5 rounded-xl bg-surface-container border border-outline-variant text-on-surface hover:text-primary transition-all duration-300 shadow-lg group"
-                aria-label="Toggle Theme"
-              >
-                {theme === "dark" ? (
-                  <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform" />
-                ) : (
-                  <Moon className="w-5 h-5 group-hover:-rotate-12 transition-transform" />
-                )}
-              </button>
-
              <Link to="/help" className="text-sm text-primary hover:text-accent-purple transition-colors hidden sm:block font-bold">Help Center</Link>
              <div className="h-8 w-px bg-outline-variant hidden sm:block" />
              <img
@@ -238,16 +224,6 @@ export function Layout({ children }: { children: ReactNode }) {
                 })}
 
                 <div className="pt-6 border-t border-outline-variant/30 mt-6 space-y-2">
-                  <button
-                    onClick={toggleTheme}
-                    className="w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all text-on-surface-variant hover:text-primary hover:bg-surface-container"
-                  >
-                    {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
-                    <span className="font-medium text-base">
-                      {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-                    </span>
-                  </button>
-
                   <a
                     href="https://keepinmind.in"
                     target="_blank"
