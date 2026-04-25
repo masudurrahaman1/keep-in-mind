@@ -59,7 +59,7 @@ export default function Explores() {
           className="w-full md:w-auto h-14 px-8 bg-primary text-on-primary rounded-2xl font-bold flex items-center justify-center gap-3 hover:shadow-xl hover:shadow-primary/20 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
-          New Exploration
+          New Post
         </button>
       </header>
 
