@@ -16,6 +16,7 @@ import ActiveSessions from "./pages/ActiveSessions";
 import Terms from "./pages/Terms";
 import UserDetails from "./pages/UserDetails";
 import Explores from "./pages/Explores";
+import NewExploration from "./pages/NewExploration";
 
 // Simple Protected Route Component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -60,6 +61,7 @@ export default function App() {
                   <Route path="/security/sessions" element={<ActiveSessions />} />
                   <Route path="/settings" element={<Settings />} />
                   <Route path="/explores" element={<Explores />} />
+                  <Route path="/explores/new" element={<NewExploration />} />
                   <Route path="/help" element={<HelpCenter />} />
                   <Route path="/logs" element={<AuditLogs />} />
                   <Route path="*" element={<Navigate to="/" replace />} />

@@ -29,7 +29,7 @@ router.post('/upload-image', upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ message: "No image uploaded" });
   
   // Return the public URL
-  const baseUrl = process.env.API_BASE_URL || 'https://api.keepinmind.in';
+  const baseUrl = process.env.API_BASE_URL || 'https://api.keepinmind.in/api';
   const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
   res.json({ imageUrl });
 });
