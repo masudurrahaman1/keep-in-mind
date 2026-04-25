@@ -62,6 +62,16 @@ export const adminService = {
       method: "PUT",
       body: JSON.stringify(data)
     });
+  },
+
+  getSessions: async () => {
+    return fetcher("/sessions");
+  },
+
+  revokeSession: async (id: string) => {
+    return fetcher(`/sessions/${id}`, {
+      method: "DELETE"
+    });
   }
 };
 

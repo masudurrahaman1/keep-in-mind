@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, getStats, getUsers, getActiveUsers, getActivities, updateProfile, getProfile } = require('../controllers/adminController');
+const { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, updateProfile, getProfile } = require('../controllers/adminController');
 
 // Public admin login
 router.post('/login', login);
@@ -11,6 +11,8 @@ router.get('/stats', getStats);
 router.get('/users', getUsers);
 router.get('/users/active', getActiveUsers);
 router.get('/activities', getActivities);
+router.get('/sessions', getSessions);
+router.delete('/sessions/:id', revokeSession);
 router.get('/profile', getProfile);
 router.put('/profile', updateProfile);
 

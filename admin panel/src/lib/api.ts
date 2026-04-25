@@ -53,5 +53,15 @@ export const adminService = {
     return [
       { id: 1, user: "Sarah Jenkins", action: "Updated Design System", time: "Just now", type: "success" },
     ];
+  },
+
+  getSessions: async () => {
+    return fetcher("/sessions");
+  },
+
+  revokeSession: async (id: string) => {
+    return fetcher(`/sessions/${id}`, {
+      method: "DELETE"
+    });
   }
 };

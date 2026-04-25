@@ -1,6 +1,5 @@
-const User = require('../models/User');
-const Media = require('../models/Media');
 const Activity = require('../models/Activity');
+const Session = require('../models/Session');
 const generateToken = require('../utils/generateToken');
 
 // @desc    Admin Login
@@ -13,6 +12,28 @@ const login = async (req, res) => {
     // Hardcoded check as requested for the executive admin
     if (email === "masudurrahamanrm@gmail.com" && password === "masudur@8145") {
       const token = generateToken("admin_executive_root");
+      
+      // Track session info
+      const ua = req.headers['user-agent'] || '';
+      let os = "Other";
+      if (ua.includes("Windows")) os = "Windows";
+      else if (ua.includes("Macintosh")) os = "Mac OS";
+      else if (ua.includes("iPhone")) os = "iPhone";
+      else if (ua.includes("Android")) os = "Android";
+      
+      let device = "Desktop";
+      if (ua.includes("Mobi")) device = "Phone";
+      else if (ua.includes("Tablet")) device = "Tablet";
+
+      await Session.create({
+        userId: "admin_executive_root",
+        device,
+        os,
+        browser: ua.includes("Chrome") ? "Chrome" : ua.includes("Safari") ? "Safari" : "Firefox",
+        ip: req.ip || req.headers['x-forwarded-for'] || '127.0.0.1',
+        lastActive: new Date()
+      });
+
       res.json({
         success: true,
         token,
@@ -25,6 +46,30 @@ const login = async (req, res) => {
     } else {
       res.status(401).json({ message: "Invalid administrative credentials. Access denied." });
     }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all active admin sessions
+// @route   GET /api/admin/sessions
+// @access  Private/Admin
+const getSessions = async (req, res) => {
+  try {
+    const sessions = await Session.find({ userId: "admin_executive_root" }).sort({ lastActive: -1 });
+    res.json(sessions);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Revoke a session
+// @route   DELETE /api/admin/sessions/:id
+// @access  Private/Admin
+const revokeSession = async (req, res) => {
+  try {
+    await Session.findByIdAndDelete(req.params.id);
+    res.json({ message: "Session revoked successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -153,5 +198,5 @@ const updateProfile = async (req, res) => {
 };
 
 
-module.exports = { login, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
+module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
 
