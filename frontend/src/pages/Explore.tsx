@@ -1,13 +1,126 @@
-import { Compass } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Compass, Megaphone, Globe, MessageSquare, History, Heart, Share2, MoreHorizontal } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { feedService } from '../services/feedService';
+import { cn } from '../components/Sidebar';
 
 export default function Explore() {
-  return (
-    <div className="flex flex-col items-center justify-center h-full text-on-surface-variant min-h-[400px]">
-      <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center mb-6">
-        <Compass size={40} className="opacity-50" />
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchFeed = async () => {
+      try {
+        const data = await feedService.getFeed();
+        setPosts(data);
+      } catch (err) {
+        console.error("Explore feed failed", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeed();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto py-8 px-4 space-y-8">
+        <div className="space-y-4">
+           <div className="h-10 w-48 bg-surface-container rounded-xl animate-pulse" />
+           <div className="h-4 w-64 bg-surface-container rounded-lg animate-pulse opacity-50" />
+        </div>
+        {[1, 2].map(i => (
+          <div key={i} className="bg-surface-container-low rounded-[32px] h-96 animate-pulse" />
+        ))}
       </div>
-      <h2 className="text-xl font-medium text-on-surface mb-2">Explore Ideas</h2>
-      <p className="max-w-xs text-center text-sm">Discover templates and inspirations for your notes.</p>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto py-8 px-4 md:px-8 space-y-10 pb-32">
+      <header>
+        <div className="flex items-center gap-3 mb-2">
+           <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
+              <Compass className="text-primary w-5 h-5" />
+           </div>
+           <h1 className="text-2xl font-bold text-on-surface">Global Discovery</h1>
+        </div>
+        <p className="text-sm text-on-surface-variant font-medium opacity-60">Handpicked inspirations and system updates for the community.</p>
+      </header>
+
+      {posts.length > 0 ? (
+        <div className="grid grid-cols-1 gap-8">
+           {posts.map((post, index) => (
+             <motion.article 
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+              key={post._id}
+              className="bg-surface-container-lowest border border-outline-variant/10 rounded-[40px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all duration-500 group"
+             >
+                {post.image && (
+                  <div className="aspect-[16/9] w-full overflow-hidden relative">
+                     <img src={post.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt={post.title} />
+                     <div className="absolute top-6 left-6">
+                        <span className="px-4 py-2 bg-black/40 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest rounded-full border border-white/10">
+                           {post.category}
+                        </span>
+                     </div>
+                  </div>
+                )}
+
+                <div className="p-8 md:p-10 space-y-6">
+                   <div className="flex justify-between items-start">
+                      <div className="space-y-1">
+                         <h2 className="text-2xl font-bold text-on-surface leading-tight">{post.title}</h2>
+                         <div className="flex items-center gap-2 text-[10px] font-bold text-on-surface-variant opacity-40 uppercase tracking-widest">
+                            <Megaphone className="w-3.5 h-3.5" />
+                            <span>System Broadcast • {new Date(post.createdAt).toLocaleDateString()}</span>
+                         </div>
+                      </div>
+                      <button className="p-3 hover:bg-surface-container rounded-2xl transition-colors">
+                         <MoreHorizontal className="w-5 h-5 opacity-40" />
+                      </button>
+                   </div>
+
+                   <p className="text-on-surface-variant leading-relaxed text-sm md:text-base">
+                      {post.content}
+                   </p>
+
+                   <div className="pt-6 border-t border-outline-variant/10 flex items-center justify-between">
+                      <div className="flex items-center gap-6">
+                         <button className="flex items-center gap-2 text-on-surface-variant hover:text-error transition-colors group/btn">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center group-hover/btn:bg-error/10 transition-colors">
+                               <Heart className="w-5 h-5" />
+                            </div>
+                            <span className="text-xs font-bold">{post.likes || 0}</span>
+                         </button>
+                         <button className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors group/btn">
+                            <div className="w-10 h-10 rounded-full flex items-center justify-center group-hover/btn:bg-primary/10 transition-colors">
+                               <MessageSquare className="w-5 h-5" />
+                            </div>
+                            <span className="text-xs font-bold">Discuss</span>
+                         </button>
+                      </div>
+                      <button className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container transition-colors">
+                         <Share2 className="w-5 h-5 opacity-40" />
+                      </button>
+                   </div>
+                </div>
+             </motion.article>
+           ))}
+        </div>
+      ) : (
+        <div className="py-20 flex flex-col items-center justify-center text-center space-y-6 bg-surface-container/20 rounded-[40px] border border-dashed border-outline-variant/30">
+          <div className="w-20 h-20 bg-surface-container rounded-full flex items-center justify-center">
+            <Compass size={40} className="opacity-20" />
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-xl font-bold text-on-surface">The Feed is Empty</h2>
+            <p className="max-w-xs text-sm text-on-surface-variant opacity-60 font-medium">Check back later for new inspirations and updates from the team.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

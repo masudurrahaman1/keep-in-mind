@@ -2,6 +2,7 @@ const User = require('../models/User');
 const Media = require('../models/Media');
 const Activity = require('../models/Activity');
 const Session = require('../models/Session');
+const Post = require('../models/Post');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
 
@@ -324,4 +325,32 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser, seedUsers, getUserById };
+const createPost = async (req, res) => {
+  try {
+    const { title, content, image, category } = req.body;
+    const post = await Post.create({ title, content, image, category });
+    res.status(201).json(post);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const getAdminPosts = async (req, res) => {
+  try {
+    const posts = await Post.find({}).sort({ createdAt: -1 });
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const deletePost = async (req, res) => {
+  try {
+    await Post.findByIdAndDelete(req.params.id);
+    res.json({ message: "Post removed from ecosystem" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser, seedUsers, getUserById, createPost, getAdminPosts, deletePost };

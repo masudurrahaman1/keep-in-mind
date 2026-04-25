@@ -14,6 +14,7 @@ import {
   LogOut,
   ExternalLink,
   ChevronRight,
+  Megaphone
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -22,6 +23,7 @@ const NAV_ITEMS = [
   { name: "Users", href: "/users", icon: Users },
   { name: "Security", href: "/security", icon: ShieldCheck },
   { name: "Logs", href: "/logs", icon: FileText },
+  { name: "Community", href: "/community", icon: Megaphone },
   { name: "Settings", href: "/settings", icon: Settings },
 ];
 
@@ -260,7 +262,7 @@ export function Layout({ children }: { children: ReactNode }) {
       )}>
         {[
           { name: "Insights", href: "/", icon: LayoutDashboard },
-          { name: "Search", href: "/search", icon: Search },
+          { name: "Community", href: "/community", icon: Megaphone },
           { name: "Users", href: "/users", icon: Users },
           { name: "Settings", href: "/settings", icon: Settings },
         ].map((item) => {

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { login, getSessions, revokeSession, getStats, getUsers, getUserById, getActiveUsers, getActivities, updateProfile, getProfile, createUser, deleteUser, seedUsers } = require('../controllers/adminController');
+const { login, getSessions, revokeSession, getStats, getUsers, getUserById, getActiveUsers, getActivities, updateProfile, getProfile, createUser, deleteUser, seedUsers, createPost, getAdminPosts, deletePost } = require('../controllers/adminController');
 
 // Public admin login
 router.post('/login', login);
@@ -13,6 +13,11 @@ router.get('/users', getUsers);
 router.get('/users/:id', getUserById);
 router.post('/users', createUser);
 router.delete('/users/:id', deleteUser);
+
+// Admin post management (Feed)
+router.post('/posts', createPost);
+router.get('/posts', getAdminPosts);
+router.delete('/posts/:id', deletePost);
 router.post('/seed', seedUsers);
 router.get('/users/active', getActiveUsers);
 router.get('/activities', getActivities);
