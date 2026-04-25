@@ -63,5 +63,11 @@ export const adminService = {
     return fetcher(`/sessions/${id}`, {
       method: "DELETE"
     });
+  },
+
+  seed: async () => {
+    return fetcher("/seed", {
+      method: "POST"
+    });
   }
 };

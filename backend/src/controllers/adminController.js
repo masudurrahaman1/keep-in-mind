@@ -119,8 +119,35 @@ const getStats = async (req, res) => {
 // @access  Private/Admin
 const getUsers = async (req, res) => {
   try {
+    console.log("[Admin API] Fetching all users...");
     const users = await User.find({}).sort({ createdAt: -1 });
+    console.log(`[Admin API] Found ${users.length} users.`);
     res.json(users);
+  } catch (error) {
+    console.error("[Admin API] Error fetching users:", error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Seed sample users for testing
+// @route   POST /api/admin/seed
+// @access  Private/Admin
+const seedUsers = async (req, res) => {
+  try {
+    const count = await User.countDocuments();
+    if (count > 0) return res.status(400).json({ message: "Database already has data. Seeding cancelled." });
+
+    const samples = [
+      { name: "Sarah Jenkins", email: "sarah.j@keepinmind.in", isVerified: true, authProvider: 'local' },
+      { name: "Michael Chen", email: "m.chen@keepinmind.in", isVerified: true, authProvider: 'google' },
+      { name: "Emily Wright", email: "emily.w@keepinmind.in", isVerified: false, authProvider: 'local' }
+    ];
+
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash("Admin123!", salt);
+
+    const created = await User.insertMany(samples.map(s => ({ ...s, password })));
+    res.json({ message: "System seeded with sample identities", count: created.length });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -243,5 +270,5 @@ const createUser = async (req, res) => {
   }
 };
 
-module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser };
+module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser, seedUsers };
 

@@ -1,4 +1,4 @@
-import { Search as SearchIcon, Users as Group, Plus, MoreVertical, Mail, Shield, UserCheck } from "lucide-react";
+import { Search as SearchIcon, Users as Group, Plus, MoreVertical, Mail, Shield, UserCheck, History } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { useState, useEffect } from "react";
@@ -43,6 +43,19 @@ export default function Users() {
     fetchData();
   }, []);
 
+  const handleSeed = async () => {
+    try {
+      setLoading(true);
+      await adminService.seed();
+      const data = await adminService.getUsers();
+      setUsers(data);
+    } catch (err) {
+      console.error("Seeding failed", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredUsers = users.filter(user => 
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -86,18 +99,31 @@ export default function Users() {
           </motion.h1>
           <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Manage ecosystem access, roles, and security permissions.</p>
         </div>
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-        >
-          <Link 
-            to="/users/new" 
-            className="bg-primary text-on-primary font-bold px-8 rounded-2xl h-14 flex items-center justify-center gap-3 hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 whitespace-nowrap"
+        <div className="flex gap-4">
+          {users.length === 0 && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={handleSeed}
+              className="glass text-on-surface font-bold px-6 rounded-2xl h-14 flex items-center justify-center gap-3 hover:bg-surface-container transition-all shadow-lg border border-outline-variant"
+            >
+              <History className="w-5 h-5 text-primary" />
+              Seed Sample Data
+            </motion.button>
+          )}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
           >
-            <Plus className="w-6 h-6" />
-            Provision User
-          </Link>
-        </motion.div>
+            <Link 
+              to="/users/new" 
+              className="bg-primary text-on-primary font-bold px-8 rounded-2xl h-14 flex items-center justify-center gap-3 hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20 whitespace-nowrap"
+            >
+              <Plus className="w-6 h-6" />
+              Provision User
+            </Link>
+          </motion.div>
+        </div>
       </header>
 
       {/* Search & Filters */}
