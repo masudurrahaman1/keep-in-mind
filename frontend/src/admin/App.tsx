@@ -17,6 +17,7 @@ import Support from "./pages/Support";
 import Terms from "./pages/Terms";
 import ActiveUsers from "./pages/ActiveUsers";
 import UserDetails from "./pages/UserDetails";
+import Explores from "./pages/Explores";
 import Heartbeat from "../components/Heartbeat";
 
 
@@ -61,7 +62,7 @@ export default function App() {
                   <Route path="/users" element={<Users />} />
                   <Route path="/users/new" element={<AddUser />} />
                   <Route path="/users/:id" element={<UserDetails />} />
-                  <Route path="/search" element={<Search />} />
+                  <Route path="/explores" element={<Explores />} />
                   <Route path="/security" element={<Security />} />
                   <Route path="/security/sessions" element={<ActiveSessions />} />
                   <Route path="/settings" element={<Settings />} />

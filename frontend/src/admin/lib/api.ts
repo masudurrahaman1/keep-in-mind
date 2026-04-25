@@ -88,6 +88,23 @@ export const adminService = {
     return fetcher("/seed", {
       method: "POST"
     });
+  },
+
+  getPosts: async () => {
+    return fetcher("/posts");
+  },
+
+  createPost: async (data: any) => {
+    return fetcher("/posts", {
+      method: "POST",
+      body: JSON.stringify(data)
+    });
+  },
+
+  deletePost: async (id: string) => {
+    return fetcher(`/posts/${id}`, {
+      method: "DELETE"
+    });
   }
 };
 
