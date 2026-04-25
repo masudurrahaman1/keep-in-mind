@@ -37,14 +37,11 @@ export default function NewExploration() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      let imageUrl = newPost.image;
-      
-      if (selectedFile) {
-        const uploadResult = await adminService.uploadImage(selectedFile);
-        imageUrl = uploadResult.imageUrl;
-      }
-
-      await adminService.createPost({ ...newPost, image: imageUrl });
+      // Use the Base64 preview directly as the image source
+      await adminService.createPost({ 
+        ...newPost, 
+        image: imagePreview || "" 
+      });
       navigate("/explores");
     } catch (err) {
       alert("Failed to create exploration");
