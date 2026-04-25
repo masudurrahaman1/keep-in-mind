@@ -22,6 +22,7 @@ const Account = lazy(() => import('./pages/Account'));
 const Labels = lazy(() => import('./pages/Labels'));
 const Archive = lazy(() => import('./pages/Archive'));
 const Explore = lazy(() => import('./pages/Explore'));
+const ExplorePost = lazy(() => import('./pages/ExplorePost'));
 const Recent = lazy(() => import('./pages/Recent'));
 const Settings = lazy(() => import('./pages/Settings'));
 const Drawing = lazy(() => import('./pages/Drawing'));
@@ -97,6 +98,7 @@ export default function App() {
           <Route path="archive"  element={<Suspense fallback={<PageLoader />}><Archive /></Suspense>} />
           <Route path="account"  element={<Suspense fallback={<PageLoader />}><Account /></Suspense>} />
           <Route path="explore"  element={<Suspense fallback={<PageLoader />}><Explore /></Suspense>} />
+          <Route path="explore/:id" element={<Suspense fallback={<PageLoader />}><ExplorePost /></Suspense>} />
           <Route path="recent"   element={<Suspense fallback={<PageLoader />}><Recent /></Suspense>}  />
           <Route path="settings" element={<Suspense fallback={<PageLoader />}><Settings /></Suspense>}/>
         </Route>

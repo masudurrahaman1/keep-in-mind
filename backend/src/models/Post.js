@@ -25,6 +25,15 @@ const postSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  likedBy: [{
+    type: String // user uid or email
+  }],
+  comments: [{
+    text: { type: String, required: true },
+    user: { type: String, required: true },
+    userEmail: { type: String },
+    createdAt: { type: Date, default: Date.now }
+  }],
   isPublic: {
     type: Boolean,
     default: true
