@@ -237,7 +237,17 @@ export function Layout({ children }: { children: ReactNode }) {
                   );
                 })}
 
-                <div className="pt-6 border-t border-outline-variant/30 mt-6">
+                <div className="pt-6 border-t border-outline-variant/30 mt-6 space-y-2">
+                  <button
+                    onClick={toggleTheme}
+                    className="w-full flex items-center gap-4 px-4 py-4 rounded-xl transition-all text-on-surface-variant hover:text-primary hover:bg-surface-container"
+                  >
+                    {theme === "dark" ? <Sun className="w-6 h-6" /> : <Moon className="w-6 h-6" />}
+                    <span className="font-medium text-base">
+                      {theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                    </span>
+                  </button>
+
                   <a
                     href="https://keepinmind.in"
                     target="_blank"
