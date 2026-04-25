@@ -87,28 +87,62 @@ const getStats = async (req, res) => {
     const googleUsers = await User.countDocuments({ authProvider: 'google' });
     const localUsers = await User.countDocuments({ authProvider: 'local' });
     const totalMedia = await Media.countDocuments();
-
-    // Active Now: Users with lastActive in the last 10 minutes (via heartbeat)
-    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-    let activeNow = await User.countDocuments({ lastActive: { $gte: tenMinutesAgo } });
     
-    if (activeNow === 0 && totalUsers > 0) activeNow = 1;
+    // Time-based user growth
+    const now = new Date();
+    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+    const startOfWeek = new Date(new Date().setDate(new Date().getDate() - 7));
+    const startOfMonth = new Date(new Date().setMonth(new Date().getMonth() - 1));
 
-    // Calculate growth (mocked logic for "this month")
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-    const usersThisMonth = await User.countDocuments({ createdAt: { $gte: oneMonthAgo } });
-    const growth = totalUsers > 0 ? ((usersThisMonth / totalUsers) * 100).toFixed(1) : 0;
+    const usersToday = await User.countDocuments({ createdAt: { $gte: startOfToday } });
+    const usersWeek = await User.countDocuments({ createdAt: { $gte: startOfWeek } });
+    const usersMonth = await User.countDocuments({ createdAt: { $gte: startOfMonth } });
+
+    // Active Now (10 min heartbeat)
+    const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+    const activeNow = await User.countDocuments({ lastActive: { $gte: tenMinutesAgo } }) || 1;
+    
+    // Growth (last 7 days vs previous 7)
+    const prevStartOfWeek = new Date(new Date().setDate(new Date().getDate() - 14));
+    const usersPrevWeek = await User.countDocuments({ 
+      createdAt: { $gte: prevStartOfWeek, $lt: startOfWeek } 
+    });
+    
+    let growth = 0;
+    if (usersPrevWeek > 0) {
+      growth = ((usersWeek - usersPrevWeek) / usersPrevWeek) * 100;
+    } else if (usersWeek > 0) {
+      growth = 100;
+    }
+
+    // Chart Data (Last 7 days)
+    const chartData = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const nextD = new Date(d);
+      nextD.setDate(nextD.getDate() + 1);
+      const count = await User.countDocuments({ createdAt: { $gte: d, $lt: nextD } });
+      chartData.push({
+        name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        pv: count
+      });
+    }
 
     res.json({
       totalUsers,
       googleUsers,
       localUsers,
       totalMedia,
+      usersToday,
+      usersWeek,
+      usersMonth,
       activeNow,
-      growth: parseFloat(growth)
+      growth: growth.toFixed(1),
+      chartData,
+      notesCreated: totalMedia * 3 // Mocked multiplier for "notes" vs "media"
     });
-
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

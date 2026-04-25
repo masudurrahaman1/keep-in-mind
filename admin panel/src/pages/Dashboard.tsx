@@ -49,6 +49,7 @@ export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<any>(null);
+  const [timeframe, setTimeframe] = useState<"daily" | "weekly" | "monthly" | "all">("daily");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,9 +99,23 @@ export default function Dashboard() {
           <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Real-time system metrics and overview.</p>
         </div>
         <div className="flex items-center gap-3 bg-surface-container rounded-2xl p-1.5 border border-outline-variant shadow-inner">
-           <button className="px-4 py-2 bg-primary text-on-primary rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95">Daily</button>
-           <button className="px-4 py-2 text-on-surface-variant hover:text-on-surface rounded-xl text-sm font-bold transition-all">Weekly</button>
-           <button className="px-4 py-2 text-on-surface-variant hover:text-on-surface rounded-xl text-sm font-bold transition-all">Monthly</button>
+           {[
+             { id: "daily", label: "Daily" },
+             { id: "weekly", label: "Weekly" },
+             { id: "monthly", label: "Monthly" },
+             { id: "all", label: "All Time" }
+           ].map((tab) => (
+             <button 
+               key={tab.id}
+               onClick={() => setTimeframe(tab.id as any)}
+               className={cn(
+                 "px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95",
+                 timeframe === tab.id ? "bg-primary text-on-primary shadow-lg shadow-primary/20" : "text-on-surface-variant hover:text-on-surface"
+               )}
+             >
+               {tab.label}
+             </button>
+           ))}
         </div>
       </header>
 
@@ -111,9 +126,14 @@ export default function Dashboard() {
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         {[
-          { label: "Total Users", value: stats?.totalUsers?.toLocaleString() || "0", trend: `+${stats?.growth || 0}%`, icon: Users, color: "text-primary", bg: "bg-primary/10" },
+          { 
+            label: timeframe === "all" ? "Total Users" : `Users (${timeframe})`, 
+            value: (timeframe === "daily" ? stats?.usersToday : timeframe === "weekly" ? stats?.usersWeek : timeframe === "monthly" ? stats?.usersMonth : stats?.totalUsers)?.toLocaleString() || "0", 
+            trend: timeframe === "all" ? `+${stats?.growth || 0}%` : "Growth", 
+            icon: Users, color: "text-primary", bg: "bg-primary/10" 
+          },
           { label: "Notes Created", value: stats?.notesCreated?.toLocaleString() || "0", trend: "+12.1%", icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Active Now", value: stats?.activeNow?.toLocaleString() || "0", trend: "+5.2%", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
+          { label: "Active Now", value: stats?.activeNow?.toLocaleString() || "0", trend: "Live", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
         ].map((stat, idx) => (
           <motion.div 
             key={stat.label}
@@ -146,7 +166,7 @@ export default function Dashboard() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h3 className="text-h2 font-bold text-on-surface">User Growth</h3>
-              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest opacity-50">Last 30 Days</p>
+              <p className="text-xs font-bold text-on-surface-variant uppercase tracking-widest opacity-50">Last 7 Days</p>
             </div>
             <div className="flex items-center gap-2 text-primary font-bold text-sm bg-primary/5 px-4 py-2 rounded-xl">
                <TrendingUp className="w-4 h-4" />
@@ -155,7 +175,7 @@ export default function Dashboard() {
           </div>
           <div className="flex-1 w-full h-full min-h-0 relative">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
+              <AreaChart data={stats?.chartData || chartData} margin={{ top: 10, right: 10, bottom: 0, left: -20 }}>
                 <defs>
                   <linearGradient id="colorPv" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.4} />
