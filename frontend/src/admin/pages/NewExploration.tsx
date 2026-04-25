@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -6,13 +6,20 @@ import {
   Image as ImageIcon, 
   X,
   ChevronLeft,
-  Info
+  Info,
+  UserCircle2,
+  Smile,
+  MapPin,
+  MoreHorizontal,
+  Tags
 } from "lucide-react";
 import { adminService } from "../lib/api";
 import { cn } from "../lib/utils";
+import { useAuth } from "../../context/AuthContext";
 
 export default function NewExploration() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [newPost, setNewPost] = useState({
@@ -33,11 +40,16 @@ export default function NewExploration() {
     }
   };
 
+  const removeImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    setImagePreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      // Use the Base64 preview directly as the image source
       await adminService.createPost({ 
         ...newPost, 
         image: imagePreview || "" 
@@ -51,135 +63,156 @@ export default function NewExploration() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto pb-24 font-sans">
-      <header className="mb-10">
+    <div className="max-w-2xl mx-auto pb-24 font-sans px-4">
+      <header className="py-6 flex items-center justify-between sticky top-0 bg-surface-container-lowest/80 backdrop-blur-md z-10 -mx-4 px-4 mb-4">
         <button 
           onClick={() => navigate("/explores")}
-          className="flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all mb-6 group"
+          className="p-2 hover:bg-surface-container rounded-full transition-colors"
         >
-          <ChevronLeft className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-          Back to Explores
+          <ChevronLeft className="w-6 h-6 text-on-surface" />
         </button>
-        <h1 className="text-4xl md:text-display-metrics gradient-text mb-2">New Exploration</h1>
-        <p className="text-on-surface-variant opacity-70 italic">Curate something beautiful for the community.</p>
+        <h1 className="text-lg font-bold text-on-surface">Create Exploration</h1>
+        <div className="w-10" /> {/* Spacer */}
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2">
-          <form onSubmit={handleSubmit} className="glass p-8 md:p-12 rounded-[48px] space-y-8">
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-primary px-1">Headline</label>
-              <input 
-                required
-                value={newPost.title}
-                onChange={(e) => setNewPost({...newPost, title: e.target.value})}
-                placeholder="E.g. The Future of Note Taking"
-                className="w-full h-16 bg-surface-container/50 rounded-2xl px-6 outline-none border border-outline-variant focus:border-primary transition-all font-bold text-lg"
-              />
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-primary px-1">Visual Content</label>
-              <div 
-                onClick={() => document.getElementById('post-image-full')?.click()}
-                className="w-full aspect-video bg-surface-container/30 rounded-[32px] border-2 border-dashed border-outline-variant flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container/50 transition-all overflow-hidden relative"
+      <form onSubmit={handleSubmit} className="bg-surface-container-lowest border border-outline-variant/20 rounded-2xl overflow-hidden shadow-sm">
+        {/* User Context */}
+        <div className="p-4 flex items-center gap-3">
+          <div className="w-11 h-11 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+            <UserCircle2 className="w-7 h-7 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-[15px] font-bold text-on-surface leading-tight">
+              {user?.name || 'System Administrator'}
+            </h2>
+            <div className="flex items-center gap-1 mt-0.5">
+              <select 
+                value={newPost.category}
+                onChange={(e) => setNewPost({...newPost, category: e.target.value})}
+                className="bg-surface-container text-[11px] font-bold px-2 py-0.5 rounded-md outline-none border-none text-on-surface-variant cursor-pointer hover:bg-surface-container-high transition-colors"
               >
-                {imagePreview ? (
-                  <>
-                    <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <ImageIcon className="text-white w-10 h-10" />
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto">
-                        <ImageIcon className="w-8 h-8 text-primary" />
-                    </div>
-                    <div>
-                        <p className="text-sm font-bold text-on-surface mb-1">Select Cover Image</p>
-                        <p className="text-[10px] text-on-surface-variant opacity-60 uppercase tracking-widest font-bold">High quality JPEG or PNG</p>
-                    </div>
-                  </div>
-                )}
-                <input 
-                  type="file" 
-                  id="post-image-full" 
-                  className="hidden" 
-                  accept="image/*"
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-primary px-1">Category</label>
-              <div className="flex flex-wrap gap-3">
                 {["Announcement", "Inspiration", "Update", "Event"].map(cat => (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setNewPost({...newPost, category: cat})}
-                    className={cn(
-                      "px-6 py-3.5 rounded-2xl text-xs font-bold uppercase tracking-widest transition-all border",
-                      newPost.category === cat 
-                        ? "bg-primary text-on-primary border-primary shadow-xl shadow-primary/20 scale-105" 
-                        : "bg-surface-container/50 text-on-surface-variant border-outline-variant hover:border-primary/50"
-                    )}
-                  >
-                    {cat}
-                  </button>
+                  <option key={cat} value={cat}>{cat}</option>
                 ))}
-              </div>
+              </select>
             </div>
-
-            <div className="space-y-3">
-              <label className="text-xs font-bold uppercase tracking-[0.2em] text-primary px-1">Detailed Story</label>
-              <textarea 
-                required
-                value={newPost.content}
-                onChange={(e) => setNewPost({...newPost, content: e.target.value})}
-                rows={8}
-                placeholder="Share the details with all users..."
-                className="w-full bg-surface-container/50 rounded-[32px] p-8 outline-none border border-outline-variant focus:border-primary transition-all font-medium resize-none text-base leading-relaxed"
-              />
-            </div>
-
-            <div className="pt-6">
-              <button 
-                disabled={submitting}
-                className="w-full h-20 bg-primary text-on-primary rounded-[28px] font-bold flex items-center justify-center gap-4 hover:shadow-2xl hover:shadow-primary/30 transition-all disabled:opacity-50 text-lg group"
-              >
-                {submitting ? (
-                  <div className="w-8 h-8 border-4 border-on-primary/20 border-t-on-primary rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <Send className="w-6 h-6 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                    Launch to Community
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
+          </div>
         </div>
 
-        <aside className="space-y-8">
-          <div className="glass p-8 rounded-[32px] bg-secondary/5 border-secondary/20">
-            <h3 className="text-lg font-bold text-on-surface mb-4 flex items-center gap-3">
-              <Info className="w-5 h-5 text-secondary" />
-              Pro Tips
-            </h3>
-            <ul className="space-y-4">
-              <li className="text-sm text-on-surface-variant leading-relaxed">
-                <span className="font-bold text-secondary">Visuals Matter:</span> High-quality images get 4x more engagement in the Explore feed.
-              </li>
-              <li className="text-sm text-on-surface-variant leading-relaxed">
-                <span className="font-bold text-secondary">Be Concise:</span> Keep headlines short and punchy for mobile notifications.
-              </li>
-            </ul>
+        {/* Text Area */}
+        <div className="px-4 pb-2">
+          <input 
+            required
+            value={newPost.title}
+            onChange={(e) => setNewPost({...newPost, title: e.target.value})}
+            placeholder="Title of your discovery..."
+            className="w-full text-xl font-bold bg-transparent border-none outline-none text-on-surface placeholder:opacity-40 mb-2"
+          />
+          <textarea 
+            required
+            value={newPost.content}
+            onChange={(e) => setNewPost({...newPost, content: e.target.value})}
+            placeholder={`What's on your mind, ${user?.name?.split(' ')[0] || 'Admin'}?`}
+            className="w-full min-h-[120px] text-lg bg-transparent border-none outline-none text-on-surface placeholder:opacity-40 resize-none leading-relaxed"
+          />
+        </div>
+
+        {/* Image Upload/Preview Card */}
+        <div className="px-4 pb-4">
+          <AnimatePresence mode="wait">
+            {imagePreview ? (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="relative rounded-xl overflow-hidden border border-outline-variant/30 group"
+              >
+                <img src={imagePreview} className="w-full h-auto max-h-[400px] object-contain bg-black/5" alt="Preview" />
+                <button 
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 w-8 h-8 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                <div 
+                  onClick={() => document.getElementById('post-image-fb')?.click()}
+                  className="absolute inset-0 bg-black/0 hover:bg-black/5 transition-colors cursor-pointer"
+                />
+              </motion.div>
+            ) : (
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                onClick={() => document.getElementById('post-image-fb')?.click()}
+                className="w-full py-12 rounded-xl border-2 border-dashed border-outline-variant/50 bg-surface-container/30 flex flex-col items-center justify-center cursor-pointer hover:bg-surface-container/50 transition-all gap-2"
+              >
+                <div className="w-12 h-12 bg-surface-container-high rounded-full flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6 text-on-surface-variant" />
+                </div>
+                <p className="font-bold text-sm text-on-surface">Add Photos</p>
+                <p className="text-xs text-on-surface-variant opacity-60 uppercase tracking-widest font-medium">Click to select</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <input 
+            type="file" 
+            id="post-image-fb" 
+            className="hidden" 
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+        </div>
+
+        {/* Action Bar (Fake UI for aesthetics) */}
+        <div className="mx-4 mb-4 p-3 rounded-xl border border-outline-variant/20 flex items-center justify-between">
+          <span className="text-[14px] font-bold text-on-surface opacity-80 pl-1">Add to your post</span>
+          <div className="flex items-center gap-1">
+            <button type="button" onClick={() => document.getElementById('post-image-fb')?.click()} className="p-2 hover:bg-surface-container rounded-full transition-colors text-success">
+              <ImageIcon className="w-6 h-6" />
+            </button>
+            <button type="button" className="p-2 hover:bg-surface-container rounded-full transition-colors text-primary">
+              <Tags className="w-6 h-6" />
+            </button>
+            <button type="button" className="p-2 hover:bg-surface-container rounded-full transition-colors text-warning">
+              <Smile className="w-6 h-6" />
+            </button>
+            <button type="button" className="p-2 hover:bg-surface-container rounded-full transition-colors text-error">
+              <MapPin className="w-6 h-6" />
+            </button>
+            <button type="button" className="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant">
+              <MoreHorizontal className="w-6 h-6" />
+            </button>
           </div>
-        </aside>
+        </div>
+
+        {/* Submit Button */}
+        <div className="px-4 pb-4">
+          <button 
+            disabled={submitting || (!newPost.content.trim() && !imagePreview)}
+            className="w-full py-2.5 bg-primary text-on-primary rounded-lg font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:shadow-none"
+          >
+            {submitting ? (
+              <div className="w-6 h-6 border-3 border-on-primary/20 border-t-on-primary rounded-full animate-spin mx-auto" />
+            ) : (
+              "Post"
+            )}
+          </button>
+        </div>
+      </form>
+
+      {/* Info Section */}
+      <div className="mt-8 bg-primary/5 border border-primary/10 rounded-2xl p-6">
+        <h3 className="text-sm font-bold text-primary mb-3 flex items-center gap-2">
+          <Info className="w-4 h-4" />
+          Community Guidelines
+        </h3>
+        <ul className="space-y-2">
+          <li className="text-xs text-on-surface-variant leading-relaxed">• Ensure images are high quality and relevant.</li>
+          <li className="text-xs text-on-surface-variant leading-relaxed">• Keep the content respectful and inspiring for all users.</li>
+        </ul>
       </div>
     </div>
   );
 }
+
