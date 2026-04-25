@@ -210,7 +210,7 @@ export default function Explores() {
                 </button>
              </div>
 
-             <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+             <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6 pb-24 md:pb-0">
                 <div className="space-y-2">
                    <label className="text-[10px] font-bold uppercase tracking-widest text-primary px-1">Exploration Title</label>
                    <input 
@@ -284,19 +284,21 @@ export default function Explores() {
                    />
                 </div>
 
-                <button 
-                  disabled={submitting}
-                  className="w-full h-16 bg-primary text-on-primary rounded-[24px] font-bold flex items-center justify-center gap-3 hover:shadow-xl hover:shadow-primary/20 transition-all disabled:opacity-50 mt-4"
-                >
-                  {submitting ? (
-                    <div className="w-6 h-6 border-2 border-on-primary/20 border-t-on-primary rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-5 h-5" />
-                      Publish Exploration
-                    </>
-                  )}
-                </button>
+                <div className="md:relative sticky bottom-0 left-0 right-0 pt-4 md:pt-0 bg-surface md:bg-transparent pb-6 md:pb-0 -mx-6 md:mx-0 px-6 md:px-0 border-t md:border-t-0 border-outline-variant/30 md:border-none z-20">
+                  <button 
+                    disabled={submitting}
+                    className="w-full h-16 bg-primary text-on-primary rounded-2xl md:rounded-[24px] font-bold flex items-center justify-center gap-3 hover:shadow-xl hover:shadow-primary/20 transition-all disabled:opacity-50"
+                  >
+                    {submitting ? (
+                      <div className="w-6 h-6 border-2 border-on-primary/20 border-t-on-primary rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="w-5 h-5" />
+                        Publish Exploration
+                      </>
+                    )}
+                  </button>
+                </div>
              </form>
           </motion.div>
         </div>
