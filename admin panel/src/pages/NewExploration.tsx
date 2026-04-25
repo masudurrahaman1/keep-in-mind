@@ -181,7 +181,7 @@ export default function NewExploration() {
               </li>
             </ul>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
