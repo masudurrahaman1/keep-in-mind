@@ -3,6 +3,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { DashboardSkeleton } from "../components/Skeleton";
 
 const chartData = [
   { name: "Oct 1", pv: 15 },
@@ -44,6 +45,13 @@ const item = {
 
 export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simulate initial loading
+    const timer = setTimeout(() => setIsLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -62,6 +70,8 @@ export default function Dashboard() {
 
     return () => clearInterval(interval);
   }, []);
+
+  if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="flex flex-col gap-10 max-w-6xl mx-auto">

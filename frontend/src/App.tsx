@@ -9,6 +9,7 @@ import Layout from './components/Layout';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Heartbeat from './components/Heartbeat';
+import { Skeleton } from './components/Skeleton';
 
 
 // Standard import for Auth (since it's the initial entry for logged-out users)
@@ -34,10 +35,33 @@ function PublicRoute({ children }: { children: ReactNode }) {
   return user ? <Navigate to="/notes" replace /> : <>{children}</>;
 }
 
-// Fallback loader for lazy components
+// Fallback loader for lazy components (Skeleton View)
 const PageLoader = () => (
-  <div className="flex items-center justify-center w-full h-full min-h-[50vh]">
-    <div className="w-10 h-10 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
+  <div className="p-6 md:p-10 space-y-8 animate-in fade-in duration-500">
+    <div className="flex justify-between items-center">
+      <div className="space-y-2">
+        <Skeleton className="w-48 h-10" />
+        <Skeleton className="w-64 h-4 opacity-50" />
+      </div>
+      <Skeleton className="w-12 h-12 rounded-2xl" />
+    </div>
+    
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="bg-surface-container-low border border-outline-variant/20 p-6 rounded-[32px] space-y-4">
+          <Skeleton className="w-3/4 h-6" />
+          <div className="space-y-2">
+            <Skeleton className="w-full h-3 opacity-40" />
+            <Skeleton className="w-full h-3 opacity-40" />
+            <Skeleton className="w-1/2 h-3 opacity-40" />
+          </div>
+          <div className="pt-4 flex justify-between items-center">
+            <Skeleton className="w-20 h-3 opacity-30" />
+            <Skeleton className="w-8 h-8 rounded-full opacity-30" />
+          </div>
+        </div>
+      ))}
+    </div>
   </div>
 );
 

@@ -1,6 +1,8 @@
 import { Search as SearchIcon, Users as Group, Plus, MoreVertical, Mail, Shield, UserCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
+import { Skeleton, CardSkeleton, TableRowSkeleton } from "../components/Skeleton";
 
 const container = {
   hidden: { opacity: 0 },
@@ -18,6 +20,38 @@ const item = {
 };
 
 export default function Users() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-5xl mx-auto flex flex-col gap-10 pb-24 font-sans">
+        <header className="flex flex-col sm:flex-row justify-between sm:items-end gap-6">
+           <div className="space-y-4">
+              <Skeleton className="w-80 h-16" />
+              <Skeleton className="w-96 h-6 opacity-50" />
+           </div>
+           <Skeleton className="w-48 h-14 rounded-2xl" />
+        </header>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+           <CardSkeleton />
+           <CardSkeleton />
+           <CardSkeleton />
+        </div>
+        <div className="space-y-4">
+           <TableRowSkeleton />
+           <TableRowSkeleton />
+           <TableRowSkeleton />
+           <TableRowSkeleton />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-5xl mx-auto flex flex-col gap-10 pb-24 font-sans">
       <header className="flex flex-col sm:flex-row justify-between sm:items-end gap-6">

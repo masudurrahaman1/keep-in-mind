@@ -268,3 +268,7 @@ h1, h2, h3, h4, h5, h6, .font-heading {
 .card-hover-effect {
   @apply transition-all duration-300 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-1;
 }
+
+.skeleton {
+  @apply bg-surface-container animate-pulse rounded-lg;
+}

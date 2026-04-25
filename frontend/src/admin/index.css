@@ -146,3 +146,7 @@
   @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary/10;
 }
 
+@utility skeleton {
+  @apply bg-surface-container animate-pulse rounded-lg;
+}
+
