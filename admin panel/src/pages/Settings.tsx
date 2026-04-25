@@ -1,6 +1,7 @@
 import { Bell, Palette, Shield as SecurityIcon, HelpCircle, ChevronRight, Edit3, User, Mail, Globe, Lock } from "lucide-react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
+import { useState, useEffect } from "react";
 
 const container = {
   hidden: { opacity: 0 },
@@ -18,6 +19,15 @@ const item = {
 };
 
 export default function Settings() {
+  const [theme, setTheme] = useState(localStorage.getItem("admin_theme") || "dark");
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("admin_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
+
   return (
     <div className="max-w-5xl mx-auto space-y-10 pb-24 font-sans">
       <header>
@@ -153,6 +163,13 @@ export default function Settings() {
             </div>
             <li className="flex items-center justify-between pt-4 border-t border-outline-variant/30 list-none">
               <div className="flex flex-col">
+                <span className="text-base font-bold text-on-surface">Dark Mode</span>
+                <span className="text-xs text-on-surface-variant opacity-60">Enable deep charcoal and primary blue theme</span>
+              </div>
+              <Switch checked={theme === "dark"} onChange={toggleTheme} />
+            </li>
+            <li className="flex items-center justify-between pt-4 border-t border-outline-variant/30 list-none">
+              <div className="flex flex-col">
                 <span className="text-base font-bold text-on-surface">Pure AMOLED Mode</span>
                 <span className="text-xs text-on-surface-variant opacity-60">Optimized for high-contrast OLEDs</span>
               </div>
@@ -215,10 +232,16 @@ export default function Settings() {
   );
 }
 
-function Switch({ defaultChecked = false }) {
+function Switch({ checked, onChange, defaultChecked = false }: { checked?: boolean, onChange?: () => void, defaultChecked?: boolean }) {
   return (
     <label className="relative inline-flex items-center cursor-pointer group">
-      <input type="checkbox" className="sr-only peer" defaultChecked={defaultChecked} />
+      <input 
+        type="checkbox" 
+        className="sr-only peer" 
+        checked={checked}
+        onChange={onChange}
+        defaultChecked={defaultChecked} 
+      />
       <div className="w-14 h-7 bg-surface-container-highest rounded-full peer peer-checked:after:translate-x-7 peer-checked:after:bg-on-primary after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-on-surface-variant after:rounded-full after:h-[20px] after:w-[20px] after:transition-all peer-checked:bg-primary shadow-inner"></div>
     </label>
   );
