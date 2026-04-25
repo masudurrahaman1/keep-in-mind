@@ -93,11 +93,11 @@ export default function Users() {
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-display-metrics gradient-text mb-2"
+            className="text-4xl md:text-display-metrics gradient-text mb-2"
           >
             User Management
           </motion.h1>
-          <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Manage ecosystem access, roles, and security permissions.</p>
+          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">Manage ecosystem access, roles, and security permissions.</p>
         </div>
         <div className="flex gap-4">
           {users.length === 0 && (
@@ -127,18 +127,18 @@ export default function Users() {
       </header>
 
       {/* Search & Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="relative flex-1 group">
           <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors w-5 h-5 opacity-50" />
           <input 
             type="text" 
-            placeholder="Search by identity or credentials..." 
+            placeholder="Search identity..." 
             className="w-full h-14 pl-14 pr-6 glass border-outline-variant rounded-2xl font-medium text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all placeholder:text-on-surface-variant/40 shadow-lg"
           />
         </div>
-        <div className="flex gap-2">
-           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors">Role: All</button>
-           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors">Status: Active</button>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2 lg:pb-0">
+           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors whitespace-nowrap">Role: All</button>
+           <button className="h-14 px-6 glass rounded-2xl font-bold text-sm hover:bg-surface-container transition-colors whitespace-nowrap">Status: Active</button>
         </div>
       </div>
 
@@ -157,7 +157,7 @@ export default function Users() {
           <motion.div 
             key={stat.label}
             variants={item}
-            className="glass p-8 rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden"
+            className="glass p-6 md:p-8 rounded-[28px] md:rounded-[32px] flex flex-col justify-between card-hover relative overflow-hidden"
           >
             <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12" />
             <div className="flex justify-between items-start mb-6">
@@ -184,7 +184,7 @@ export default function Users() {
           <motion.div 
             key={user._id} 
             variants={item}
-            className="glass p-6 rounded-[24px] flex items-center gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-default"
+            className="glass p-4 md:p-6 rounded-[20px] md:rounded-[24px] flex items-center gap-4 md:gap-6 group hover:bg-surface-container/30 transition-all duration-300 cursor-default"
           >
             <div className="relative">
               {user.avatar ? (

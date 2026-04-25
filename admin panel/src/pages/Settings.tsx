@@ -34,17 +34,17 @@ export default function Settings() {
         <motion.h1 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="text-display-metrics gradient-text mb-2"
+          className="text-4xl md:text-display-metrics gradient-text mb-1"
         >
-          System Settings
+          Settings
         </motion.h1>
-        <p className="text-body-lg text-on-surface-variant font-medium opacity-70">Manage your administrative profile and ecosystem preferences.</p>
+        <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">Manage your administrative profile and preferences.</p>
       </header>
 
       <motion.section 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="glass p-10 rounded-[32px] shadow-xl relative overflow-hidden"
+        className="glass p-6 md:p-10 rounded-[28px] md:rounded-[32px] shadow-xl relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32" />
         <h2 className="text-h2 font-bold mb-8 text-on-surface flex items-center gap-3">
@@ -56,7 +56,7 @@ export default function Settings() {
             <div className="absolute inset-0 bg-primary/20 rounded-3xl blur-xl group-hover:bg-primary/40 transition-all duration-500 opacity-0 group-hover:opacity-100" />
             <img
               alt="Profile Picture"
-              className="w-32 h-32 rounded-3xl object-cover border-2 border-outline-variant relative z-10 shadow-2xl"
+              className="w-24 h-24 md:w-32 md:h-32 rounded-[20px] md:rounded-3xl object-cover border-2 border-outline-variant relative z-10 shadow-2xl"
               src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=200&auto=format&fit=crop"
             />
             <button className="absolute -bottom-2 -right-2 bg-primary text-on-primary rounded-xl p-2.5 shadow-xl hover:scale-110 active:scale-95 transition-all z-20">
@@ -92,7 +92,7 @@ export default function Settings() {
                 </div>
               </div>
             </div>
-            <div className="flex flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row gap-4">
               <button className="h-14 bg-primary text-on-primary font-bold px-8 rounded-2xl hover:opacity-90 active:scale-95 transition-all shadow-xl shadow-primary/20">
                 Update Identity
               </button>

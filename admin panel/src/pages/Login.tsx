@@ -22,7 +22,7 @@ export default function Login() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="w-full max-w-[440px] glass p-10 rounded-[32px] shadow-2xl relative z-10"
+        className="w-full max-w-[440px] glass p-6 md:p-10 rounded-[28px] md:rounded-[32px] shadow-2xl relative z-10"
       >
         <Link 
           to="https://keepinmind.in" 
@@ -32,16 +32,16 @@ export default function Login() {
           Back to Website
         </Link>
 
-        <header className="flex flex-col items-center text-center mb-10">
+        <header className="flex flex-col items-center text-center mb-8 md:mb-10">
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, type: "spring" }}
-            className="w-20 h-20 bg-primary text-on-primary rounded-3xl flex items-center justify-center mb-6 shadow-2xl shadow-primary/30"
+            className="w-16 h-16 md:w-20 md:h-20 bg-primary text-on-primary rounded-[20px] md:rounded-3xl flex items-center justify-center mb-4 md:mb-6 shadow-2xl shadow-primary/30"
           >
-            <ShieldCheck className="w-10 h-10" />
+            <ShieldCheck className="w-8 h-8 md:w-10 md:h-10" />
           </motion.div>
-          <h1 className="text-3xl font-bold tracking-tight gradient-text mb-2">Admin Portal</h1>
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight gradient-text mb-2">Admin Portal</h1>
           <p className="text-sm font-medium text-on-surface-variant opacity-70">
             Securely authenticate to access control center
           </p>
