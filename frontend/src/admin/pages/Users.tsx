@@ -129,13 +129,13 @@ export default function Users() {
               )} />
             </div>
             
-            <div className="flex-1 overflow-hidden">
-               <div className="flex items-center gap-2 mb-1">
-                 <h3 className="font-bold text-on-surface group-hover:text-primary transition-colors">{user.name}</h3>
-                 <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest opacity-40">{user.authProvider} User</span>
+            <div className="flex-1 min-w-0">
+               <div className="flex flex-col mb-1">
+                 <h3 className="font-bold text-on-surface group-hover:text-primary transition-colors truncate whitespace-nowrap">{user.name}</h3>
+                 <span className="text-[9px] font-bold text-primary uppercase tracking-widest opacity-60">{user.authProvider} Identity</span>
                </div>
-               <div className="flex items-center gap-2 text-sm text-on-surface-variant opacity-60">
-                  <Mail className="w-3.5 h-3.5" />
+               <div className="flex items-center gap-2 text-xs text-on-surface-variant opacity-60">
+                  <Mail className="w-3.5 h-3.5 shrink-0" />
                   <span className="truncate">{user.email}</span>
                </div>
             </div>
