@@ -245,7 +245,10 @@ export function Layout({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       {/* Mobile Bottom Nav */}
-      <nav className="md:hidden fixed bottom-6 left-6 right-6 z-50 h-16 glass border border-outline-variant rounded-2xl shadow-2xl flex justify-around items-center px-2">
+      <nav className={cn(
+        "md:hidden fixed bottom-6 left-6 right-6 z-50 h-16 glass border border-outline-variant rounded-2xl shadow-2xl flex justify-around items-center px-2 transition-all duration-300",
+        isMobileMenuOpen ? "opacity-0 pointer-events-none translate-y-10" : "opacity-100 translate-y-0"
+      )}>
         {[
           { name: "Insights", href: "/", icon: LayoutDashboard },
           { name: "Search", href: "/search", icon: Search },
