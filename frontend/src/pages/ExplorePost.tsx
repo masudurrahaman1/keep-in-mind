@@ -3,10 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft, Heart, MessageSquare, Share2, UserCircle2, Send } from 'lucide-react';
 import { motion } from 'motion/react';
 import { feedService } from '../services/feedService';
+import { useAuth } from '../context/AuthContext';
 
 export default function ExplorePost() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [commentText, setCommentText] = useState('');
@@ -54,6 +56,25 @@ export default function ExplorePost() {
     }
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: post.title,
+      text: post.content.substring(0, 100) + '...',
+      url: window.location.href
+    };
+    
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.url);
+        alert("Link copied to clipboard!");
+      }
+    } catch (err) {
+      console.error("Share failed", err);
+    }
+  };
+
   if (loading) {
     return (
       <div className="max-w-2xl mx-auto py-8 space-y-6 px-4">
@@ -70,6 +91,8 @@ export default function ExplorePost() {
       </div>
     );
   }
+
+  const isLiked = user && post.likedBy?.includes(user.id);
 
   return (
     <div className="max-w-2xl mx-auto pb-32 font-sans bg-surface-container-lowest min-h-screen">
@@ -119,13 +142,18 @@ export default function ExplorePost() {
         {/* Action Bar */}
         <div className="px-4 py-3 flex items-center justify-between border-y border-outline-variant/10 mt-2">
             <div className="flex items-center gap-4">
-              <button 
+              <motion.button 
+                whileTap={{ scale: 0.8 }}
                 onClick={handleLike}
-                className="flex items-center gap-2 text-on-surface-variant hover:text-error transition-colors"
+                className={`flex items-center gap-2 transition-colors ${
+                  isLiked ? 'text-error' : 'text-on-surface-variant hover:text-error'
+                }`}
               >
-                  <Heart className="w-6 h-6" />
+                  <Heart 
+                    className={`w-6 h-6 transition-all duration-300 ${isLiked ? 'fill-current scale-110' : 'scale-100'}`} 
+                  />
                   <span className="font-bold">{post.likes || 0}</span>
-              </button>
+              </motion.button>
               <button 
                 className="flex items-center gap-2 text-on-surface-variant transition-colors"
               >
@@ -133,10 +161,14 @@ export default function ExplorePost() {
                   <span className="font-bold">{post.comments?.length || 0}</span>
               </button>
             </div>
-            <button className="text-on-surface-variant">
+            <button 
+              onClick={handleShare}
+              className="text-on-surface-variant hover:bg-surface-container p-2 rounded-full transition-colors"
+            >
               <Share2 className="w-6 h-6" />
             </button>
         </div>
+
 
         {/* Comments Section */}
         <div className="p-4 space-y-6">
