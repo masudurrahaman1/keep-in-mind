@@ -14,6 +14,8 @@ import {
   LogOut,
   ExternalLink,
   ChevronRight,
+  Sun,
+  Moon
 } from "lucide-react";
 
 const NAV_ITEMS = [
@@ -27,7 +29,15 @@ const NAV_ITEMS = [
 
 export function Layout({ children }: { children: ReactNode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [theme, setTheme] = useState(localStorage.getItem("admin_theme") || "dark");
   const location = useLocation();
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("admin_theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === "dark" ? "light" : "dark");
 
   return (
     <div className="flex h-screen overflow-hidden bg-surface text-on-surface font-sans">
@@ -138,6 +148,19 @@ export function Layout({ children }: { children: ReactNode }) {
                 <div className="w-2 h-2 rounded-full bg-secondary animate-pulse mr-2" />
                 <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">Live System: Stable</span>
              </div>
+
+             <button
+                onClick={toggleTheme}
+                className="p-2.5 rounded-xl bg-surface-container border border-outline-variant text-on-surface hover:text-primary transition-all duration-300 shadow-lg group"
+                aria-label="Toggle Theme"
+              >
+                {theme === "dark" ? (
+                  <Sun className="w-5 h-5 group-hover:rotate-45 transition-transform" />
+                ) : (
+                  <Moon className="w-5 h-5 group-hover:-rotate-12 transition-transform" />
+                )}
+              </button>
+
              <Link to="/help" className="text-sm text-primary hover:text-accent-purple transition-colors hidden sm:block font-bold">Help Center</Link>
              <div className="h-8 w-px bg-outline-variant hidden sm:block" />
              <img
