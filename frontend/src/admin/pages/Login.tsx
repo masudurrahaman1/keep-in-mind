@@ -78,7 +78,7 @@ export default function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-transparent border-none text-base font-medium text-on-surface placeholder:text-on-surface-variant/30 px-6 pl-14 py-4 focus:outline-none"
-                placeholder="masudurrahamanrm@gmail.com"
+                placeholder="Enter your identity"
                 required
               />
             </div>
