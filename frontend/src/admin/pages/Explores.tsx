@@ -78,44 +78,61 @@ export default function Explores() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   key={post._id}
-                  className="glass p-6 md:p-8 rounded-[32px] group relative overflow-hidden"
+                  className="bg-surface-container-lowest border border-outline-variant/20 rounded-[24px] md:rounded-[32px] overflow-hidden group shadow-sm hover:shadow-xl hover:shadow-primary/5 transition-all"
                  >
-                    <div className="flex justify-between items-start mb-6">
+                    {/* Header (Author & Meta & Admin Delete) */}
+                    <div className="p-5 md:p-6 flex justify-between items-start">
                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                             <Compass className="w-5 h-5 text-primary" />
+                          <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary/20 flex items-center justify-center overflow-hidden">
+                            <Compass className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                           </div>
                           <div>
-                             <h3 className="font-bold text-on-surface text-base md:text-lg">{post.title}</h3>
-                             <p className="text-[9px] md:text-[10px] font-bold text-primary uppercase tracking-widest">{post.category}</p>
+                             <h2 className="text-sm md:text-base font-bold text-on-surface leading-tight">
+                               {post.author || 'System Broadcast'}
+                             </h2>
+                             <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-on-surface-variant opacity-70 mt-0.5">
+                                <span className="font-bold text-primary uppercase tracking-widest">{post.category}</span>
+                                <span>•</span>
+                                <span>{new Date(post.createdAt).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' })}</span>
+                             </div>
                           </div>
                        </div>
                        <button 
                         onClick={() => handleDelete(post._id)}
-                        className="p-3 glass rounded-xl text-error opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-error/10 active:scale-90"
+                        className="p-2 md:p-3 bg-error/10 text-error rounded-full opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-all hover:bg-error/20 active:scale-90"
                        >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                        </button>
                     </div>
 
-                    <p className="text-on-surface-variant text-sm md:text-base leading-relaxed mb-6">
-                       {post.content}
-                    </p>
+                    {/* Content (Text above image) */}
+                    <div className="px-5 md:px-6 pb-4 space-y-2">
+                       <h3 className="font-bold text-base md:text-lg text-on-surface">{post.title}</h3>
+                       <p className="text-on-surface-variant text-sm md:text-base leading-relaxed whitespace-pre-wrap">
+                          {post.content}
+                       </p>
+                    </div>
 
+                    {/* Image (Full width) */}
                     {post.image && (
-                      <div className="w-full h-56 md:h-72 rounded-2xl overflow-hidden mb-6 border border-outline-variant/30 bg-surface-container">
-                         <img src={post.image} className="w-full h-full object-cover" alt="Post content" />
+                      <div className="w-full bg-surface-container border-y border-outline-variant/10">
+                         <img src={post.image} className="w-full h-auto max-h-[500px] md:max-h-[600px] object-contain" alt={post.title} />
                       </div>
                     )}
 
-                    <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-outline-variant/30 text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-on-surface-variant opacity-60">
-                       <div className="flex items-center gap-4">
+                    {/* Action Bar (Stats) */}
+                    <div className="px-5 md:px-6 py-4 flex items-center justify-between border-t border-outline-variant/10 text-xs md:text-sm font-bold text-on-surface-variant opacity-80 bg-surface-container/20">
+                       <div className="flex items-center gap-6">
                           <span className="flex items-center gap-2">
-                             <Globe className="w-3.5 h-3.5" />
-                             Public Feed
+                            <Heart className="w-4 h-4 text-error/80" /> {post.likes || 0} Likes
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <MessageSquare className="w-4 h-4 text-primary/80" /> {post.comments?.length || 0} Comments
                           </span>
                        </div>
-                       <span>{new Date(post.createdAt).toLocaleDateString('en-IN')}</span>
+                       <span className="flex items-center gap-2 uppercase tracking-widest text-[10px]">
+                          <Globe className="w-3.5 h-3.5" /> Public Feed
+                       </span>
                     </div>
                  </motion.div>
                ))}
