@@ -1,6 +1,9 @@
+const User = require('../models/User');
+const Media = require('../models/Media');
 const Activity = require('../models/Activity');
 const Session = require('../models/Session');
 const generateToken = require('../utils/generateToken');
+const bcrypt = require('bcryptjs');
 
 // @desc    Admin Login
 // @route   POST /api/admin/login
@@ -198,5 +201,47 @@ const updateProfile = async (req, res) => {
 };
 
 
-module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
+// @desc    Delete a user
+// @route   DELETE /api/admin/users/:id
+// @access  Private/Admin
+const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    await user.deleteOne();
+    res.json({ message: "User identity purged from system" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Provision (Create) a new user
+// @route   POST /api/admin/users
+// @access  Private/Admin
+const createUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    
+    const userExists = await User.findOne({ email });
+    if (userExists) return res.status(400).json({ message: "Identity already exists" });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password || "ChangeMe123!", salt);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      isVerified: true,
+      authProvider: 'local'
+    });
+
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { login, getSessions, revokeSession, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile, deleteUser, createUser };
 
