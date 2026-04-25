@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://api.keepinmind.in/admin";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://api.keepinmind.in/api/admin";
 
 async function fetcher(endpoint: string, options: RequestInit = {}) {
   const token = localStorage.getItem("admin_token");
@@ -36,23 +36,11 @@ export const adminService = {
   },
 
   getStats: async () => {
-    // In production, this would call the real endpoint
-    // return fetcher("/stats");
-    
-    // Mock for now but ready for integration
-    return {
-      totalUsers: 14208,
-      notesCreated: 82500,
-      activeUsers: 3492,
-      growth: 18.4
-    };
+    return fetcher("/stats");
   },
   
   getActivities: async () => {
-    // return fetcher("/activities");
-    return [
-      { id: 1, user: "Sarah Jenkins", action: "Updated Design System", time: "Just now", type: "success" },
-    ];
+    return fetcher("/activities");
   },
 
   getSessions: async () => {
