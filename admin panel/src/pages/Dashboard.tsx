@@ -48,6 +48,7 @@ const item = {
 export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<any>({
     totalUsers: 0,
     activeNow: 0,
@@ -66,9 +67,13 @@ export default function Dashboard() {
         const data = await adminService.getStats();
         if (data && typeof data === 'object' && !data.message) {
           setStats((prev: any) => ({ ...prev, ...data }));
+          setError(null);
+        } else if (data && data.message) {
+          setError(data.message);
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to load dashboard stats", err);
+        setError(err.message || "Connection failed");
       } finally {
         setIsLoading(false);
       }
@@ -76,8 +81,8 @@ export default function Dashboard() {
     
     fetchData();
     
-    // Auto-refresh stats every 5 seconds for "Live" feel
-    const statsInterval = setInterval(fetchData, 5000);
+    // Auto-refresh stats every 10 seconds (less aggressive)
+    const statsInterval = setInterval(fetchData, 10000);
     return () => clearInterval(statsInterval);
   }, []);
 
@@ -110,7 +115,14 @@ export default function Dashboard() {
           >
             Insights
           </motion.h2>
-          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
+            {error && (
+              <span className="text-[10px] bg-error/10 text-error px-2 py-0.5 rounded-full font-bold animate-pulse">
+                {error}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-1.5 bg-surface-container rounded-2xl p-1 border border-outline-variant shadow-inner overflow-x-auto no-scrollbar">
            {[

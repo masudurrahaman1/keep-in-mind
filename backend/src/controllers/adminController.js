@@ -91,33 +91,27 @@ const getStats = async (req, res) => {
     // Active Now (2 min heartbeat for more accurate 'live' status)
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 
-    // Parallelize all count queries
-    const [
-      totalUsers,
-      googleUsers,
-      localUsers,
-      totalMedia,
-      usersToday,
-      usersWeek,
-      usersMonth,
-      activeNowCount,
-      usersPrevWeek
-    ] = await Promise.all([
-      User.countDocuments(),
-      User.countDocuments({ authProvider: 'google' }),
-      User.countDocuments({ authProvider: 'local' }),
-      Media.countDocuments(),
-      User.countDocuments({ createdAt: { $gte: startOfToday } }),
-      User.countDocuments({ createdAt: { $gte: startOfWeek } }),
-      User.countDocuments({ createdAt: { $gte: startOfMonth } }),
-      User.countDocuments({ lastActive: { $gte: twoMinutesAgo } }),
-      User.countDocuments({ createdAt: { $gte: prevStartOfWeek, $lt: startOfWeek } })
-    ]);
+    // Sequential queries for debugging/stability
+    const totalUsers = await User.countDocuments().catch(e => { console.error("totalUsers error", e); return 0; });
+    const googleUsers = await User.countDocuments({ authProvider: 'google' }).catch(() => 0);
+    const localUsers = await User.countDocuments({ authProvider: 'local' }).catch(() => 0);
+    const totalMedia = await Media.countDocuments().catch(() => 0);
+    
+    const usersToday = await User.countDocuments({ createdAt: { $gte: startOfToday } }).catch(() => 0);
+    const usersWeek = await User.countDocuments({ createdAt: { $gte: startOfWeek } }).catch(() => 0);
+    const usersMonth = await User.countDocuments({ createdAt: { $gte: startOfMonth } }).catch(() => 0);
+    
+    const activeNow = await User.countDocuments({ 
+      lastActive: { $gte: twoMinutesAgo },
+      email: { $ne: 'masudurrahamanrm@gmail.com' } // Exclude root admin from count
+    }).catch(() => 0);
+    
+    const usersPrevWeek = await User.countDocuments({ 
+      createdAt: { $gte: prevStartOfWeek, $lt: startOfWeek } 
+    }).catch(() => 0);
 
-    const activeNow = activeNowCount || 0;
-
-    // Optimize Chart Data (Last 7 days)
-    const chartPromises = [];
+    // Chart Data (Last 7 days) - Sequential to avoid overload
+    const chartData = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
       d.setDate(d.getDate() - i);
@@ -125,20 +119,12 @@ const getStats = async (req, res) => {
       const nextD = new Date(d);
       nextD.setDate(nextD.getDate() + 1);
       
-      chartPromises.push((async () => {
-        const count = await User.countDocuments({ createdAt: { $gte: d, $lt: nextD } });
-        return {
-          name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-          pv: count,
-          _timestamp: d.getTime()
-        };
-      })());
+      const count = await User.countDocuments({ createdAt: { $gte: d, $lt: nextD } }).catch(() => 0);
+      chartData.push({
+        name: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        pv: count
+      });
     }
-
-    const chartDataResults = await Promise.all(chartPromises);
-    const chartData = chartDataResults
-      .sort((a, b) => a._timestamp - b._timestamp)
-      .map(({ name, pv }) => ({ name, pv }));
     
     // Calculate growth
     let growth = 0;
@@ -147,6 +133,8 @@ const getStats = async (req, res) => {
     } else if (usersWeek > 0) {
       growth = 100;
     }
+
+    console.log(`[Stats API] Found ${totalUsers} total users, ${activeNow} active.`);
 
     res.json({
       totalUsers,
