@@ -28,6 +28,13 @@ async function fetcher(endpoint: string, options: RequestInit = {}) {
 }
 
 export const adminService = {
+  login: async (credentials: any) => {
+    return fetcher("/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    });
+  },
+
   getStats: async () => {
     // In production, this would call the real endpoint
     // return fetcher("/stats");

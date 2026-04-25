@@ -2,12 +2,14 @@ import { ArrowRight, ShieldCheck, Mail, Lock, Eye, ArrowLeft } from "lucide-reac
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { adminService } from "../lib/api";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   return (
@@ -47,13 +49,18 @@ export default function Login() {
 
         <form
           className="flex flex-col gap-6"
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            if (email === "masudurrahamanrm@gmail.com" && password === "masudur@8145") {
-               localStorage.setItem("admin_token", "mock_admin_session_token");
-               navigate("/");
-            } else {
-               setError("Invalid credentials. Only authorized administrators can access this portal.");
+            setIsLoading(true);
+            setError("");
+            try {
+              const data = await adminService.login({ email, password });
+              localStorage.setItem("admin_token", data.token);
+              navigate("/");
+            } catch (err: any) {
+              setError(err.message || "Invalid credentials. Only authorized administrators can access this portal.");
+            } finally {
+              setIsLoading(false);
             }
           }}
         >
@@ -116,9 +123,10 @@ export default function Login() {
 
           <button
             type="submit"
-            className="mt-6 bg-primary text-on-primary font-bold text-base rounded-2xl py-4 w-full flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 group"
+            disabled={isLoading}
+            className="mt-6 bg-primary text-on-primary font-bold text-base rounded-2xl py-4 w-full flex items-center justify-center gap-3 hover:opacity-90 active:scale-[0.98] transition-all shadow-xl shadow-primary/20 group disabled:opacity-50"
           >
-            Authorize Session
+            {isLoading ? "Verifying..." : "Authorize Session"}
             <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
           </button>
         </form>

@@ -1,6 +1,34 @@
 const User = require('../models/User');
 const Media = require('../models/Media');
 const Activity = require('../models/Activity');
+const generateToken = require('../utils/generateToken');
+
+// @desc    Admin Login
+// @route   POST /api/admin/login
+// @access  Public
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Hardcoded check as requested for the executive admin
+    if (email === "masudurrahamanrm@gmail.com" && password === "masudur@8145") {
+      const token = generateToken("admin_executive_root");
+      res.json({
+        success: true,
+        token,
+        admin: {
+          name: "Executive Admin",
+          email: "masudurrahamanrm@gmail.com",
+          role: "ROOT"
+        }
+      });
+    } else {
+      res.status(401).json({ message: "Invalid administrative credentials. Access denied." });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // @desc    Get system-wide stats
 // @route   GET /api/admin/stats
@@ -125,5 +153,5 @@ const updateProfile = async (req, res) => {
 };
 
 
-module.exports = { getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
+module.exports = { login, getStats, getUsers, getActiveUsers, getActivities, getProfile, updateProfile };
 
