@@ -30,12 +30,31 @@ export default function ExplorePost() {
   };
 
   const handleLike = async () => {
+    if (!user) {
+      alert("Please login to like posts");
+      return;
+    }
+
+    // Store previous state
+    const previousPost = { ...post };
+
+    // Optimistic Update
+    const isCurrentlyLiked = post.likedBy?.includes(user.id);
+    const newLikedBy = isCurrentlyLiked 
+      ? post.likedBy.filter((id: string) => id !== user.id)
+      : [...(post.likedBy || []), user.id];
+    const newLikes = isCurrentlyLiked ? Math.max(0, post.likes - 1) : post.likes + 1;
+
+    setPost({ ...post, likes: newLikes, likedBy: newLikedBy });
+
     try {
       const data = await feedService.likePost(id as string);
       setPost({ ...post, likes: data.likes, likedBy: data.likedBy });
     } catch (err) {
       console.error("Failed to like", err);
-      alert("Please login to like posts");
+      // Rollback
+      setPost(previousPost);
+      alert("Could not update like. Please check your connection.");
     }
   };
 
