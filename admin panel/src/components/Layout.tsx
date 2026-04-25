@@ -118,7 +118,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-accent-purple/5 rounded-full blur-[100px] -ml-32 -mb-32 pointer-events-none" />
 
         {/* Top Header */}
-        <header className="flex-shrink-0 h-20 glass border-b border-outline-variant flex items-center justify-between px-6 md:px-10 z-30">
+        <header className="flex-shrink-0 h-20 bg-surface border-b border-outline-variant flex items-center justify-between px-6 md:px-10 z-30">
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
@@ -246,7 +246,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
       {/* Mobile Bottom Nav */}
       <nav className={cn(
-        "md:hidden fixed bottom-6 left-6 right-6 z-50 h-16 glass border border-outline-variant rounded-2xl shadow-2xl flex justify-around items-center px-2 transition-all duration-300",
+        "md:hidden fixed bottom-6 left-6 right-6 z-50 h-16 bg-surface border border-outline-variant rounded-2xl shadow-2xl flex justify-around items-center px-2 transition-all duration-300",
         isMobileMenuOpen ? "opacity-0 pointer-events-none translate-y-10" : "opacity-100 translate-y-0"
       )}>
         {[
