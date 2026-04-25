@@ -206,9 +206,7 @@ export default function Settings() {
                  Global Dialect
               </label>
               <select className="w-full glass border-outline-variant rounded-2xl px-5 py-4 text-base font-bold focus:outline-none focus:border-primary transition-all cursor-pointer h-14">
-                <option>English (US) - Primary</option>
-                <option>Spanish (ES)</option>
-                <option>French (FR)</option>
+                <option>English (India)</option>
               </select>
             </div>
             <li className="flex items-center justify-between pt-4 border-t border-outline-variant/30 list-none">
