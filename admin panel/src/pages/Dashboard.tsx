@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { DashboardSkeleton } from "../components/Skeleton";
+import { cn } from "../lib/utils";
+import { adminService } from "../lib/api";
 
 const chartData = [
   { name: "Oct 1", pv: 15 },
@@ -46,11 +48,20 @@ const item = {
 export default function Dashboard() {
   const [activities, setActivities] = useState(INITIAL_ACTIVITIES);
   const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => setIsLoading(false), 1500);
-    return () => clearTimeout(timer);
+    const fetchData = async () => {
+      try {
+        const data = await adminService.getStats();
+        setStats(data);
+      } catch (err) {
+        console.error("Failed to load dashboard stats", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -100,9 +111,9 @@ export default function Dashboard() {
         className="grid grid-cols-1 md:grid-cols-3 gap-6"
       >
         {[
-          { label: "Total Users", value: "14,208", trend: "+18.4%", icon: Users, color: "text-primary", bg: "bg-primary/10" },
-          { label: "Notes Created", value: "82.5k", trend: "+12.1%", icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
-          { label: "Active Now", value: "3,492", trend: "+5.2%", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
+          { label: "Total Users", value: stats?.totalUsers?.toLocaleString() || "0", trend: `+${stats?.growth || 0}%`, icon: Users, color: "text-primary", bg: "bg-primary/10" },
+          { label: "Notes Created", value: stats?.notesCreated?.toLocaleString() || "0", trend: "+12.1%", icon: FileText, color: "text-secondary", bg: "bg-secondary/10" },
+          { label: "Active Now", value: stats?.activeNow?.toLocaleString() || "0", trend: "+5.2%", icon: Activity, color: "text-accent-purple", bg: "bg-accent-purple/10" },
         ].map((stat, idx) => (
           <motion.div 
             key={stat.label}
