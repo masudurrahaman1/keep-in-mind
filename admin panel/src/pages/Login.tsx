@@ -5,6 +5,9 @@ import { useState } from "react";
 
 export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   return (
@@ -46,11 +49,23 @@ export default function Login() {
           className="flex flex-col gap-6"
           onSubmit={(e) => {
             e.preventDefault();
-            // In a real app, handle auth here
-            localStorage.setItem("admin_token", "mock_admin_session_token");
-            navigate("/");
+            if (email === "masudurrahamanrm@gmail.com" && password === "masudur@8145") {
+               localStorage.setItem("admin_token", "mock_admin_session_token");
+               navigate("/");
+            } else {
+               setError("Invalid credentials. Only authorized administrators can access this portal.");
+            }
           }}
         >
+          {error && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="bg-error/10 border border-error/20 text-error text-[11px] font-bold py-3 px-4 rounded-xl text-center"
+            >
+              {error}
+            </motion.div>
+          )}
           <div className="flex flex-col gap-2">
             <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1" htmlFor="email">
               Identity
@@ -60,8 +75,10 @@ export default function Login() {
               <input
                 type="email"
                 id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-transparent border-none text-base font-medium text-on-surface placeholder:text-on-surface-variant/30 px-6 pl-14 py-4 focus:outline-none"
-                placeholder="admin@keepinmind.in"
+                placeholder="masudurrahamanrm@gmail.com"
                 required
               />
             </div>
@@ -81,6 +98,8 @@ export default function Login() {
               <input
                 type={showPassword ? "text" : "password"}
                 id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 className="w-full bg-transparent border-none text-base font-medium text-on-surface placeholder:text-on-surface-variant/30 px-6 pl-14 py-4 focus:outline-none"
                 placeholder="••••••••"
                 required
