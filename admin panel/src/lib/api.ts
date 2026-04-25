@@ -8,10 +8,10 @@ async function fetcher(endpoint: string, options: RequestInit = {}) {
     ...options.headers,
   };
 
-  // Add cache-busting for GET requests to ensure fresh data
-  const url = options.method === 'GET' || !options.method 
-    ? `${API_BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}_t=${Date.now()}`
-    : `${API_BASE_URL}${endpoint}`;
+  // Safer URL joining
+  const cleanBase = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const url = `${cleanBase}${cleanEndpoint}`;
 
   const response = await fetch(url, {
     ...options,

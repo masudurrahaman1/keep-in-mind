@@ -64,7 +64,9 @@ export default function Dashboard() {
     const fetchData = async () => {
       try {
         const data = await adminService.getStats();
-        setStats(data);
+        if (data && typeof data === 'object' && !data.message) {
+          setStats((prev: any) => ({ ...prev, ...data }));
+        }
       } catch (err) {
         console.error("Failed to load dashboard stats", err);
       } finally {
