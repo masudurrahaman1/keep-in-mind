@@ -46,11 +46,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const savedGToken = localStorage.getItem('googleToken');
 
     if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      // Handle the case where googleToken might be exactly the string "undefined" or null
-      const validGToken = (savedGToken && savedGToken !== 'undefined') ? savedGToken : null;
-      setGoogleAccessToken(validGToken);
+      try {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+        // Handle the case where googleToken might be exactly the string "undefined" or null
+        const validGToken = (savedGToken && savedGToken !== 'undefined') ? savedGToken : null;
+        setGoogleAccessToken(validGToken);
+      } catch (err) {
+        console.error('Failed to parse saved user data:', err);
+        signOut(); // Clear corrupted data
+      }
     }
     setLoading(false);
   }, []);
@@ -84,6 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = (userData: User, authToken: string, googleToken?: string) => {
+    if (!userData || !authToken) {
+      console.error('Login called with missing user data or token');
+      return;
+    }
     const validGToken = (googleToken && googleToken !== 'undefined') ? googleToken : null;
     setUser(userData);
     setToken(authToken);

@@ -9,10 +9,15 @@
       "client_info": {
         "mobilesdk_app_id": "1:329859333999:android:74172beeafbae5332ab29a",
         "android_client_info": {
-          "package_name": "com.kim.keepinmind"
+          "package_name": "com.keepinmind.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "329859333999-evmi7lf00bek6dddl53sd1lqs826m4fk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329859333999-evmi7lf00bek6dddl53sd1lqs826m4fk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

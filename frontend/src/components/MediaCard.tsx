@@ -7,17 +7,18 @@ import { useAuth } from '../context/AuthContext';
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface MediaCardProps {
+  key?: React.Key;
   media: any;
-  onDelete: (id: string) => void;
-  onRename: (id: string, currentName: string) => void;
+  onDelete: (id: string) => void | Promise<void>;
+  onRename: (id: string, currentName: string) => void | Promise<void>;
   onSelect: () => void;
   onLongPress?: () => void;
   isSelected?: boolean;
   isSelectionMode?: boolean;
   onToggleSelect?: () => void;
   isTrashMode?: boolean;
-  onRestore?: (id: string) => void;
-  onPermanentDelete?: (id: string) => void;
+  onRestore?: (id: string) => void | Promise<void>;
+  onPermanentDelete?: (id: string) => void | Promise<void>;
 }
 
 export default function MediaCard({ 

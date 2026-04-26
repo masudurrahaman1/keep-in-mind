@@ -1,9 +1,9 @@
+import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
-import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { loginWithFirebaseToken } from '../services/authService';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
@@ -106,9 +106,9 @@ export default function Auth() {
 
       if (Capacitor.isNativePlatform()) {
         // Native platform: Use Capacitor Google Auth
-        const googleUser = await GoogleAuth.signIn();
-        const nativeIdToken = googleUser.authentication.idToken;
-        googleAccessToken = googleUser.authentication.accessToken;
+        const googleUser = (await GoogleAuth.signIn()) as any;
+        const nativeIdToken = googleUser.authentication.idToken as string;
+        googleAccessToken = googleUser.authentication.accessToken as string;
         
         // Pass the native Google token to Firebase to sign in
         const credential = GoogleAuthProvider.credential(nativeIdToken);

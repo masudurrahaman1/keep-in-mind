@@ -104,7 +104,7 @@ export default function UploadActivityCenter({ isOpen, onClose, queue, history }
   );
 }
 
-function ActivityRow({ item }: { item: any }) {
+function ActivityRow({ item }: { item: any, key?: React.Key }) {
   const isSyncing = item.status === 'uploading';
   const isDone = item.status === 'completed';
   const isFailed = item.status === 'failed';

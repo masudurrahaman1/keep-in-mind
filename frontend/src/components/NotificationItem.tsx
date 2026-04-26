@@ -16,6 +16,7 @@ export interface Notification {
 }
 
 interface NotificationItemProps {
+  key?: React.Key;
   notification: Notification;
   onRead: (id: string) => void;
   onDelete: (id: string) => void;

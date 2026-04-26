@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, X, Image as ImageIcon, Film as FilmIcon, Loader2 } from 'lucide-react';
 
@@ -27,7 +27,7 @@ export default function MediaUploadFAB({ onFilesSelect, isLoading }: MediaUpload
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+    const files = Array.from(e.target.files || []) as File[];
     if (files.length > 0) {
       onFilesSelect(files);
       e.target.value = '';

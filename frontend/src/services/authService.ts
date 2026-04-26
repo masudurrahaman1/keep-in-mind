@@ -1,5 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+console.log('Using API_URL:', API_URL);
+
 const handleResponse = async (response: Response) => {
   const text = await response.text();
   let data;

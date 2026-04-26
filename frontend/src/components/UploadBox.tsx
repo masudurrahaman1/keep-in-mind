@@ -42,7 +42,7 @@ export default function UploadBox({ onFilesSelect, token, googleAccessToken }: U
     multiple: true,
     maxFiles: 50,
     disabled: isUploading
-  });
+  } as any);
 
   return (
     <div className="w-full">

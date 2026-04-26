@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // Placeholder imports for pages we are about to create
 import Dashboard from "./pages/Dashboard";

@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Activity, Search, Target, CheckSquare, MoreHorizontal, Pin, Tag } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import NoteModal from '../modals/NoteModal';
 import { cn } from '../components/Sidebar';
 import NoteContextMenu from '../components/NoteContextMenu';
 import { useAuth } from '../context/AuthContext';

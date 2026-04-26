@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { Compass, MessageSquare, Heart, Share2, MoreHorizontal, UserCircle2, Send } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Compass, MessageSquare, Heart, Share2, MoreHorizontal, UserCircle2, Send } from 'lucide-react';
 import { feedService } from '../services/feedService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';

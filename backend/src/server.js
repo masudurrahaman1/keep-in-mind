@@ -17,6 +17,6 @@ if (!fs.existsSync(serviceAccountPath) || !process.env.JWT_SECRET) {
   console.warn('Authentication will fail until these are configured.\n');
 }
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
 });

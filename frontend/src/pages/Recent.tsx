@@ -3,7 +3,6 @@ import { formatDistanceToNow, parseISO } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Clock, CheckSquare, Search, FileText, MoreHorizontal, Pin, Tag, Mic, PenLine } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import NoteModal from '../modals/NoteModal';
 import { cn } from '../components/Sidebar';
 import NoteContextMenu from '../components/NoteContextMenu';
 import { useAuth } from '../context/AuthContext';

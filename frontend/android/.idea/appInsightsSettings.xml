@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.kim.keepinmind" />
+                  <option name="mobileSdkAppId" value="1:856059392786:android:cb44de7488332af60df9cb" />
+                  <option name="projectId" value="keep-in-minds" />
+                  <option name="projectNumber" value="856059392786" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

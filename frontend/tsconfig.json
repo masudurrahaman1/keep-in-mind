@@ -18,6 +18,9 @@
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@admin/*": [
+        "./src/admin/*"
       ]
     },
     "allowImportingTsExtensions": true,

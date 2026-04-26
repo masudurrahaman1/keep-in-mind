@@ -20,18 +20,7 @@ export default function BottomNav() {
           const active = location.pathname.startsWith(item.path) || (isProfile && location.pathname === '/settings');
           const Icon = item.icon;
           
-          if (item.isMain) {
-            return (
-              <li key={item.label} className="relative -top-5">
-                <Link
-                  to={item.path}
-                  className="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:bg-primary/90 transition-all active:scale-95"
-                >
-                  <Icon size={30} strokeWidth={1.5} />
-                </Link>
-              </li>
-            );
-          }
+
           
           return (
             <li key={item.label}>

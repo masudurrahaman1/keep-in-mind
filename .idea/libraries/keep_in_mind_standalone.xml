@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="keep-in-mind-standalone">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/frontend/keep-in-mind-standalone.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
