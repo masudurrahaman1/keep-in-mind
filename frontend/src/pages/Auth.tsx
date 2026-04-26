@@ -127,6 +127,29 @@ export default function Auth() {
     }
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setIsLoading(true);
+    setError('');
+    try {
+      // Import sendPasswordResetEmail from firebase/auth
+      const { sendPasswordResetEmail } = await import('firebase/auth');
+      await sendPasswordResetEmail(auth, email);
+      setError('Password reset link sent! Check your inbox.');
+    } catch (err: any) {
+      if (err.code === 'auth/user-not-found') {
+        setError('No account found with this email.');
+      } else {
+        setError(err.message || 'Failed to send password reset email.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleVerify2FA = async () => {
     if (otpCode.length < 6) { setError('Enter the full 6-digit code.'); return; }
     setIsLoading(true);
@@ -298,6 +321,15 @@ export default function Auth() {
                       <label className="text-xs font-bold text-white/80" htmlFor="password">
                         Password
                       </label>
+                      {mode === "login" && (
+                        <button 
+                          type="button" 
+                          onClick={handleForgotPassword}
+                          className="text-xs font-bold text-[#5142E6] hover:text-[#5142E6]/80 transition-colors"
+                        >
+                          Forgot Password?
+                        </button>
+                      )}
                     </div>
                     <div className="relative group">
                       <Lock className="w-5 h-5 text-white/40 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-white/80 transition-colors" />

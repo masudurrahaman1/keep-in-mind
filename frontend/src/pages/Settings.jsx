@@ -7,12 +7,19 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { syncNotesToGoogleDrive, fetchNotesFromGoogleDrive } from '../services/driveService';
 
+import { auth } from '../config/firebase';
+import PasswordModal from '../modals/PasswordModal';
+
 export default function Settings() {
   const [activeTab, setActiveTab] = useState('Account');
   const { theme, setTheme } = useTheme();
   const { user, token, googleAccessToken, signOut } = useAuth();
   const [isSyncing, setIsSyncing] = useState(false);
   const [isFetching, setIsFetching] = useState(false);
+  
+  // Password Modal State
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const hasPassword = auth.currentUser?.providerData?.some(p => p.providerId === 'password');
 
   // Storage keys unique to user
   const notesKey = user ? `keep-in-mind-notes-${user._id}` : 'keep-in-mind-notes-guest';
@@ -137,11 +144,17 @@ export default function Settings() {
               </span>
             </SettingRow>
 
-            <SettingRow label="Password" description="Ensure your account is using a long, random password">
-              <Button variant="secondary" onClick={() => {}}>
-                Change
+            <SettingRow label="Password" description={hasPassword ? "Ensure your account is using a long, random password" : "Create a password to login with your email"}>
+              <Button variant="secondary" onClick={() => setIsPasswordModalOpen(true)}>
+                {hasPassword ? 'Change' : 'Setup'}
               </Button>
             </SettingRow>
+            
+            <PasswordModal 
+              isOpen={isPasswordModalOpen} 
+              onClose={() => setIsPasswordModalOpen(false)} 
+              hasPassword={hasPassword} 
+            />
 
           </SectionCard>
         );
