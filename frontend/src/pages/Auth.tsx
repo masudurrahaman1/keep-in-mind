@@ -1,11 +1,11 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { loginWithGoogle, loginWithEmail, registerWithEmail, verifyEmailOTP } from '../services/authService';
+import { loginWithFirebaseToken } from '../services/authService';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -25,7 +25,6 @@ export default function Auth() {
   
   const [otpCode, setOtpCode] = useState('');
   const [is2FAMode, setIs2FAMode] = useState(false);
-  const [isEmailVerifyMode, setIsEmailVerifyMode] = useState(false);
 
   const [tfState, setTfState] = useState<{
     pendingToken: string;
@@ -42,7 +41,15 @@ export default function Auth() {
     
     try {
       if (mode === 'login') {
-        const data = await loginWithEmail(email, password);
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        
+        if (!userCredential.user.emailVerified) {
+          // If not verified, throw an error to the catch block
+          throw { unverified: true, message: 'Please verify your email address by clicking the link sent to your inbox.' };
+        }
+
+        const idToken = await userCredential.user.getIdToken();
+        const data = await loginWithFirebaseToken(idToken);
         
         if (data.twoFactorRequired) {
           setTfState({
@@ -57,35 +64,31 @@ export default function Auth() {
         login(data.user, data.token, '');
         navigate(from, { replace: true });
       } else {
-        await registerWithEmail(name, email, password);
-        // On successful registration, switch to email verification mode
-        setIsEmailVerifyMode(true);
-        setOtpCode('');
-        setError('Verification code sent to your email.'); 
+        // Sign Up Mode
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        
+        // Update user profile with their name
+        await updateProfile(userCredential.user, { displayName: name });
+        
+        // Send Firebase verification link
+        await sendEmailVerification(userCredential.user);
+        
+        setMode('login');
+        setError('Account created! Please check your email for the verification link before logging in.');
+        
+        // Log out the unverified user immediately so they must verify and log in again
+        await auth.signOut();
       }
     } catch (err: any) {
-      if (err?.unverified) {
-        setIsEmailVerifyMode(true);
-        setOtpCode('');
-        setError('Email not verified. A new code has been sent.');
+      if (err.unverified) {
+        setError(err.message);
+      } else if (err.code === 'auth/email-already-in-use') {
+        setError('An account with this email already exists.');
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('Invalid email or password.');
       } else {
         setError(err.message || 'Authentication failed. Please try again.');
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyEmailOTP = async () => {
-    if (otpCode.length < 6) { setError('Enter the full 6-digit code.'); return; }
-    setIsLoading(true);
-    setError('');
-    try {
-      const data = await verifyEmailOTP(email, otpCode);
-      login(data.user, data.token, '');
-      navigate(from, { replace: true });
-    } catch (err: any) {
-      setError(err.message || 'Invalid or expired verification code.');
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +105,7 @@ export default function Auth() {
       if (!googleAccessToken) throw new Error('Failed to obtain Google access token.');
 
       const idToken = await result.user.getIdToken();
-      const data = await loginWithGoogle(idToken);
+      const data = await loginWithFirebaseToken(idToken);
 
       if (data.twoFactorRequired) {
         setTfState({
@@ -169,14 +172,12 @@ export default function Auth() {
              <ShieldCheck className="w-8 h-8 text-[#5142E6] relative z-10" />
           </motion.div>
           <h1 className="text-3xl font-bold tracking-tight text-white text-center">
-            {is2FAMode ? 'Verify Identity' : isEmailVerifyMode ? 'Verify Email' : 'Keep In Mind'}
+            {is2FAMode ? 'Verify Identity' : 'Keep In Mind'}
           </h1>
           <p className="text-sm font-medium text-white/60 text-center">
              {is2FAMode 
                 ? `Enter the code to verify it's you, ${tfState?.userName}.` 
-                : isEmailVerifyMode 
-                  ? 'Enter the 6-digit OTP sent to your email.'
-                  : 'The most elegant way to capture your thoughts.'}
+                : 'The most elegant way to capture your thoughts.'}
           </p>
         </motion.div>
 
@@ -186,7 +187,7 @@ export default function Auth() {
           className="bg-[#12141c]/80 backdrop-blur-xl border border-white/5 p-8 rounded-[32px] shadow-2xl relative"
         >
           <AnimatePresence mode="wait">
-            {is2FAMode || isEmailVerifyMode ? (
+            {is2FAMode ? (
               <motion.div key="otp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
                 {error && (
                   <div className={`border text-xs font-bold py-3 px-4 rounded-xl text-center ${error.includes('sent') ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
@@ -202,21 +203,13 @@ export default function Auth() {
                   autoFocus
                 />
                 <button 
-                  onClick={isEmailVerifyMode ? handleVerifyEmailOTP : handleVerify2FA} 
+                  onClick={handleVerify2FA} 
                   disabled={isLoading || otpCode.length < 6} 
                   className="w-full py-4 rounded-xl bg-[#5142E6] text-white font-bold transition-all disabled:opacity-50 hover:bg-[#5142E6]/90 shadow-lg shadow-[#5142E6]/20 flex items-center justify-center gap-2"
                 >
                   {isLoading ? 'Verifying...' : 'Confirm'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
-                {isEmailVerifyMode && (
-                  <button 
-                    onClick={() => setIsEmailVerifyMode(false)}
-                    className="text-xs font-bold text-white/50 hover:text-white transition-colors text-center mt-2"
-                  >
-                    Back to Login
-                  </button>
-                )}
               </motion.div>
             ) : (
               <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -248,7 +241,7 @@ export default function Auth() {
                     <motion.div 
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className={`border text-xs font-bold py-3 px-4 rounded-xl text-center overflow-hidden ${error.includes("successfully") ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}
+                      className={`border text-xs font-bold py-3 px-4 rounded-xl text-center overflow-hidden ${error.includes("Account created") ? "bg-green-500/10 border-green-500/20 text-green-400" : "bg-red-500/10 border-red-500/20 text-red-400"}`}
                     >
                       {error}
                     </motion.div>
@@ -316,6 +309,7 @@ export default function Auth() {
                         className="w-full bg-[#1a1c26] border border-white/5 rounded-xl text-sm font-medium text-white placeholder:text-white/20 pl-12 pr-12 py-3.5 focus:outline-none focus:border-[#5142E6] transition-all"
                         placeholder="••••••••"
                         required
+                        minLength={6}
                       />
                       <button
                         type="button"

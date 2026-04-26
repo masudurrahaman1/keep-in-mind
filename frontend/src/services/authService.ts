@@ -16,8 +16,8 @@ const handleResponse = async (response: Response) => {
   return data;
 };
 
-export const loginWithGoogle = async (idToken: string) => {
-  const response = await fetch(`${API_URL}/auth/google`, {
+export const loginWithFirebaseToken = async (idToken: string) => {
+  const response = await fetch(`${API_URL}/auth/firebase`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -25,36 +25,6 @@ export const loginWithGoogle = async (idToken: string) => {
     body: JSON.stringify({ token: idToken }),
   });
 
-  return handleResponse(response);
-};
-
-export const loginWithEmail = async (email, password) => {
-  const response = await fetch(`${API_URL}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password }),
-  });
-  
-  return handleResponse(response);
-};
-
-export const registerWithEmail = async (name, email, password) => {
-  const response = await fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, email, password }),
-  });
-  
-  return handleResponse(response);
-};
-
-export const verifyEmailOTP = async (email, code) => {
-  const response = await fetch(`${API_URL}/auth/verify-email`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, code }),
-  });
-  
   return handleResponse(response);
 };
 
