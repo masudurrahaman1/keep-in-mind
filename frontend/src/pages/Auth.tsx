@@ -5,7 +5,7 @@ import { auth, googleProvider } from '../config/firebase';
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { loginWithGoogle, loginWithEmail, registerWithEmail } from '../services/authService';
+import { loginWithGoogle, loginWithEmail, registerWithEmail, verifyEmailOTP } from '../services/authService';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -25,6 +25,7 @@ export default function Auth() {
   
   const [otpCode, setOtpCode] = useState('');
   const [is2FAMode, setIs2FAMode] = useState(false);
+  const [isEmailVerifyMode, setIsEmailVerifyMode] = useState(false);
 
   const [tfState, setTfState] = useState<{
     pendingToken: string;
@@ -57,11 +58,34 @@ export default function Auth() {
         navigate(from, { replace: true });
       } else {
         await registerWithEmail(name, email, password);
-        setMode('login');
-        setError('Account created successfully! Please log in.'); // Success message
+        // On successful registration, switch to email verification mode
+        setIsEmailVerifyMode(true);
+        setOtpCode('');
+        setError('Verification code sent to your email.'); 
       }
     } catch (err: any) {
-      setError(err.message || 'Authentication failed. Please try again.');
+      if (err?.unverified) {
+        setIsEmailVerifyMode(true);
+        setOtpCode('');
+        setError('Email not verified. A new code has been sent.');
+      } else {
+        setError(err.message || 'Authentication failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyEmailOTP = async () => {
+    if (otpCode.length < 6) { setError('Enter the full 6-digit code.'); return; }
+    setIsLoading(true);
+    setError('');
+    try {
+      const data = await verifyEmailOTP(email, otpCode);
+      login(data.user, data.token, '');
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Invalid or expired verification code.');
     } finally {
       setIsLoading(false);
     }
@@ -145,10 +169,14 @@ export default function Auth() {
              <ShieldCheck className="w-8 h-8 text-[#5142E6] relative z-10" />
           </motion.div>
           <h1 className="text-3xl font-bold tracking-tight text-white text-center">
-            {is2FAMode ? 'Verify Identity' : 'Keep In Mind'}
+            {is2FAMode ? 'Verify Identity' : isEmailVerifyMode ? 'Verify Email' : 'Keep In Mind'}
           </h1>
           <p className="text-sm font-medium text-white/60 text-center">
-             {is2FAMode ? `Enter the code to verify it's you, ${tfState?.userName}.` : 'The most elegant way to capture your thoughts.'}
+             {is2FAMode 
+                ? `Enter the code to verify it's you, ${tfState?.userName}.` 
+                : isEmailVerifyMode 
+                  ? 'Enter the 6-digit OTP sent to your email.'
+                  : 'The most elegant way to capture your thoughts.'}
           </p>
         </motion.div>
 
@@ -158,10 +186,10 @@ export default function Auth() {
           className="bg-[#12141c]/80 backdrop-blur-xl border border-white/5 p-8 rounded-[32px] shadow-2xl relative"
         >
           <AnimatePresence mode="wait">
-            {is2FAMode ? (
-              <motion.div key="2fa" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
+            {is2FAMode || isEmailVerifyMode ? (
+              <motion.div key="otp" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col gap-6">
                 {error && (
-                  <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold py-3 px-4 rounded-xl text-center">
+                  <div className={`border text-xs font-bold py-3 px-4 rounded-xl text-center ${error.includes('sent') ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
                     {error}
                   </div>
                 )}
@@ -174,13 +202,21 @@ export default function Auth() {
                   autoFocus
                 />
                 <button 
-                  onClick={handleVerify2FA} 
+                  onClick={isEmailVerifyMode ? handleVerifyEmailOTP : handleVerify2FA} 
                   disabled={isLoading || otpCode.length < 6} 
                   className="w-full py-4 rounded-xl bg-[#5142E6] text-white font-bold transition-all disabled:opacity-50 hover:bg-[#5142E6]/90 shadow-lg shadow-[#5142E6]/20 flex items-center justify-center gap-2"
                 >
                   {isLoading ? 'Verifying...' : 'Confirm'}
                   <ArrowRight className="w-4 h-4" />
                 </button>
+                {isEmailVerifyMode && (
+                  <button 
+                    onClick={() => setIsEmailVerifyMode(false)}
+                    className="text-xs font-bold text-white/50 hover:text-white transition-colors text-center mt-2"
+                  >
+                    Back to Login
+                  </button>
+                )}
               </motion.div>
             ) : (
               <motion.div key="auth" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
