@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 // Placeholder imports for pages we are about to create
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
+import SignUp from "./pages/SignUp";
 import Users from "./pages/Users";
 import AddUser from "./pages/AddUser";
 import Search from "./pages/Search";
@@ -43,6 +44,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/support" element={<Support />} />
         <Route path="/terms" element={<Terms />} />
         <Route

@@ -40,6 +40,13 @@ export const adminService = {
     });
   },
 
+  register: async (data: any) => {
+    return fetcher("/register", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
   getStats: async () => {
     return fetcher("/stats");
   },
