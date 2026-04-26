@@ -5,6 +5,7 @@ const Session = require('../models/Session');
 const Post = require('../models/Post');
 const generateToken = require('../utils/generateToken');
 const bcrypt = require('bcryptjs');
+const logActivity = require('../utils/logger');
 
 // @desc    Admin Login
 // @route   POST /api/admin/login
@@ -88,6 +89,7 @@ const getStats = async (req, res) => {
     const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
     const startOfWeek = new Date(new Date().setDate(new Date().getDate() - 7));
     const startOfMonth = new Date(new Date().setMonth(new Date().getMonth() - 1));
+    const prevStartOfWeek = new Date(new Date().setDate(new Date().getDate() - 14));
     // Active Now (2 min heartbeat for more accurate 'live' status)
     const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
 

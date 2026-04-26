@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import { cn } from "../lib/utils";
 import { adminService } from "../lib/api";
+import { formatDistanceToNow } from "date-fns";
 
 const chartData = [
   { name: "Oct 1", pv: 15 },
@@ -208,9 +209,9 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
           <div className="flex justify-between mt-6 text-label-caps font-bold text-on-surface-variant opacity-40">
-            <span>Oct 01</span>
-            <span>Oct 15</span>
-            <span>Oct 30</span>
+            <span>{stats?.chartData?.[0]?.name || "Oct 01"}</span>
+            <span>{stats?.chartData?.[Math.floor((stats?.chartData?.length || 7) / 2)]?.name || "Oct 15"}</span>
+            <span>{stats?.chartData?.[(stats?.chartData?.length || 1) - 1]?.name || "Oct 30"}</span>
           </div>
         </motion.section>
 
@@ -267,28 +268,34 @@ export default function Dashboard() {
         </div>
         <div className="glass rounded-[32px] overflow-hidden">
           <ul className="divide-y divide-outline-variant">
-            {activities.map((activity: any) => (
-              <li key={activity.id} className="p-6 flex items-center justify-between hover:bg-surface-container/50 transition-colors group cursor-default">
+            {activities.length > 0 ? activities.map((activity: any) => (
+              <li key={activity._id} className="p-6 flex items-center justify-between hover:bg-surface-container/50 transition-colors group cursor-default">
                 <div className="flex items-center gap-5">
                   <div className={cn(
                     "w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300 shadow-lg",
-                    activity.type === 'error' ? 'bg-error/20 text-error' : 'bg-primary/20 text-primary'
+                    activity.type === 'error' ? 'bg-error/20 text-error' : 
+                    activity.type === 'success' ? 'bg-secondary/20 text-secondary' :
+                    'bg-primary/20 text-primary'
                   )}>
-                    {activity.type === 'success' ? <UserCog className="w-6 h-6" /> : <Laptop className="w-6 h-6" />}
+                    {activity.title.includes('User') || activity.title.includes('Profile') ? <UserCog className="w-6 h-6" /> : <Laptop className="w-6 h-6" />}
                   </div>
                   <div>
-                    <p className="text-base font-bold text-on-surface">{activity.action}</p>
-                    <p className="text-xs font-medium text-on-surface-variant opacity-60">{activity.user} • {activity.time}</p>
+                    <p className="text-base font-bold text-on-surface">{activity.title}</p>
+                    <p className="text-xs font-medium text-on-surface-variant opacity-60">{activity.actor} • {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}</p>
                   </div>
                 </div>
                 <span className={cn(
                   "text-[10px] font-bold uppercase tracking-widest px-4 py-2 rounded-xl shadow-sm",
-                  activity.type === 'error' ? 'text-error bg-error/10 border border-error/20' : 'text-secondary bg-secondary/10 border border-secondary/20'
+                  activity.type === 'error' ? 'text-error bg-error/10 border border-error/20' : 
+                  activity.type === 'success' ? 'text-secondary bg-secondary/10 border border-secondary/20' :
+                  'text-on-surface-variant bg-surface-container border border-outline-variant'
                 )}>
-                  {activity.type === 'error' ? 'Failed' : 'Success'}
+                  {activity.level || 'Info'}
                 </span>
               </li>
-            ))}
+            )) : (
+              <li className="p-10 text-center text-on-surface-variant opacity-50 font-medium">No recent system activity.</li>
+            )}
 
           </ul>
         </div>
