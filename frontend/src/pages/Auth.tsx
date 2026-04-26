@@ -1,11 +1,13 @@
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { signInWithPopup, GoogleAuthProvider, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile, signInWithCredential } from 'firebase/auth';
 import { auth, googleProvider } from '../config/firebase';
 import { ShieldCheck, Mail, Lock, Eye, EyeOff, User, ArrowRight } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { loginWithFirebaseToken } from '../services/authService';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
+import { Capacitor } from '@capacitor/core';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -84,7 +86,7 @@ export default function Auth() {
         setError(err.message);
       } else if (err.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists.');
-      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
         setError('Invalid email or password.');
       } else {
         setError(err.message || 'Authentication failed. Please try again.');
@@ -99,28 +101,46 @@ export default function Auth() {
     setIsLoading(true);
     setError('');
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const credential = GoogleAuthProvider.credentialFromResult(result);
-      const googleAccessToken = credential?.accessToken;
-      if (!googleAccessToken) throw new Error('Failed to obtain Google access token.');
+      let firebaseIdToken: string | null = null;
+      let googleAccessToken: string | null = null;
 
-      const idToken = await result.user.getIdToken();
-      const data = await loginWithFirebaseToken(idToken);
+      if (Capacitor.isNativePlatform()) {
+        // Native platform: Use Capacitor Google Auth
+        const googleUser = await GoogleAuth.signIn();
+        const nativeIdToken = googleUser.authentication.idToken;
+        googleAccessToken = googleUser.authentication.accessToken;
+        
+        // Pass the native Google token to Firebase to sign in
+        const credential = GoogleAuthProvider.credential(nativeIdToken);
+        const result = await signInWithCredential(auth, credential);
+        firebaseIdToken = await result.user.getIdToken();
+      } else {
+        // Web platform: Use Firebase Popup
+        const result = await signInWithPopup(auth, googleProvider);
+        const credential = GoogleAuthProvider.credentialFromResult(result);
+        googleAccessToken = credential?.accessToken || null;
+        firebaseIdToken = await result.user.getIdToken();
+      }
+
+      if (!firebaseIdToken) throw new Error('Failed to obtain ID token.');
+
+      const data = await loginWithFirebaseToken(firebaseIdToken);
 
       if (data.twoFactorRequired) {
         setTfState({
           pendingToken: data.pendingToken,
           userName: data.user?.name?.split(' ')[0] || 'there',
-          googleToken: googleAccessToken,
+          googleToken: googleAccessToken || '',
         });
         setIs2FAMode(true);
         return;
       }
 
-      login(data.user, data.token, googleAccessToken);
+      login(data.user, data.token, googleAccessToken || '');
       navigate(from, { replace: true });
     } catch (err: any) {
       if (err?.code === 'auth/popup-closed-by-user') return;
+      console.error('Google Sign-in Error:', err);
       setError(err.message || 'Google sign-in failed.');
     } finally {
       setIsLoading(false);

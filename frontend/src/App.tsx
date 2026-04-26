@@ -10,7 +10,10 @@ import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import Heartbeat from './components/Heartbeat';
 import { Skeleton } from './components/Skeleton';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
+// Initialize Capacitor Google Auth
+GoogleAuth.initialize();
 
 // Standard import for Auth (since it's the initial entry for logged-out users)
 import Auth from './pages/Auth';
