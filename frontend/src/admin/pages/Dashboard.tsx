@@ -95,14 +95,24 @@ export default function Dashboard() {
           </motion.h2>
           <div className="flex items-center gap-3">
              <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
-             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-highest rounded-full border border-outline-variant/30 shadow-sm">
-                <div className={cn(
-                  "w-1.5 h-1.5 rounded-full",
-                  isRefreshing ? "bg-primary animate-ping" : "bg-secondary"
-                )} />
-                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
-                  {isRefreshing ? "Syncing..." : `Updated ${formatDistanceToNow(lastUpdated, { addSuffix: true })}`}
-                </span>
+             <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-highest rounded-full border border-outline-variant/30 shadow-sm">
+                   <div className={cn(
+                     "w-1.5 h-1.5 rounded-full",
+                     isRefreshing ? "bg-primary animate-ping" : "bg-secondary"
+                   )} />
+                   <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
+                     {isRefreshing ? "Syncing..." : `Last Sync: ${formatDistanceToNow(lastUpdated, { addSuffix: true })}`}
+                   </span>
+                </div>
+                {activities[0] && (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-primary/5 rounded-full border border-primary/10 shadow-sm">
+                     <History className="w-3 h-3 text-primary" />
+                     <span className="text-[10px] font-bold text-primary uppercase tracking-wider whitespace-nowrap">
+                       Last Activity: {formatDistanceToNow(new Date(activities[0].createdAt), { addSuffix: true })}
+                     </span>
+                  </div>
+                )}
              </div>
           </div>
         </div>
