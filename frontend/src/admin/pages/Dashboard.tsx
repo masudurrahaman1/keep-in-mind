@@ -43,9 +43,12 @@ export default function Dashboard() {
     activeNow: 0,
     growth: 0
   });
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadData = async (isManual = false) => {
+      if (!isManual) setIsRefreshing(true);
       try {
         const [statsData, activitiesData] = await Promise.all([
           adminService.getStats(),
@@ -53,13 +56,16 @@ export default function Dashboard() {
         ]);
         setStats(statsData);
         setActivities(activitiesData);
+        setLastUpdated(new Date());
       } catch (err) {
         console.error("Failed to load admin data:", err);
+      } finally {
+        if (!isManual) setTimeout(() => setIsRefreshing(false), 800);
       }
     };
 
-    loadData();
-    const interval = setInterval(loadData, 15000); // Refresh every 15 seconds
+    loadData(true);
+    const interval = setInterval(() => loadData(), 15000); // Refresh every 15 seconds
 
     return () => clearInterval(interval);
   }, []);
@@ -87,7 +93,18 @@ export default function Dashboard() {
           >
             Insights
           </motion.h2>
-          <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
+          <div className="flex items-center gap-3">
+             <p className="text-sm md:text-body-lg text-on-surface-variant font-medium opacity-70">System metrics and overview.</p>
+             <div className="flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-highest rounded-full border border-outline-variant/30 shadow-sm">
+                <div className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  isRefreshing ? "bg-primary animate-ping" : "bg-secondary"
+                )} />
+                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider whitespace-nowrap">
+                  {isRefreshing ? "Syncing..." : `Updated ${formatDistanceToNow(lastUpdated, { addSuffix: true })}`}
+                </span>
+             </div>
+          </div>
         </div>
         <div className="flex items-center gap-1.5 bg-surface-container rounded-2xl p-1 border border-outline-variant shadow-inner overflow-x-auto no-scrollbar">
            {[
