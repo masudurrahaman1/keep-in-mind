@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "329859333999",
+    "project_id": "keepinmind-dce6e",
+    "storage_bucket": "keepinmind-dce6e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329859333999:android:74172beeafbae5332ab29a",
+        "android_client_info": {
+          "package_name": "com.kim.keepinmind"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

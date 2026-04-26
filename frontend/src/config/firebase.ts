@@ -9,13 +9,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD4ojD86GoU0_w0zAgLEIgDirSnvazvsn8",
-  authDomain: "keep-in-minds.firebaseapp.com",
-  projectId: "keep-in-minds",
-  storageBucket: "keep-in-minds.firebasestorage.app",
-  messagingSenderId: "856059392786",
-  appId: "1:856059392786:web:ce5ee79d736866e90df9cb"
-
+  apiKey: "AIzaSyC70djYK_hIKvIgYuL323RymOKkpbS7yog",
+  authDomain: "keepinmind-dce6e.firebaseapp.com",
+  projectId: "keepinmind-dce6e",
+  storageBucket: "keepinmind-dce6e.firebasestorage.app",
+  messagingSenderId: "329859333999",
+  appId: "1:329859333999:web:a721e118de39e3a62ab29a",
+  measurementId: "G-FJ1STMBFL1"
 };
 
 const app = initializeApp(firebaseConfig);
