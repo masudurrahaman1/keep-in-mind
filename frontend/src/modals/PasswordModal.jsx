@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Lock, X, Eye, EyeOff, AlertTriangle, CheckCircle } from 'lucide-react';
-import { auth } from '../../config/firebase';
+import { auth } from '../config/firebase';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 export default function PasswordModal({ isOpen, onClose, hasPassword }) {
