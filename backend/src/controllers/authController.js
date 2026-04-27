@@ -20,7 +20,20 @@ const authFirebase = async (req, res) => {
 
     console.log(`Token verified for: ${email} (UID: ${uid}, Provider: ${provider})`);
 
+    // Check if user exists by Firebase UID
     let user = await User.findOne({ googleId: uid });
+
+    // If not found by UID, check by Email (for users migrating from old Firebase projects)
+    if (!user && email) {
+      user = await User.findOne({ email });
+      if (user) {
+        console.log(`User found by email. Updating UID for: ${email}`);
+        user.googleId = uid;
+        // Also update avatar if missing
+        if (!user.avatar && picture) user.avatar = picture;
+        await user.save();
+      }
+    }
 
     if (!user) {
       console.log(`Creating new user record for: ${email}`);
@@ -30,7 +43,7 @@ const authFirebase = async (req, res) => {
         name: name || email.split('@')[0],
         avatar: picture || '',
         authProvider: provider,
-        isVerified: true // Firebase handles verification before they can log in
+        isVerified: true 
       });
       
       await logActivity({
