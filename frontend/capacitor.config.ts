@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.keepinmind.app',
+  appId: 'com.kim.keepinmind',
   appName: 'Keep In Mind',
   webDir: 'dist',
   plugins: {
@@ -10,7 +10,7 @@ const config: CapacitorConfig = {
     },
     GoogleAuth: {
       scopes: ["profile", "email", "https://www.googleapis.com/auth/drive.file"],
-      serverClientId: "856059392786-evmi7lf00bek6dddl53sd1lqs826m4fk.apps.googleusercontent.com",
+      serverClientId: "329859333999-rqm1odrq5kj41f1kqki4sgc5a1qhuad6.apps.googleusercontent.com",
       forceCodeForRefreshToken: true,
     },
   },

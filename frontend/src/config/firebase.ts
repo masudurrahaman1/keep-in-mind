@@ -9,7 +9,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC70djYK_hIKvIgYuL323RymOKkpbS7yog",
+  apiKey: "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs",
   authDomain: "keepinmind-dce6e.firebaseapp.com",
   projectId: "keepinmind-dce6e",
   storageBucket: "keepinmind-dce6e.firebasestorage.app",
