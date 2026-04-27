@@ -9,10 +9,20 @@ if (fs.existsSync(serviceAccountPath)) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount)
   });
-  console.log('Firebase Admin initialized successfully.');
+  console.log('Firebase Admin initialized from file.');
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount)
+    });
+    console.log('Firebase Admin initialized from environment variable.');
+  } catch (err) {
+    console.error('❌ Error parsing FIREBASE_SERVICE_ACCOUNT env var:', err.message);
+  }
 } else {
-  console.error('\n❌ CRITICAL ERROR: backend/serviceAccountKey.json is missing!');
-  console.error('Download your service account key from Firebase Console and save it to the backend folder.\n');
+  console.error('\n❌ CRITICAL ERROR: Firebase credentials missing!');
+  console.error('Either provide backend/serviceAccountKey.json or set FIREBASE_SERVICE_ACCOUNT environment variable.\n');
 }
 
 module.exports = admin;
