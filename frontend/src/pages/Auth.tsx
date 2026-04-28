@@ -333,7 +333,7 @@ export default function Auth() {
                         type="email"
                         id="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => setEmail(e.target.value.trim())}
                         className="w-full bg-[#1a1c26] border border-white/5 rounded-xl text-sm font-medium text-white placeholder:text-white/20 pl-12 pr-4 py-3.5 focus:outline-none focus:border-[#5142E6] transition-all"
                         placeholder="name@company.com"
                         required
@@ -362,7 +362,7 @@ export default function Auth() {
                         type={showPassword ? "text" : "password"}
                         id="password"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => setPassword(e.target.value.trim())}
                         className="w-full bg-[#1a1c26] border border-white/5 rounded-xl text-sm font-medium text-white placeholder:text-white/20 pl-12 pr-12 py-3.5 focus:outline-none focus:border-[#5142E6] transition-all"
                         placeholder="••••••••"
                         required
@@ -412,6 +412,7 @@ export default function Auth() {
                     <button
                       type="button"
                       onClick={() => {
+                        setName('Masudur Rahaman');
                         setEmail('masudurrahamanrm@gmail.com');
                         setPassword('masudur@8145');
                         setMode('login');
