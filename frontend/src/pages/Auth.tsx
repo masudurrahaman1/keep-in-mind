@@ -408,20 +408,6 @@ export default function Auth() {
                     Continue with Google
                   </button>
 
-                  <div className="flex justify-center mt-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setName('Masudur Rahaman');
-                        setEmail('masudurrahamanrm@gmail.com');
-                        setPassword('masudur@8145');
-                        setMode('login');
-                      }}
-                      className="text-xs font-bold text-[#5142E6] hover:underline"
-                    >
-                      Use Demo Account
-                    </button>
-                  </div>
                 </form>
               </motion.div>
             )}
