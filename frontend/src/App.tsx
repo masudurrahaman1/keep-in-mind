@@ -13,9 +13,13 @@ import { Skeleton } from './components/Skeleton';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 // Initialize Capacitor Google Auth
-GoogleAuth.initialize({
-  clientId: "329859333999-rqm1odrq5kj41f1kqki4sgc5a1qhuad6.apps.googleusercontent.com",
-});
+try {
+  GoogleAuth.initialize({
+    clientId: "329859333999-rqm1odrq5kj41f1kqki4sgc5a1qhuad6.apps.googleusercontent.com",
+  });
+} catch (e) {
+  console.warn('Google Auth failed to initialize:', e);
+}
 
 // Standard import for Auth (since it's the initial entry for logged-out users)
 import Auth from './pages/Auth';
