@@ -42,14 +42,15 @@ export default function Auth() {
     setError('');
     
     try {
+      // Check for placeholder config
+      if (auth.app.options.apiKey === "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs") {
+        setError("⚠️ You are using a placeholder Firebase configuration. Please replace it with your own config in src/config/firebase.ts.");
+        setIsLoading(false);
+        return;
+      }
+
       if (mode === 'login') {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        
-        if (!userCredential.user.emailVerified) {
-          // If not verified, throw an error to the catch block
-          throw { unverified: true, message: 'Please verify your email address by clicking the link sent to your inbox.' };
-        }
-
         const idToken = await userCredential.user.getIdToken();
         const data = await loginWithFirebaseToken(idToken);
         
@@ -72,27 +73,26 @@ export default function Auth() {
         // Update user profile with their name
         await updateProfile(userCredential.user, { displayName: name });
         
-        // Send Firebase verification link
-        await sendEmailVerification(userCredential.user);
+        const idToken = await userCredential.user.getIdToken();
+        const data = await loginWithFirebaseToken(idToken);
         
-        setMode('login');
-        setError('Account created! Please check your email for the verification link before logging in.');
-        
-        // Log out the unverified user immediately so they must verify and log in again
-        await auth.signOut();
+        login(data.user, data.token, '');
+        navigate(from, { replace: true });
       }
     } catch (err: any) {
       console.error('Firebase Auth Error:', err);
       if (err.unverified) {
         setError(err.message);
       } else if (err.code === 'auth/operation-not-allowed') {
-        setError('Email/Password sign-in is not enabled in your Firebase Console.');
-      } else if (err.code === 'auth/invalid-api-key') {
-        setError('Invalid Firebase API Key. Please check your config.');
+        setError('Email/Password sign-in is disabled. Enable it in Firebase Console → Authentication → Sign-in method.');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('Too many failed attempts. Please wait a few minutes before trying again.');
+      } else if (err.code === 'auth/invalid-api-key' || err.code === 'auth/unauthorized-domain') {
+        setError('Firebase configuration error. Check your API Key and Authorized Domains in the console.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists.');
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
-        setError('Invalid email or password. If this is a demo account, make sure you have Signed Up first.');
+        setError('Invalid email or password. If you haven\'t created an account yet, please switch to Sign Up.');
       } else {
         setError(err.message || 'Authentication failed. Please check your connection or Firebase settings.');
       }
