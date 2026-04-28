@@ -9,13 +9,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs",
-  authDomain: "keepinmind-dce6e.firebaseapp.com",
-  projectId: "keepinmind-dce6e",
-  storageBucket: "keepinmind-dce6e.firebasestorage.app",
-  messagingSenderId: "329859333999",
-  appId: "1:329859333999:web:a721e118de39e3a62ab29a",
-  measurementId: "G-FJ1STMBFL1"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "keepinmind-dce6e.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "keepinmind-dce6e",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "keepinmind-dce6e.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "329859333999",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:329859333999:web:a721e118de39e3a62ab29a",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-FJ1STMBFL1"
 };
 
 const app = initializeApp(firebaseConfig);
