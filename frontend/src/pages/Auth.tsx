@@ -42,12 +42,6 @@ export default function Auth() {
     setError('');
     
     try {
-      // Check for placeholder config
-      if (auth.app.options.apiKey === "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs") {
-        setError("⚠️ You are using a placeholder Firebase configuration. Please replace it with your own config in src/config/firebase.ts.");
-        setIsLoading(false);
-        return;
-      }
 
       if (mode === 'login') {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
