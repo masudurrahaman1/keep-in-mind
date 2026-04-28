@@ -210,6 +210,20 @@ export default function Login() {
                   GitHub
                </button>
             </div>
+
+            <div className="flex justify-center mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('masudurrahamanrm@gmail.com');
+                  setPassword('masudur@8145');
+                  setMode('login');
+                }}
+                className="text-xs font-bold text-primary hover:underline"
+              >
+                Use Demo Account
+              </button>
+            </div>
           </form>
         </motion.div>
       </div>

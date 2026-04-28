@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.kim.keepinmind" />
-                  <option name="mobileSdkAppId" value="1:856059392786:android:cb44de7488332af60df9cb" />
-                  <option name="projectId" value="keep-in-minds" />
-                  <option name="projectNumber" value="856059392786" />
+                  <option name="mobileSdkAppId" value="1:329859333999:android:74172beeafbae5332ab29a" />
+                  <option name="projectId" value="keepinmind-dce6e" />
+                  <option name="projectNumber" value="329859333999" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

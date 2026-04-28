@@ -7,9 +7,38 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:329859333999:android:d111d0af755573232ab29a",
+        "android_client_info": {
+          "package_name": "com.keepinmind.official"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329859333999-rqm1odrq5kj41f1kqki4sgc5a1qhuad6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuAoN4WXflYR1zJmMZ8nNPShI2m8zhDfs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329859333999-rqm1odrq5kj41f1kqki4sgc5a1qhuad6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:329859333999:android:74172beeafbae5332ab29a",
         "android_client_info": {
-          "package_name": "com.keepinmind.notes.app"
+          "package_name": "com.kim.keepinmind"
         }
       },
       "oauth_client": [
