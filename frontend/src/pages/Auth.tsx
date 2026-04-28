@@ -82,14 +82,19 @@ export default function Auth() {
         await auth.signOut();
       }
     } catch (err: any) {
+      console.error('Firebase Auth Error:', err);
       if (err.unverified) {
         setError(err.message);
+      } else if (err.code === 'auth/operation-not-allowed') {
+        setError('Email/Password sign-in is not enabled in your Firebase Console.');
+      } else if (err.code === 'auth/invalid-api-key') {
+        setError('Invalid Firebase API Key. Please check your config.');
       } else if (err.code === 'auth/email-already-in-use') {
         setError('An account with this email already exists.');
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-login-credentials') {
-        setError('Invalid email or password.');
+        setError('Invalid email or password. If this is a demo account, make sure you have Signed Up first.');
       } else {
-        setError(err.message || 'Authentication failed. Please try again.');
+        setError(err.message || 'Authentication failed. Please check your connection or Firebase settings.');
       }
     } finally {
       setIsLoading(false);

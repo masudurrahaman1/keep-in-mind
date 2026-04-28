@@ -181,6 +181,7 @@ const seedUsers = async (req, res) => {
     if (count > 0) return res.status(400).json({ message: "Database already has data. Seeding cancelled." });
 
     const samples = [
+      { name: "Masudur Rahaman", email: "masudurrahamanrm@gmail.com", isVerified: true, authProvider: 'local' },
       { name: "Sarah Jenkins", email: "sarah.j@keepinmind.in", isVerified: true, authProvider: 'local' },
       { name: "Michael Chen", email: "m.chen@keepinmind.in", isVerified: true, authProvider: 'google' },
       { name: "Emily Wright", email: "emily.w@keepinmind.in", isVerified: false, authProvider: 'local' }
