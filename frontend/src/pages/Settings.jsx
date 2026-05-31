@@ -10,22 +10,73 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { syncNotesToGoogleDrive, fetchNotesFromGoogleDrive } from '../services/driveService';
+import { motion } from 'motion/react';
 
 /* ─── Toggle ─────────────────────────────────────────────────────── */
 function Toggle({ checked, onChange }) {
+  const { themeColor } = usePreferences();
+
+  const themeMap = {
+    yellow: {
+      track: 'bg-amber-100 dark:bg-amber-900/40 border-amber-200 dark:border-amber-800',
+      thumb: 'linear-gradient(135deg, #FDE047, #F59E0B)',
+      shadow: 'rgba(245, 158, 11, 0.4)'
+    },
+    blue: {
+      track: 'bg-blue-100 dark:bg-blue-900/40 border-blue-200 dark:border-blue-800',
+      thumb: 'linear-gradient(135deg, #60A5FA, #2563EB)',
+      shadow: 'rgba(37, 99, 235, 0.4)'
+    },
+    green: {
+      track: 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-200 dark:border-emerald-800',
+      thumb: 'linear-gradient(135deg, #34D399, #059669)',
+      shadow: 'rgba(5, 150, 105, 0.4)'
+    },
+    purple: {
+      track: 'bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800',
+      thumb: 'linear-gradient(135deg, #A78BFA, #7C3AED)',
+      shadow: 'rgba(124, 58, 237, 0.4)'
+    }
+  };
+
+  const currentTheme = themeMap[themeColor] || themeMap.yellow;
+
   return (
     <button
       role="switch"
       aria-checked={checked}
       onClick={() => onChange(!checked)}
-      className={`relative w-[52px] h-7 rounded-full transition-colors duration-300 focus:outline-none ${
-        checked ? 'bg-[#FBBF24]' : 'bg-neutral-200 dark:bg-neutral-600'
+      className={`relative w-[44px] h-[26px] rounded-full flex items-center p-1 cursor-pointer transition-colors duration-500 ease-in-out overflow-hidden ${
+        checked ? currentTheme.track : 'bg-neutral-200 dark:bg-neutral-700 border border-transparent'
       }`}
+      style={{
+        boxShadow: "inset 0px 2px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(255,255,255,0.3)"
+      }}
     >
-      <span
-        className={`absolute top-[2px] left-[2px] w-[24px] h-[24px] rounded-full bg-white shadow-md transition-transform duration-300 ${
-          checked ? 'translate-x-[24px]' : 'translate-x-0'
-        }`}
+      <motion.div
+        layout
+        initial={false}
+        animate={{
+          x: checked ? 18 : 0,
+        }}
+        whileTap={{
+          width: 24,
+          x: checked ? 10 : 0
+        }}
+        transition={{
+          type: "spring",
+          stiffness: 400,
+          damping: 25
+        }}
+        className="h-[18px] w-[18px] rounded-full shadow-md z-10"
+        style={{
+          background: checked 
+            ? currentTheme.thumb
+            : "linear-gradient(135deg, #ffffff, #f0f0f0)",
+          boxShadow: checked 
+            ? `0 2px 5px ${currentTheme.shadow}, inset 0 -1px 2px rgba(0,0,0,0.1), inset 0 1px 2px rgba(255,255,255,0.6)`
+            : "0 2px 4px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.05), inset 0 1px 2px rgba(255,255,255,0.8)"
+        }}
       />
     </button>
   );
@@ -192,8 +243,16 @@ export default function Settings() {
     finally { setIsFetching(false); }
   };
 
+  const bgMap = {
+    yellow: 'bg-[#FFF9ED]',
+    blue: 'bg-[#F0F7FF]',
+    green: 'bg-[#F0FDF4]',
+    purple: 'bg-[#FAF5FF]',
+  };
+  const activeBg = bgMap[themeColor] || 'bg-[#FFF9ED]';
+
   return (
-    <div className="min-h-full bg-[#FCF7ED] dark:bg-neutral-900 pb-28 flex flex-col">
+    <div className={`min-h-full ${activeBg} dark:bg-neutral-900 pb-28 flex flex-col`}>
 
       {/* Header */}
       <div className="flex items-center justify-between p-5 sticky top-0 z-10 glass border-b border-outline-variant/20">

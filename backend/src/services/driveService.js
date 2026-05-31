@@ -147,10 +147,43 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
     };
 
     const targetField = schemaFieldMap[category] || schemaFieldMap['Others'];
-    const parentFolderId = user[targetField];
+    let parentFolderId = user[targetField];
 
     if (!parentFolderId) {
-      throw new Error(`Folder ID for category "${category}" not found. User might need to re-login to initialize folders.`);
+      console.log(`[DriveService] Folder ID missing for category "${category}". Resolving dynamically...`);
+      
+      // 1. Ensure root folder exists
+      let rootFolderId = user.rootFolderId;
+      if (!rootFolderId) {
+        const rootRes = await drive.files.list({
+          q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+          fields: 'files(id)', spaces: 'drive',
+        });
+        if (rootRes.data.files.length > 0) {
+          rootFolderId = rootRes.data.files[0].id;
+        } else {
+          const rootFolder = await drive.files.create({ resource: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+          rootFolderId = rootFolder.data.id;
+        }
+        user.rootFolderId = rootFolderId;
+      }
+
+      // 2. Ensure category folder exists
+      const safeCategory = category || 'Others';
+      const catRes = await drive.files.list({
+        q: `name = '${safeCategory.replace(/'/g, "\\'")}' and '${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+        fields: 'files(id)', spaces: 'drive',
+      });
+      if (catRes.data.files.length > 0) {
+        parentFolderId = catRes.data.files[0].id;
+      } else {
+        const catFolder = await drive.files.create({ resource: { name: safeCategory, parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+        parentFolderId = catFolder.data.id;
+      }
+      
+      // Save it back to user doc
+      user[targetField] = parentFolderId;
+      await user.save();
     }
 
     const { Readable } = require('stream');
