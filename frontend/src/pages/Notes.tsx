@@ -392,50 +392,50 @@ export default function Notes() {
     <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
       
       {/* 1. GREETING BANNER CARD */}
-      <div className="w-full relative overflow-hidden rounded-[32px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-6 shadow-lg mb-8 shrink-0">
+      <div className="w-full relative overflow-hidden rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-4 sm:p-6 shadow-lg mb-6 sm:mb-8 shrink-0">
 
         {/* Background Glow */}
-        <div className="absolute right-10 top-10 h-64 w-64 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
+        <div className="absolute right-10 top-10 h-32 w-32 sm:h-64 sm:w-64 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative z-10">
           
           {/* Left Content */}
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-black/20 px-4 py-2 backdrop-blur-md">
-              <span>{greeting.includes('Morning') ? '☀️' : greeting.includes('Night') ? '🌙' : '🌤️'}</span>
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-white/70 dark:bg-black/20 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md text-[10px] sm:text-xs">
+              <span className="text-xs sm:text-sm">{greeting.includes('Morning') ? '☀️' : greeting.includes('Night') ? '🌙' : '🌤️'}</span>
               <span className="font-semibold text-purple-600 dark:text-purple-300">
                 {greeting.toUpperCase()}
               </span>
             </div>
 
-            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">
+            <h1 className="mt-3 sm:mt-5 text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight">
               Hello there! 👋
             </h1>
 
-            <p className="mt-3 text-lg sm:text-xl text-slate-500 dark:text-slate-300">
+            <p className="mt-1.5 sm:mt-3 text-sm sm:text-xl text-slate-500 dark:text-slate-300">
               What are your thoughts today?
             </p>
 
             {/* Stats */}
-            <div className="mt-8 flex flex-wrap gap-4">
+            <div className="mt-5 sm:mt-8 flex flex-wrap gap-2 sm:gap-4">
               
-              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
-                <div className="text-3xl font-bold text-purple-600 dark:text-purple-300">{notes.length}</div>
-                <div className="text-gray-600 dark:text-gray-300">Notes</div>
+              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
+                <div className="text-xl sm:text-3xl font-bold text-purple-600 dark:text-purple-300 leading-none mb-0.5 sm:mb-1">{notes.length}</div>
+                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Notes</div>
               </div>
 
-              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
-                <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">
+              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
+                <div className="text-xl sm:text-3xl font-bold text-yellow-500 dark:text-yellow-400 leading-none mb-0.5 sm:mb-1">
                   {localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) 
                     ? JSON.parse(localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) || '[]').length 
                     : 0}
                 </div>
-                <div className="text-gray-600 dark:text-gray-300">Tasks</div>
+                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Tasks</div>
               </div>
 
-              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
-                <div className="text-3xl font-bold text-violet-500 dark:text-violet-300">3</div>
-                <div className="text-gray-600 dark:text-gray-300">Reminders</div>
+              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
+                <div className="text-xl sm:text-3xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5 sm:mb-1">3</div>
+                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Reminders</div>
               </div>
             </div>
           </div>
