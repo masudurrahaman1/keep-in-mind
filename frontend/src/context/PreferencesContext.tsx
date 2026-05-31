@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-export type ThemeColor = 'yellow' | 'blue' | 'green' | 'purple';
+export type ThemeColor = 'yellow' | 'blue' | 'green' | 'purple' | 'rose' | 'orange';
 export type FontStyle = 'inter' | 'outfit' | 'roboto' | 'opensans';
 export type TextSize = 'small' | 'medium' | 'large';
 

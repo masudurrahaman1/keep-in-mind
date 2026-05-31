@@ -12,6 +12,8 @@ export default function ThemeColorSettings() {
     { id: 'blue', name: 'Vibrant Blue', hex: '#007AFF' },
     { id: 'green', name: 'Emerald Green', hex: '#34C759' },
     { id: 'purple', name: 'Royal Purple', hex: '#AF52DE' },
+    { id: 'rose', name: 'Rose Red', hex: '#FF2D55' },
+    { id: 'orange', name: 'Sunset Orange', hex: '#FF9500' },
   ];
 
   const handleSelect = (id) => {

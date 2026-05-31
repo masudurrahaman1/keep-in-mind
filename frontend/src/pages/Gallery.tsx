@@ -65,6 +65,26 @@ export default function Gallery() {
       btn: 'text-purple-900 dark:text-purple-100 bg-white/80 dark:bg-white/10 hover:bg-white',
       topIconBg: 'bg-purple-100 dark:bg-purple-900/40 text-purple-500 border-purple-200/50',
       notifDot: 'bg-purple-500',
+    },
+    rose: {
+      bg: 'from-rose-100 to-rose-200 dark:from-rose-900/40 dark:to-rose-800/40 border-rose-200/50 dark:border-rose-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-rose-300/30 text-rose-600 dark:text-rose-400',
+      iconWatermark: 'text-rose-500/20 dark:text-rose-500/10',
+      textMain: 'text-rose-900 dark:text-rose-200',
+      textSub: 'text-rose-700 dark:text-rose-400',
+      btn: 'text-rose-900 dark:text-rose-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-rose-100 dark:bg-rose-900/40 text-rose-500 border-rose-200/50',
+      notifDot: 'bg-rose-500',
+    },
+    orange: {
+      bg: 'from-orange-100 to-orange-200 dark:from-orange-900/40 dark:to-orange-800/40 border-orange-200/50 dark:border-orange-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-orange-300/30 text-orange-600 dark:text-orange-400',
+      iconWatermark: 'text-orange-500/20 dark:text-orange-500/10',
+      textMain: 'text-orange-900 dark:text-orange-200',
+      textSub: 'text-orange-700 dark:text-orange-400',
+      btn: 'text-orange-900 dark:text-orange-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-orange-100 dark:bg-orange-900/40 text-orange-500 border-orange-200/50',
+      notifDot: 'bg-orange-500',
     }
   };
   const activeTheme = themeMap[themeColor] || themeMap.yellow;

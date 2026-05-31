@@ -13,7 +13,9 @@ export default function BottomNav() {
     yellow: { text: 'text-[#FFC107]', fill: 'fill-[#FFC107]/10', bg: 'bg-[#FFF9EA] dark:bg-amber-950/25', ring: 'ring-[#FFC107]' },
     blue: { text: 'text-[#007AFF]', fill: 'fill-[#007AFF]/10', bg: 'bg-[#F0F7FF] dark:bg-blue-950/25', ring: 'ring-[#007AFF]' },
     green: { text: 'text-[#34C759]', fill: 'fill-[#34C759]/10', bg: 'bg-[#F0FDF4] dark:bg-emerald-950/25', ring: 'ring-[#34C759]' },
-    purple: { text: 'text-[#AF52DE]', fill: 'fill-[#AF52DE]/10', bg: 'bg-[#FAF5FF] dark:bg-purple-950/25', ring: 'ring-[#AF52DE]' }
+    purple: { text: 'text-[#AF52DE]', fill: 'fill-[#AF52DE]/10', bg: 'bg-[#FAF5FF] dark:bg-purple-950/25', ring: 'ring-[#AF52DE]' },
+    rose: { text: 'text-[#FF2D55]', fill: 'fill-[#FF2D55]/10', bg: 'bg-[#FFE5E9] dark:bg-rose-950/25', ring: 'ring-[#FF2D55]' },
+    orange: { text: 'text-[#FF9500]', fill: 'fill-[#FF9500]/10', bg: 'bg-[#FFF0D4] dark:bg-orange-950/25', ring: 'ring-[#FF9500]' }
   };
   const activeTheme = themeMap[themeColor] || themeMap.yellow;
 

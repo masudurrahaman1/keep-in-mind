@@ -51,6 +51,22 @@ export default function Tasks() {
       glow: 'bg-purple-300',
       check: 'bg-[#AF52DE] text-white',
       checkBorder: 'hover:border-[#AF52DE]'
+    },
+    rose: {
+      headerBg: 'bg-[#FFE5E9] dark:from-[#40121D] dark:to-[#5A1A2A]',
+      textDark: 'dark:text-rose-100',
+      textDarkSub: 'dark:text-rose-200/80',
+      glow: 'bg-rose-300',
+      check: 'bg-[#FF2D55] text-white',
+      checkBorder: 'hover:border-[#FF2D55]'
+    },
+    orange: {
+      headerBg: 'bg-[#FFF0D4] dark:from-[#4A2012] dark:to-[#6B2F1A]',
+      textDark: 'dark:text-orange-100',
+      textDarkSub: 'dark:text-orange-200/80',
+      glow: 'bg-orange-300',
+      check: 'bg-[#FF9500] text-white',
+      checkBorder: 'hover:border-[#FF9500]'
     }
   };
   const activeTheme = themeMap[themeColor] || themeMap.yellow;

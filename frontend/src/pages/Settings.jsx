@@ -36,6 +36,16 @@ function Toggle({ checked, onChange }) {
       track: 'bg-purple-100 dark:bg-purple-900/40 border-purple-200 dark:border-purple-800',
       thumb: 'linear-gradient(135deg, #A78BFA, #7C3AED)',
       shadow: 'rgba(124, 58, 237, 0.4)'
+    },
+    rose: {
+      track: 'bg-rose-100 dark:bg-rose-900/40 border-rose-200 dark:border-rose-800',
+      thumb: 'linear-gradient(135deg, #FB7185, #E11D48)',
+      shadow: 'rgba(225, 29, 72, 0.4)'
+    },
+    orange: {
+      track: 'bg-orange-100 dark:bg-orange-900/40 border-orange-200 dark:border-orange-800',
+      thumb: 'linear-gradient(135deg, #FB923C, #EA580C)',
+      shadow: 'rgba(234, 88, 12, 0.4)'
     }
   };
 
@@ -85,7 +95,7 @@ function Toggle({ checked, onChange }) {
 /* ─── Section Label ───────────────────────────────────────────────── */
 function SectionLabel({ children }) {
   const { themeColor } = usePreferences();
-  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE', rose: '#FF2D55', orange: '#FF9500' };
   return (
     <h2 style={{ color: colorMap[themeColor] || '#FBC02D' }} className="font-semibold text-sm mb-3 ml-1">{children}</h2>
   );
@@ -108,7 +118,7 @@ function Divider() {
 /* ─── Standard Row (chevron right) ──────────────────────────────── */
 function LinkRow({ icon: Icon, label, value }) {
   const { themeColor } = usePreferences();
-  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE', rose: '#FF2D55', orange: '#FF9500' };
   return (
     <div className="flex items-center justify-between py-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
       <div className="flex items-center gap-4">
@@ -128,7 +138,7 @@ function LinkRow({ icon: Icon, label, value }) {
 /* ─── Toggle Row ──────────────────────────────────────────────────── */
 function ToggleRow({ icon: Icon, label, checked, onChange, darkIcon = false }) {
   const { themeColor } = usePreferences();
-  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE', rose: '#FF2D55', orange: '#FF9500' };
   const iconColor = colorMap[themeColor] || '#FBC02D';
   
   return (
@@ -151,6 +161,8 @@ function ThemeColorDot({ color }) {
     blue: '#007AFF',
     green: '#34C759',
     purple: '#AF52DE',
+    rose: '#FF2D55',
+    orange: '#FF9500'
   };
   return (
     <div className="flex items-center gap-2 text-neutral-400 text-sm">
@@ -192,7 +204,7 @@ export default function Settings() {
     triggerHaptic 
   } = usePreferences();
 
-  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE', rose: '#FF2D55', orange: '#FF9500' };
 
   const [darkMode, setDarkMode]         = useState(theme === 'dark');
   const [animations, setAnimations]     = useState(true);

@@ -95,6 +95,18 @@ export default function Notes() {
       textDark: 'dark:text-purple-100',
       textDarkSub: 'dark:text-purple-200/80',
       glow: 'bg-purple-300'
+    },
+    rose: {
+      headerBg: 'bg-[#FFE5E9] dark:from-[#40121D] dark:to-[#5A1A2A]',
+      textDark: 'dark:text-rose-100',
+      textDarkSub: 'dark:text-rose-200/80',
+      glow: 'bg-rose-300'
+    },
+    orange: {
+      headerBg: 'bg-[#FFF0D4] dark:from-[#4A2012] dark:to-[#6B2F1A]',
+      textDark: 'dark:text-orange-100',
+      textDarkSub: 'dark:text-orange-200/80',
+      glow: 'bg-orange-300'
     }
   };
   const activeTheme = themeMap[themeColor] || themeMap.yellow;
@@ -143,6 +155,7 @@ export default function Notes() {
 
 
   const [filterActive, setFilterActive] = useState('All');
+  const [sortOrder, setSortOrder] = useState<'recent' | 'oldest'>('recent');
   const { searchQuery } = useOutletContext<{ searchQuery: string }>();
 
   const filters = ['All', ...(() => {
@@ -163,9 +176,13 @@ export default function Notes() {
 
     return {
       pinnedNotes: result.filter(n => n.pinned),
-      allNotes: result.filter(n => !n.pinned).sort((a, b) => b.id - a.id)
+      allNotes: result.filter(n => !n.pinned).sort((a, b) => {
+        const timeA = a.date ? new Date(a.date).getTime() : a.id;
+        const timeB = b.date ? new Date(b.date).getTime() : b.id;
+        return sortOrder === 'recent' ? timeB - timeA : timeA - timeB;
+      })
     };
-  }, [notes, searchQuery, filterActive]);
+  }, [notes, searchQuery, filterActive, sortOrder]);
 
   const handleSaveNote = (savedNote: any) => {
     // Legacy support for Editor, not strictly needed as Editor handles saves directly now
@@ -375,20 +392,72 @@ export default function Notes() {
     <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
       
       {/* 1. GREETING BANNER CARD */}
-      <div className={`w-full ${activeTheme.headerBg} rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 mb-6 relative overflow-hidden shadow-sm shrink-0 h-[120px] sm:h-[144px]`}>
-        <div className="relative z-10 w-[70%] sm:w-2/3">
-          <h2 className={`text-xl sm:text-[22px] font-bold text-gray-900 ${activeTheme.textDark} leading-tight mb-1`}>
-            {greeting}, 👋
-          </h2>
-          <p className={`text-xs sm:text-sm text-gray-600 ${activeTheme.textDarkSub}`}>
-            What are your thoughts today?
-          </p>
-        </div>
-        {/* Decorative glow */}
-        <div className={`absolute right-[-10px] bottom-[-20px] w-32 h-32 ${activeTheme.glow} rounded-full opacity-20 blur-2xl pointer-events-none`} />
-        {/* Dynamic 3D Graphic */}
-        <div className="absolute right-0 bottom-0 w-28 sm:w-32 h-full flex items-end justify-center pr-2 pb-2">
-          <img src={imageSrc} alt={greeting} className="h-20 sm:h-24 w-auto object-contain drop-shadow-md" />
+      <div className="w-full relative overflow-hidden rounded-[32px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-6 shadow-lg mb-8 shrink-0">
+
+        {/* Background Glow */}
+        <div className="absolute right-10 top-10 h-64 w-64 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative z-10">
+          
+          {/* Left Content */}
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 dark:bg-black/20 px-4 py-2 backdrop-blur-md">
+              <span>{greeting.includes('Morning') ? '☀️' : greeting.includes('Night') ? '🌙' : '🌤️'}</span>
+              <span className="font-semibold text-purple-600 dark:text-purple-300">
+                {greeting.toUpperCase()}
+              </span>
+            </div>
+
+            <h1 className="mt-5 text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white">
+              Hello there! 👋
+            </h1>
+
+            <p className="mt-3 text-lg sm:text-xl text-slate-500 dark:text-slate-300">
+              What are your thoughts today?
+            </p>
+
+            {/* Stats */}
+            <div className="mt-8 flex flex-wrap gap-4">
+              
+              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
+                <div className="text-3xl font-bold text-purple-600 dark:text-purple-300">{notes.length}</div>
+                <div className="text-gray-600 dark:text-gray-300">Notes</div>
+              </div>
+
+              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
+                <div className="text-3xl font-bold text-yellow-500 dark:text-yellow-400">
+                  {localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) 
+                    ? JSON.parse(localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) || '[]').length 
+                    : 0}
+                </div>
+                <div className="text-gray-600 dark:text-gray-300">Tasks</div>
+              </div>
+
+              <div className="rounded-3xl bg-white/70 dark:bg-black/20 px-6 py-4 backdrop-blur-md">
+                <div className="text-3xl font-bold text-violet-500 dark:text-violet-300">3</div>
+                <div className="text-gray-600 dark:text-gray-300">Reminders</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Side */}
+          <div className="relative hidden md:flex justify-center">
+            <div className="absolute h-80 w-80 rounded-full border border-white/40 dark:border-white/10"></div>
+
+            <img
+              src={imageSrc}
+              alt="Greeting"
+              className="relative z-10 w-64 object-contain"
+            />
+
+            <div className="absolute left-10 bottom-24 text-5xl opacity-80">
+              ☁️
+            </div>
+
+            <div className="absolute right-6 bottom-8 text-5xl opacity-80">
+              ☁️
+            </div>
+          </div>
         </div>
       </div>
 
@@ -521,8 +590,11 @@ export default function Notes() {
             <FileText size={14} className="text-gray-400" />
             <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">All Notes</h3>
           </div>
-          <button className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors">
-            Recent <ChevronDown size={12} strokeWidth={2.5} />
+          <button 
+            onClick={() => setSortOrder(prev => prev === 'recent' ? 'oldest' : 'recent')}
+            className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            {sortOrder === 'recent' ? 'Recent' : 'Oldest'} <ChevronDown size={12} strokeWidth={2.5} className={`transition-transform ${sortOrder === 'oldest' ? 'rotate-180' : ''}`} />
           </button>
         </div>
 
