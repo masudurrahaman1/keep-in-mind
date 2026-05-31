@@ -252,7 +252,7 @@ export default function VaultCategory() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-[#FFF9ED] dark:bg-neutral-900 p-4 sm:p-5 md:p-6 pb-32 min-h-full">
+    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-white dark:bg-neutral-900 p-4 sm:p-5 md:p-6 pb-32 min-h-full">
       <AnimatePresence>
         {noGoogleDrive && (
           <motion.div

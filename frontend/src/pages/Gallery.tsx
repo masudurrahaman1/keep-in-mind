@@ -468,7 +468,7 @@ export default function Gallery() {
   }, [selectedMediaIndex]);
 
   return (
-    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-[#FFF9ED] dark:bg-neutral-900 p-4 sm:p-5 md:p-6 pb-32 sm:pb-32 md:pb-12 min-h-full">
+    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-white dark:bg-neutral-900 p-4 sm:p-5 md:p-6 pb-32 sm:pb-32 md:pb-12 min-h-full">
 
       {/* No Google Drive Connection Banner */}
       <AnimatePresence>
@@ -542,47 +542,6 @@ export default function Gallery() {
         </div>
       </div>
 
-      {/* ── Dashboard Stats Cards ────────────────── */}
-      <div className="grid grid-cols-3 gap-3 mb-8">
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-100 dark:border-neutral-700 flex flex-col justify-between relative overflow-hidden">
-          <div className="flex items-center gap-2 mb-3 z-10">
-            <div className="w-6 h-6 rounded-md bg-amber-100 text-amber-500 flex items-center justify-center shrink-0">
-              <FileText size={14} />
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-neutral-600 dark:text-neutral-300 leading-tight">Total Documents</span>
-          </div>
-          <div className="flex items-baseline gap-1 z-10">
-            <span className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">{activeCount}</span>
-            <span className="text-[10px] text-neutral-400">Files</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-100 dark:border-neutral-700 flex flex-col justify-between relative overflow-hidden">
-          <div className="flex items-center gap-2 mb-3 z-10">
-            <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-500 flex items-center justify-center shrink-0">
-              <Cloud size={14} />
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-neutral-600 dark:text-neutral-300 leading-tight">Cloud Synced</span>
-          </div>
-          <div className="flex items-baseline gap-1 z-10">
-            <span className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">{activeCount}</span>
-            <span className="text-[10px] text-neutral-400">Files</span>
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-100 dark:border-neutral-700 flex flex-col justify-between relative overflow-hidden">
-          <div className="flex items-center gap-2 mb-3 z-10">
-            <div className="w-6 h-6 rounded-md bg-purple-100 text-purple-500 flex items-center justify-center shrink-0">
-              <Lock size={14} />
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-neutral-600 dark:text-neutral-300 leading-tight">Encrypted</span>
-          </div>
-          <div className="flex items-baseline gap-1 z-10">
-            <span className="text-xl sm:text-2xl font-bold text-neutral-900 dark:text-white">100%</span>
-            <span className="text-[10px] text-neutral-400">Secure</span>
-          </div>
-        </div>
-      </div>
 
       {/* ── Categories Grid ──────────────────────── */}
       <div className="grid grid-cols-2 gap-3 mb-8">
