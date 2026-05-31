@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { formatDistanceToNow, parseISO, format, isToday, isYesterday } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Plus, CheckSquare, Settings2, MoreHorizontal, Search, FileText, PenLine, Pin, Tag, Mic, Star, Menu, ChevronDown } from 'lucide-react';
+import { Plus, CheckSquare, Settings2, MoreHorizontal, MoreVertical, Search, FileText, PenLine, Pin, Tag, Mic, Star, Menu, ChevronDown, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
@@ -375,7 +375,7 @@ export default function Notes() {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
             {pinnedNotes.map((note) => {
               const isList = note.type === 'list';
               let listItems: any[] = [];
@@ -386,6 +386,7 @@ export default function Notes() {
                   listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
                 }
               }
+              const isDrawing = note.type === 'drawing';
 
               return (
                 <div
@@ -405,11 +406,17 @@ export default function Notes() {
                       isLongPressTriggered.current = true;
                     }
                   }}
-                  className="bg-[#FFF9EA] dark:bg-yellow-950/20 rounded-[24px] p-5 shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative flex justify-between items-start cursor-pointer group"
+                  className="break-inside-avoid mb-3 inline-block w-full bg-[#FFF9EA] dark:bg-yellow-950/20 rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
                 >
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h4 className="text-base font-black text-gray-900 dark:text-gray-100 truncate flex items-center gap-1.5">
+                  {isDrawing && note.content && note.content.startsWith('data:image') && (
+                    <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
+                      <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  
+                  <div className="p-4 flex flex-col flex-1">
+                    <div className="flex items-start justify-between mb-2 gap-2">
+                      <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
                         {note.title}
                       </h4>
                       <button
@@ -417,22 +424,22 @@ export default function Notes() {
                           e.stopPropagation();
                           handlePin(note);
                         }}
-                        className="p-1 text-[#FFC107] rounded-full transition-colors"
+                        className="p-1 -mt-1 -mr-1 text-[#FFC107] rounded-full transition-colors shrink-0"
                       >
-                        <Pin size={18} className="fill-[#FFC107]" />
+                        <Pin size={16} className="fill-[#FFC107]" />
                       </button>
                     </div>
 
                     {isList ? (
-                      <div className="space-y-2">
+                      <div className="space-y-1.5 mb-3">
                         {listItems.slice(0, 3).map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-2.5 text-xs text-gray-700 dark:text-gray-300 font-semibold">
+                          <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
                             <div className={cn(
-                              "w-[15px] h-[15px] rounded border shrink-0 flex items-center justify-center transition-all",
-                              item.checked ? "border-[#FFC107] bg-[#FFC107]/15" : "border-gray-300 dark:border-white/20"
+                              "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
+                              item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
                             )}>
                               {item.checked && (
-                                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#FFC107" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
                                   <polyline points="20 6 9 17 4 12"></polyline>
                                 </svg>
                               )}
@@ -444,15 +451,31 @@ export default function Notes() {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-semibold line-clamp-3">
-                        {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
-                      </p>
+                      !isDrawing && (
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
+                          {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
+                        </p>
+                      )
                     )}
-                  </div>
 
-                  {/* clipboard 3D image on right side */}
-                  <div className="w-[84px] h-[84px] shrink-0 flex items-center justify-center">
-                    <img src="/clipboard-3d.png" alt="Clipboard" className="w-full h-full object-contain mix-blend-multiply dark:mix-blend-normal" />
+                    <div className="mt-auto pt-2 flex flex-col gap-2">
+                      {note.category && (
+                        <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
+                          {note.category}
+                        </span>
+                      )}
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                        {(() => {
+                          try {
+                            const date = parseISO(note.date);
+                            if (isNaN(date.getTime())) return note.date;
+                            if (isToday(date)) return format(date, 'h:mm a');
+                            if (isYesterday(date)) return 'Yesterday';
+                            return format(date, 'MMM d, yyyy');
+                          } catch { return note.date; }
+                        })()}
+                      </span>
+                    </div>
                   </div>
                 </div>
               );
@@ -473,19 +496,19 @@ export default function Notes() {
           </button>
         </div>
 
-        <div className="flex flex-col gap-3">
+        <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
           <AnimatePresence>
             {allNotes.map((note) => {
               const isList = note.type === 'list';
-              let previewText = note.content || '';
+              let listItems: any[] = [];
               if (isList && note.content) {
                 try {
-                  const parsed = JSON.parse(note.content);
-                  previewText = parsed.map((p: any) => p.text).join(', ');
+                  listItems = JSON.parse(note.content);
                 } catch {
-                  previewText = note.content.replace(/^-\s*/gm, '').replace(/\n/g, ', ');
+                  listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
                 }
               }
+              const isDrawing = note.type === 'drawing';
 
               return (
                 <motion.div
@@ -510,53 +533,77 @@ export default function Notes() {
                       isLongPressTriggered.current = true;
                     }
                   }}
-                  className="bg-white dark:bg-[#1A1C20] rounded-[22px] p-4 shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 flex items-center gap-4 cursor-pointer relative group"
+                  className="break-inside-avoid mb-3 inline-block w-full bg-white dark:bg-[#1A1C20] rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
                 >
-                  {/* Left 3D icon wrapper */}
-                  <div className={cn("w-[50px] h-[50px] rounded-[18px] flex items-center justify-center shrink-0 overflow-hidden", getNoteIconBg(note))}>
-                    <img src={getNote3DIcon(note)} alt="Icon" className="w-[36px] h-[36px] object-contain mix-blend-multiply dark:mix-blend-normal" />
-                  </div>
+                  {isDrawing && note.content && note.content.startsWith('data:image') && (
+                    <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
+                      <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
+                    </div>
+                  )}
 
-                  {/* Middle Content */}
-                  <div className="flex-1 min-w-0 flex flex-col justify-center">
-                    <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 truncate pr-4 mb-1">
-                      {note.title}
-                    </h4>
-                    <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 line-clamp-2 pr-6">
-                      {previewText ? previewText.replace(/<[^>]*>?/gm, '') : ''}
-                    </p>
-                  </div>
+                  <div className="p-4 flex flex-col flex-1">
+                    <div className="flex items-start justify-between mb-2 gap-2">
+                      <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
+                        {note.title}
+                      </h4>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                          setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
+                        }}
+                        className="p-1 -mt-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition-colors shrink-0"
+                      >
+                        <MoreVertical size={16} />
+                      </button>
+                    </div>
 
-                  {/* Right Side */}
-                  <div className="flex flex-col items-end gap-1.5 shrink-0 justify-center">
-                    <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight whitespace-nowrap">
-                      {(() => {
-                        try {
-                          const date = parseISO(note.date);
-                          if (isNaN(date.getTime())) return note.date;
-                          
-                          if (isToday(date)) {
-                            return format(date, 'h:mm a');
-                          } else if (isYesterday(date)) {
-                            return 'Yesterday';
-                          } else {
-                            return format(date, 'MMM d');
-                          }
-                        } catch {
-                          return note.date;
-                        }
-                      })()}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePin(note);
-                      }}
-                      className="p-1 text-gray-300 hover:text-[#FFC107] rounded-full transition-colors mt-[-4px]"
-                      title={note.pinned ? "Unpin Note" : "Pin Note"}
-                    >
-                      <Star size={16} className={cn(note.pinned ? "fill-[#FFC107] text-[#FFC107]" : "text-gray-300 dark:text-gray-600")} />
-                    </button>
+                    {isList ? (
+                      <div className="space-y-1.5 mb-3">
+                        {listItems.slice(0, 3).map((item: any) => (
+                          <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
+                            <div className={cn(
+                              "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
+                              item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
+                            )}>
+                              {item.checked && (
+                                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                  <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                              )}
+                            </div>
+                            <span className={cn("truncate", item.checked && "line-through opacity-50")}>
+                              {item.text}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      !isDrawing && (
+                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
+                          {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
+                        </p>
+                      )
+                    )}
+
+                    <div className="mt-auto pt-2 flex flex-col gap-2">
+                      {note.category && (
+                        <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
+                          {note.category}
+                        </span>
+                      )}
+                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                        {(() => {
+                          try {
+                            const date = parseISO(note.date);
+                            if (isNaN(date.getTime())) return note.date;
+                            if (isToday(date)) return format(date, 'h:mm a');
+                            if (isYesterday(date)) return 'Yesterday';
+                            return format(date, 'MMM d, yyyy');
+                          } catch { return note.date; }
+                        })()}
+                      </span>
+                    </div>
                   </div>
                 </motion.div>
               );
