@@ -257,7 +257,7 @@ export default function Settings() {
     <div className="min-h-full bg-white dark:bg-neutral-900 pb-28 flex flex-col">
 
       {/* Header */}
-      <div className="flex items-center justify-between p-5 sticky top-0 z-10 glass border-b border-outline-variant/20">
+      <div className="flex items-center justify-between px-5 py-3 sticky top-0 z-10 glass border-b border-outline-variant/20">
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigate(-1)}
