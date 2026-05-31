@@ -345,9 +345,49 @@ export default function VaultCategory() {
           <Loader2 size={32} className="text-amber-500 animate-spin mb-4" />
           <p className="text-neutral-500 text-sm font-medium">Decrypting Vault...</p>
         </div>
-      ) : filteredMedia.length > 0 ? (
+      ) : filteredMedia.length > 0 || uploadQueue.length > 0 ? (
         <div className="flex flex-col gap-2 mb-8">
           <AnimatePresence mode="popLayout">
+            {/* Show Uploading Items first */}
+            {uploadQueue.map((item) => (
+              <motion.div
+                key={item.id}
+                layout
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="group relative flex items-center gap-4 p-3 bg-white dark:bg-[#1C1C1E] rounded-2xl border border-neutral-100 dark:border-neutral-800 shadow-sm overflow-hidden"
+              >
+                {/* Progress bar background */}
+                <div 
+                  className="absolute left-0 top-0 bottom-0 bg-amber-500/5 dark:bg-amber-500/10 transition-all duration-300"
+                  style={{ width: `${item.progress}%` }}
+                />
+                
+                <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center shrink-0 relative z-10">
+                  {item.status === 'completed' ? (
+                    <FileText size={20} />
+                  ) : item.status === 'failed' ? (
+                    <XIcon size={20} className="text-error" />
+                  ) : (
+                    <Loader2 size={20} className="animate-spin" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center relative z-10">
+                  <h4 className="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate mb-0.5">
+                    {item.name}
+                  </h4>
+                  <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
+                    <span className="text-amber-600 dark:text-amber-400">
+                      {item.status === 'uploading' ? `Uploading ${item.progress}%` : 
+                       item.status === 'completed' ? 'Processing...' : 'Failed'}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+
+            {/* Show Actual Documents */}
             {filteredMedia.map((item, index) => (
               <DocumentListCard 
                 key={item._id} 
