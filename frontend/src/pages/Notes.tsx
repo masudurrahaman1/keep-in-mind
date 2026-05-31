@@ -5,6 +5,7 @@ import { Plus, CheckSquare, Settings2, MoreHorizontal, MoreVertical, Search, Fil
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
 import SpeedDial from '../components/SpeedDial';
 import NoteContextMenu from '../components/NoteContextMenu';
 
@@ -66,8 +67,37 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function Notes() {
   const { user, token, googleAccessToken } = useAuth();
+  const { themeColor } = usePreferences();
   const navigate = useNavigate();
   const [contextMenu, setContextMenu] = useState<{ note: any; x: number; y: number } | null>(null);
+  
+  const themeMap = {
+    yellow: {
+      headerBg: 'bg-[#FEF7D6] dark:from-[#2C2415] dark:to-[#42361C]',
+      textDark: 'dark:text-amber-100',
+      textDarkSub: 'dark:text-amber-200/80',
+      glow: 'bg-yellow-300'
+    },
+    blue: {
+      headerBg: 'bg-[#E5F1FF] dark:from-[#112440] dark:to-[#173055]',
+      textDark: 'dark:text-blue-100',
+      textDarkSub: 'dark:text-blue-200/80',
+      glow: 'bg-blue-300'
+    },
+    green: {
+      headerBg: 'bg-[#E6F8ED] dark:from-[#133020] dark:to-[#1A402A]',
+      textDark: 'dark:text-emerald-100',
+      textDarkSub: 'dark:text-emerald-200/80',
+      glow: 'bg-emerald-300'
+    },
+    purple: {
+      headerBg: 'bg-[#F4EBFF] dark:from-[#2D1B42] dark:to-[#3C2458]',
+      textDark: 'dark:text-purple-100',
+      textDarkSub: 'dark:text-purple-200/80',
+      glow: 'bg-purple-300'
+    }
+  };
+  const activeTheme = themeMap[themeColor] || themeMap.yellow;
   
   const storageKey = user ? `keep-in-mind-notes-${user._id}` : 'keep-in-mind-notes-guest';
 
@@ -345,20 +375,20 @@ export default function Notes() {
     <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
       
       {/* 1. GREETING BANNER CARD */}
-      <div className="w-full bg-[#FEF7D6] dark:from-[#2C2415] dark:to-[#42361C] rounded-[28px] p-6 mb-6 relative overflow-hidden shadow-sm shrink-0" style={{height:'144px'}}>
-        <div className="relative z-10 w-2/3">
-          <h2 className="text-[22px] font-bold text-gray-900 dark:text-amber-100 leading-tight mb-1">
+      <div className={`w-full ${activeTheme.headerBg} rounded-[24px] sm:rounded-[28px] p-4 sm:p-6 mb-6 relative overflow-hidden shadow-sm shrink-0 h-[120px] sm:h-[144px]`}>
+        <div className="relative z-10 w-[70%] sm:w-2/3">
+          <h2 className={`text-xl sm:text-[22px] font-bold text-gray-900 ${activeTheme.textDark} leading-tight mb-1`}>
             {greeting}, 👋
           </h2>
-          <p className="text-sm text-gray-600 dark:text-amber-200/80">
+          <p className={`text-xs sm:text-sm text-gray-600 ${activeTheme.textDarkSub}`}>
             What are your thoughts today?
           </p>
         </div>
         {/* Decorative glow */}
-        <div className="absolute right-[-10px] bottom-[-20px] w-32 h-32 bg-yellow-300 rounded-full opacity-20 blur-2xl pointer-events-none" />
+        <div className={`absolute right-[-10px] bottom-[-20px] w-32 h-32 ${activeTheme.glow} rounded-full opacity-20 blur-2xl pointer-events-none`} />
         {/* Dynamic 3D Graphic */}
-        <div className="absolute right-0 bottom-0 w-32 h-full flex items-end justify-center pr-2 pb-2">
-          <img src={imageSrc} alt={greeting} className="h-24 w-auto object-contain drop-shadow-md" />
+        <div className="absolute right-0 bottom-0 w-28 sm:w-32 h-full flex items-end justify-center pr-2 pb-2">
+          <img src={imageSrc} alt={greeting} className="h-20 sm:h-24 w-auto object-contain drop-shadow-md" />
         </div>
       </div>
 
