@@ -44,28 +44,28 @@ const uploadMedia = async (req, res) => {
       console.log(`[Upload] Created root folder: ${parentFolderId}`);
     }
 
-    // 2. Get or Create the 'Gallery' Subfolder
-    console.log('[Upload] Checking for Gallery subfolder...');
+    // 2. Get or Create the 'Personal' Subfolder
+    console.log('[Upload] Checking for Personal subfolder...');
     let galleryFolderId;
     const galleryRes = await drive.files.list({
-      q: `name = 'Gallery' and '${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      q: `name = 'Personal' and '${parentFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
       fields: 'files(id)',
       spaces: 'drive',
     });
 
     if (galleryRes.data.files.length > 0) {
       galleryFolderId = galleryRes.data.files[0].id;
-      console.log(`[Upload] Gallery folder found: ${galleryFolderId}`);
+      console.log(`[Upload] Personal folder found: ${galleryFolderId}`);
     } else {
-      console.log('[Upload] Creating Gallery folder...');
+      console.log('[Upload] Creating Personal folder...');
       const galleryMetadata = {
-        name: 'Gallery',
+        name: 'Personal',
         parents: [parentFolderId],
         mimeType: 'application/vnd.google-apps.folder'
       };
       const galleryFolder = await drive.files.create({ resource: galleryMetadata, fields: 'id' });
       galleryFolderId = galleryFolder.data.id;
-      console.log(`[Upload] Created Gallery folder: ${galleryFolderId}`);
+      console.log(`[Upload] Created Personal folder: ${galleryFolderId}`);
     }
 
     // 3. Upload File to Drive
@@ -306,9 +306,9 @@ const getGalleryStorage = async (req, res) => {
 
     const rootId = rootRes.data.files[0].id;
 
-    // 2. Find Gallery folder
+    // 2. Find Personal folder
     const galRes = await drive.files.list({
-      q: `name = 'Gallery' and '${rootId}' in parents and trashed = false`,
+      q: `name = 'Personal' and '${rootId}' in parents and trashed = false`,
       fields: 'files(id)',
       spaces: 'drive',
     });
