@@ -84,8 +84,10 @@ function Toggle({ checked, onChange }) {
 
 /* ─── Section Label ───────────────────────────────────────────────── */
 function SectionLabel({ children }) {
+  const { themeColor } = usePreferences();
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
   return (
-    <h2 className="text-[#F3A83B] font-semibold text-sm mb-3 ml-1">{children}</h2>
+    <h2 style={{ color: colorMap[themeColor] || '#FBC02D' }} className="font-semibold text-sm mb-3 ml-1">{children}</h2>
   );
 }
 
@@ -105,10 +107,12 @@ function Divider() {
 
 /* ─── Standard Row (chevron right) ──────────────────────────────── */
 function LinkRow({ icon: Icon, label, value }) {
+  const { themeColor } = usePreferences();
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
   return (
     <div className="flex items-center justify-between py-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
       <div className="flex items-center gap-4">
-        <div className="text-[#F3A83B]">
+        <div style={{ color: colorMap[themeColor] || '#FBC02D' }}>
           <Icon size={22} strokeWidth={2} />
         </div>
         <span className="font-medium text-neutral-900 dark:text-neutral-100 text-[15px]">{label}</span>
@@ -122,7 +126,11 @@ function LinkRow({ icon: Icon, label, value }) {
 }
 
 /* ─── Toggle Row ──────────────────────────────────────────────────── */
-function ToggleRow({ icon: Icon, label, checked, onChange, iconColor = '#F3A83B', darkIcon = false }) {
+function ToggleRow({ icon: Icon, label, checked, onChange, darkIcon = false }) {
+  const { themeColor } = usePreferences();
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
+  const iconColor = colorMap[themeColor] || '#FBC02D';
+  
   return (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-4">
@@ -153,7 +161,7 @@ function ThemeColorDot({ color }) {
 }
 
 /* ─── FontAT icon ─────────────────────────────────────────────────── */
-function FontATIcon({ size = 22, color = '#F3A83B' }) {
+function FontATIcon({ size = 22, color = 'currentColor' }) {
   return (
     <span style={{ color, fontWeight: 700, fontSize: size * 0.8, letterSpacing: '-1px', lineHeight: 1 }}>
       AT
@@ -162,7 +170,7 @@ function FontATIcon({ size = 22, color = '#F3A83B' }) {
 }
 
 /* ─── TextSize icon ──────────────────────────────────────────────── */
-function TextSizeIcon({ color = '#F3A83B' }) {
+function TextSizeIcon({ color = 'currentColor' }) {
   return (
     <span style={{ color, fontWeight: 600, lineHeight: 1 }}>
       <span style={{ fontSize: 12 }}>a</span>
@@ -183,6 +191,8 @@ export default function Settings() {
     hapticFeedback, setHapticFeedback,
     triggerHaptic 
   } = usePreferences();
+
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE' };
 
   const [darkMode, setDarkMode]         = useState(theme === 'dark');
   const [animations, setAnimations]     = useState(true);
@@ -281,7 +291,7 @@ export default function Settings() {
             <Divider />
             <div onClick={() => navigate('/settings/theme-color')} className="flex items-center justify-between py-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
               <div className="flex items-center gap-4">
-                <div className="text-[#F3A83B]"><Clock size={22} strokeWidth={2} /></div>
+                <div style={{ color: colorMap[themeColor] || '#FBC02D' }}><Clock size={22} strokeWidth={2} /></div>
                 <span className="font-medium text-neutral-900 dark:text-neutral-100 text-[15px]">Theme Color</span>
               </div>
               <ThemeColorDot color={themeColor} />
@@ -289,7 +299,7 @@ export default function Settings() {
             <Divider />
             <div onClick={cycleFontStyle} className="flex items-center justify-between py-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
               <div className="flex items-center gap-4">
-                <div className="text-[#F3A83B]"><FontATIcon /></div>
+                <div style={{ color: colorMap[themeColor] || '#FBC02D' }}><FontATIcon /></div>
                 <span className="font-medium text-neutral-900 dark:text-neutral-100 text-[15px]">Font Style</span>
               </div>
               <div className="flex items-center gap-2 text-neutral-400 text-sm">
@@ -300,7 +310,7 @@ export default function Settings() {
             <Divider />
             <div onClick={cycleTextSize} className="flex items-center justify-between py-4 cursor-pointer hover:bg-black/[0.02] dark:hover:bg-white/[0.03] transition-colors">
               <div className="flex items-center gap-4">
-                <div className="text-[#F3A83B]"><TextSizeIcon /></div>
+                <div style={{ color: colorMap[themeColor] || '#FBC02D' }}><TextSizeIcon /></div>
                 <span className="font-medium text-neutral-900 dark:text-neutral-100 text-[15px]">Text Size</span>
               </div>
               <div className="flex items-center gap-2 text-neutral-400 text-sm">

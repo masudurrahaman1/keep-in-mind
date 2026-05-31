@@ -1,11 +1,21 @@
 import { Link, useLocation } from 'react-router-dom';
 import { FileText, CheckCircle2, Bell, User, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { cn } from '../lib/utils';
 
 export default function BottomNav() {
   const location = useLocation();
   const { user } = useAuth();
+  const { themeColor } = usePreferences();
+
+  const themeMap = {
+    yellow: { text: 'text-[#FFC107]', fill: 'fill-[#FFC107]/10', bg: 'bg-[#FFF9EA] dark:bg-amber-950/25', ring: 'ring-[#FFC107]' },
+    blue: { text: 'text-[#007AFF]', fill: 'fill-[#007AFF]/10', bg: 'bg-[#F0F7FF] dark:bg-blue-950/25', ring: 'ring-[#007AFF]' },
+    green: { text: 'text-[#34C759]', fill: 'fill-[#34C759]/10', bg: 'bg-[#F0FDF4] dark:bg-emerald-950/25', ring: 'ring-[#34C759]' },
+    purple: { text: 'text-[#AF52DE]', fill: 'fill-[#AF52DE]/10', bg: 'bg-[#FAF5FF] dark:bg-purple-950/25', ring: 'ring-[#AF52DE]' }
+  };
+  const activeTheme = themeMap[themeColor] || themeMap.yellow;
 
   // Hide BottomNav on settings pages
   if (location.pathname.startsWith('/settings')) {
@@ -33,7 +43,7 @@ export default function BottomNav() {
 
             const renderAvatar = () => {
               const borderClass = active 
-                ? 'ring-1.5 ring-[#FFC107] ring-offset-1 dark:ring-offset-black scale-105' 
+                ? `ring-1.5 ${activeTheme.ring} ring-offset-1 dark:ring-offset-black scale-105` 
                 : 'border border-gray-300/40 hover:border-gray-400 dark:border-white/20';
               if (user?.avatar) {
                 return (
@@ -62,7 +72,7 @@ export default function BottomNav() {
                     size={19} 
                     className={`transition-all duration-300 ${
                       active 
-                        ? 'text-[#FFC107] scale-110 fill-[#FFC107]/10' 
+                        ? `${activeTheme.text} scale-110 ${activeTheme.fill}` 
                         : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400'
                     }`} 
                   />
@@ -82,14 +92,14 @@ export default function BottomNav() {
                   className={cn(
                     "flex flex-col items-center justify-center w-14 h-10 rounded-[14px] transition-all duration-300 active:opacity-75",
                     active 
-                      ? "bg-[#FFF9EA] dark:bg-amber-950/25 text-[#FFC107]" 
+                      ? `${activeTheme.bg} ${activeTheme.text}` 
                       : "text-gray-400 dark:text-gray-500"
                   )}
                 >
                   {renderIcon()}
                   <span className={`text-[9px] mt-0.5 font-semibold tracking-wide transition-all duration-300 ${
                     active 
-                      ? 'text-[#FFC107] font-bold' 
+                      ? `${activeTheme.text} font-bold` 
                       : 'text-gray-400 dark:text-gray-500'
                   }`}>
                     {item.label}

@@ -7,6 +7,7 @@ import {
   SquareActivity, Building2, Home, Folder, ArrowRight, ShieldAlert, LockKeyhole, Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
 import MediaCard from '../components/MediaCard';
 import axios from 'axios';
 import MediaUploadFAB from '../components/MediaUploadFAB';
@@ -22,6 +23,52 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api';
 export default function Gallery() {
   const navigate = useNavigate();
   const { token, googleAccessToken, signOut, clearGoogleToken } = useAuth();
+  const { themeColor } = usePreferences();
+  
+  const themeMap = {
+    yellow: {
+      bg: 'from-[#FFE8B6] to-[#FFD682] dark:from-amber-900/40 dark:to-amber-800/40 border-amber-200/50 dark:border-amber-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-amber-300/30 text-amber-600 dark:text-amber-400',
+      iconWatermark: 'text-amber-500/20 dark:text-amber-500/10',
+      textMain: 'text-amber-900 dark:text-amber-200',
+      textSub: 'text-amber-700 dark:text-amber-400',
+      btn: 'text-amber-900 dark:text-amber-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-amber-100 dark:bg-amber-900/40 text-amber-500 border-amber-200/50',
+      notifDot: 'bg-amber-500',
+    },
+    blue: {
+      bg: 'from-blue-100 to-blue-200 dark:from-blue-900/40 dark:to-blue-800/40 border-blue-200/50 dark:border-blue-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-blue-300/30 text-blue-600 dark:text-blue-400',
+      iconWatermark: 'text-blue-500/20 dark:text-blue-500/10',
+      textMain: 'text-blue-900 dark:text-blue-200',
+      textSub: 'text-blue-700 dark:text-blue-400',
+      btn: 'text-blue-900 dark:text-blue-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-blue-100 dark:bg-blue-900/40 text-blue-500 border-blue-200/50',
+      notifDot: 'bg-blue-500',
+    },
+    green: {
+      bg: 'from-emerald-100 to-emerald-200 dark:from-emerald-900/40 dark:to-emerald-800/40 border-emerald-200/50 dark:border-emerald-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-emerald-300/30 text-emerald-600 dark:text-emerald-400',
+      iconWatermark: 'text-emerald-500/20 dark:text-emerald-500/10',
+      textMain: 'text-emerald-900 dark:text-emerald-200',
+      textSub: 'text-emerald-700 dark:text-emerald-400',
+      btn: 'text-emerald-900 dark:text-emerald-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-emerald-100 dark:bg-emerald-900/40 text-emerald-500 border-emerald-200/50',
+      notifDot: 'bg-emerald-500',
+    },
+    purple: {
+      bg: 'from-purple-100 to-purple-200 dark:from-purple-900/40 dark:to-purple-800/40 border-purple-200/50 dark:border-purple-700/50',
+      iconBg: 'bg-white/80 dark:bg-black/30 border-purple-300/30 text-purple-600 dark:text-purple-400',
+      iconWatermark: 'text-purple-500/20 dark:text-purple-500/10',
+      textMain: 'text-purple-900 dark:text-purple-200',
+      textSub: 'text-purple-700 dark:text-purple-400',
+      btn: 'text-purple-900 dark:text-purple-100 bg-white/80 dark:bg-white/10 hover:bg-white',
+      topIconBg: 'bg-purple-100 dark:bg-purple-900/40 text-purple-500 border-purple-200/50',
+      notifDot: 'bg-purple-500',
+    }
+  };
+  const activeTheme = themeMap[themeColor] || themeMap.yellow;
+
   const [media, setMedia] = useState<any[]>([]);
   const [storage, setStorage] = useState<{ totalSize: string, totalFiles: number } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -497,7 +544,7 @@ export default function Gallery() {
       <div className="flex flex-col mb-8 mt-2">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/40 rounded-xl flex items-center justify-center text-amber-500 shadow-sm border border-amber-200/50">
+            <div className={`w-10 h-10 ${activeTheme.topIconBg} rounded-xl flex items-center justify-center shadow-sm border`}>
               <ShieldCheck size={24} />
             </div>
             <div>
@@ -512,7 +559,7 @@ export default function Gallery() {
             >
               <Bell size={20} className="text-neutral-700 dark:text-neutral-300" />
               {uploadQueue.length > 0 && (
-                <span className="absolute top-2 right-2.5 w-2 h-2 bg-amber-500 rounded-full border border-white dark:border-neutral-800"></span>
+                <span className={`absolute top-2 right-2.5 w-2 h-2 ${activeTheme.notifDot} rounded-full border border-white dark:border-neutral-800`}></span>
               )}
             </button>
             <UploadActivityCenter 
@@ -633,18 +680,18 @@ export default function Gallery() {
       )}
 
       {/* ── Security Banner ──────────────────────── */}
-      <div className="bg-gradient-to-r from-[#FFE8B6] to-[#FFD682] dark:from-amber-900/40 dark:to-amber-800/40 rounded-3xl p-5 relative overflow-hidden flex items-center justify-between border border-amber-200/50 dark:border-amber-700/50 shadow-sm mb-4">
+      <div className={`bg-gradient-to-r ${activeTheme.bg} rounded-3xl p-5 relative overflow-hidden flex items-center justify-between border shadow-sm mb-4`}>
         {/* Background Graphic */}
-        <LockKeyhole size={100} className="absolute -bottom-8 right-8 text-amber-500/20 dark:text-amber-500/10 rotate-12 pointer-events-none" />
+        <LockKeyhole size={100} className={`absolute -bottom-8 right-8 ${activeTheme.iconWatermark} rotate-12 pointer-events-none`} />
         
         <div className="flex items-start gap-3 sm:gap-4 relative z-10 max-w-[70%]">
-          <div className="w-10 h-10 rounded-full bg-white/80 dark:bg-black/30 flex items-center justify-center shrink-0 border border-amber-300/30">
-            <ShieldAlert size={20} className="text-amber-600 dark:text-amber-400" />
+          <div className={`w-10 h-10 rounded-full ${activeTheme.iconBg} flex items-center justify-center shrink-0 border`}>
+            <ShieldAlert size={20} />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-amber-900 dark:text-amber-200 mb-1">Your data is 100% secure</h3>
-            <p className="text-xs text-amber-700 dark:text-amber-400 mb-3">End-to-end encrypted & stored safely in cloud.</p>
-            <button className="text-[10px] uppercase font-bold tracking-wider text-amber-900 dark:text-amber-100 bg-white/80 dark:bg-white/10 px-3 py-1.5 rounded-full hover:bg-white transition-colors">
+            <h3 className={`text-sm font-bold ${activeTheme.textMain} mb-1`}>Your data is 100% secure</h3>
+            <p className={`text-xs ${activeTheme.textSub} mb-3`}>End-to-end encrypted & stored safely in cloud.</p>
+            <button className={`text-[10px] uppercase font-bold tracking-wider ${activeTheme.btn} px-3 py-1.5 rounded-full transition-colors`}>
               Learn more
             </button>
           </div>

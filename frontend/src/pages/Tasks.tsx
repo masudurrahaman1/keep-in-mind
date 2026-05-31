@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Plus, Check, Trash2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { cn } from '../components/Sidebar';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -15,7 +16,44 @@ interface TaskType {
 
 export default function Tasks() {
   const { user, token } = useAuth();
+  const { themeColor } = usePreferences();
   const storageKey = user ? `keep-in-mind-tasks-${user._id}` : 'keep-in-mind-tasks-guest';
+
+  const themeMap = {
+    yellow: {
+      headerBg: 'bg-[#FEF7D6] dark:from-[#2C2415] dark:to-[#42361C]',
+      textDark: 'dark:text-amber-100',
+      textDarkSub: 'dark:text-amber-200/80',
+      glow: 'bg-yellow-300',
+      check: 'bg-[#FFC107] text-white',
+      checkBorder: 'hover:border-[#FFC107]'
+    },
+    blue: {
+      headerBg: 'bg-[#E5F1FF] dark:from-[#112440] dark:to-[#173055]',
+      textDark: 'dark:text-blue-100',
+      textDarkSub: 'dark:text-blue-200/80',
+      glow: 'bg-blue-300',
+      check: 'bg-[#007AFF] text-white',
+      checkBorder: 'hover:border-[#007AFF]'
+    },
+    green: {
+      headerBg: 'bg-[#E6F8ED] dark:from-[#133020] dark:to-[#1A402A]',
+      textDark: 'dark:text-emerald-100',
+      textDarkSub: 'dark:text-emerald-200/80',
+      glow: 'bg-emerald-300',
+      check: 'bg-[#34C759] text-white',
+      checkBorder: 'hover:border-[#34C759]'
+    },
+    purple: {
+      headerBg: 'bg-[#F4EBFF] dark:from-[#2D1B42] dark:to-[#3C2458]',
+      textDark: 'dark:text-purple-100',
+      textDarkSub: 'dark:text-purple-200/80',
+      glow: 'bg-purple-300',
+      check: 'bg-[#AF52DE] text-white',
+      checkBorder: 'hover:border-[#AF52DE]'
+    }
+  };
+  const activeTheme = themeMap[themeColor] || themeMap.yellow;
 
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [newTask, setNewTask] = useState('');
@@ -184,19 +222,19 @@ export default function Tasks() {
     <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
       {/* HEADER BANNER */}
       <div
-        className="w-full bg-[#FEF7D6] dark:from-[#2C2415] dark:to-[#42361C] rounded-[28px] p-6 mb-8 relative overflow-hidden shadow-sm shrink-0"
+        className={`w-full ${activeTheme.headerBg} rounded-[28px] p-6 mb-8 relative overflow-hidden shadow-sm shrink-0`}
         style={{ height: '144px' }}
       >
         <div className="relative z-10 w-2/3">
-          <h2 className="text-[22px] font-bold text-gray-900 dark:text-amber-100 leading-tight mb-1">
+          <h2 className={`text-[22px] font-bold text-gray-900 ${activeTheme.textDark} leading-tight mb-1`}>
             Your Tasks 📝
           </h2>
-          <p className="text-sm text-gray-600 dark:text-amber-200/80">
+          <p className={`text-sm text-gray-600 ${activeTheme.textDarkSub}`}>
             {completedCount} of {tasks.length} completed
           </p>
         </div>
         {/* Decorative glow */}
-        <div className="absolute right-[-10px] bottom-[-20px] w-32 h-32 bg-yellow-300 rounded-full opacity-20 blur-2xl pointer-events-none" />
+        <div className={`absolute right-[-10px] bottom-[-20px] w-32 h-32 ${activeTheme.glow} rounded-full opacity-20 blur-2xl pointer-events-none`} />
         {/* Progress Circle Visual */}
         <div className="absolute right-6 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-8 border-white/40 flex items-center justify-center">
           <span className="font-bold text-gray-800 text-lg">
@@ -242,8 +280,8 @@ export default function Tasks() {
                       className={cn(
                         'w-6 h-6 rounded-md flex items-center justify-center transition-colors shrink-0',
                         task.completed
-                          ? 'bg-[#FFC107] text-white'
-                          : 'border-2 border-gray-300 dark:border-gray-600 text-transparent hover:border-[#FFC107]'
+                          ? activeTheme.check
+                          : `border-2 border-gray-300 dark:border-gray-600 text-transparent ${activeTheme.checkBorder}`
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
