@@ -66,54 +66,90 @@ const initializeUserDrive = async (userId) => {
       return;
     }
 
-    if (user.rootFolderId) {
-      console.log(`User ${userId} already has a root folder. Skipping init.`);
-      return;
-    }
-
-    console.log(`Starting Drive initialization for User ${userId}...`);
+    console.log(`Starting Drive initialization/verification for User ${userId}...`);
     const drive = getDriveClient(user);
 
-    // Create Root Folder
-    const rootFolderId = await createDriveFolder(drive, 'KeepInMind');
-    user.rootFolderId = rootFolderId;
-    await user.save(); // Save early so we don't recreate the root folder if subfolders fail
+    // 1. Verify or Create Root Folder
+    let rootFolderId = user.rootFolderId;
+    let rootFolderExists = false;
 
-    // Create Subfolders Concurrently
-    const folderPromises = FOLDERS.map(async (folderName) => {
-      const folderId = await createDriveFolder(drive, folderName, rootFolderId);
-      return { name: folderName, id: folderId };
-    });
-
-    const results = await Promise.allSettled(folderPromises);
-    
-    results.forEach((result) => {
-      if (result.status === 'fulfilled') {
-        const { name, id } = result.value;
-        const fieldName = name.replace(/\s+/g, '').toLowerCase() + 'FolderId'; // e.g. governmentidsFolderId
-        // Normalizing the field name mapping to match the schema
-        const schemaFieldMap = {
-          'Government IDs': 'governmentFolderId',
-          'Education': 'educationFolderId',
-          'Medical': 'medicalFolderId',
-          'Banking': 'bankingFolderId',
-          'Property': 'propertyFolderId',
-          'Others': 'othersFolderId',
-          'Notes': 'notesFolderId',
-          'Backups': 'backupsFolderId',
-          'Encrypted': 'encryptedFolderId'
-        };
-        const exactField = schemaFieldMap[name];
-        if (exactField) {
-          user[exactField] = id;
+    if (rootFolderId) {
+      try {
+        const rootRes = await drive.files.get({ fileId: rootFolderId, fields: 'id, trashed' });
+        if (!rootRes.data.trashed) {
+          rootFolderExists = true;
         }
-      } else {
-        console.error('Failed to create a subfolder:', result.reason);
+      } catch (err) {
+        console.log(`Root folder ${rootFolderId} not found in Drive. Will recreate or find.`);
       }
+    }
+
+    if (!rootFolderExists) {
+      const rootSearch = await drive.files.list({
+        q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        fields: 'files(id)', spaces: 'drive',
+      });
+      if (rootSearch.data.files.length > 0) {
+        rootFolderId = rootSearch.data.files[0].id;
+      } else {
+        rootFolderId = await createDriveFolder(drive, 'KeepInMind');
+      }
+      user.rootFolderId = rootFolderId;
+      await user.save(); // Save early
+    }
+
+    // 2. Fetch existing subfolders from Drive
+    const existingFoldersRes = await drive.files.list({
+      q: `'${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+      fields: 'files(id, name)', spaces: 'drive',
     });
+    
+    const existingFolders = existingFoldersRes.data.files || [];
+    const existingFolderNames = existingFolders.map(f => f.name);
+
+    const schemaFieldMap = {
+      'Government IDs': 'governmentFolderId',
+      'Education': 'educationFolderId',
+      'Medical': 'medicalFolderId',
+      'Banking': 'bankingFolderId',
+      'Property': 'propertyFolderId',
+      'Others': 'othersFolderId',
+      'Notes': 'notesFolderId',
+      'Backups': 'backupsFolderId',
+      'Encrypted': 'encryptedFolderId'
+    };
+
+    // Update DB with active IDs
+    existingFolders.forEach(f => {
+      const field = schemaFieldMap[f.name];
+      if (field) user[field] = f.id;
+    });
+
+    // 3. Determine missing folders and create them
+    const missingFolders = FOLDERS.filter(name => !existingFolderNames.includes(name));
+    
+    if (missingFolders.length > 0) {
+      console.log(`Creating missing folders: ${missingFolders.join(', ')}`);
+      const folderPromises = missingFolders.map(async (folderName) => {
+        const folderId = await createDriveFolder(drive, folderName, rootFolderId);
+        return { name: folderName, id: folderId };
+      });
+
+      const results = await Promise.allSettled(folderPromises);
+      
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          const { name, id } = result.value;
+          const exactField = schemaFieldMap[name];
+          if (exactField) user[exactField] = id;
+        } else {
+          console.error('Failed to create a missing subfolder:', result.reason);
+        }
+      });
+    }
 
     await user.save();
-    console.log(`Successfully initialized Drive folders for User ${userId}`);
+    console.log(`Successfully verified/initialized Drive folders for User ${userId}`);
     
   } catch (error) {
     console.error(`Fatal error in initializeUserDrive for ${userId}:`, error.message);
