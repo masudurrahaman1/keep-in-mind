@@ -59,7 +59,9 @@ const uploadDocument = async (req, res) => {
     });
   } catch (error) {
     console.error('Upload Controller Error:', error.message);
-    res.status(500).json({ message: error.message || 'File upload failed' });
+    require('fs').writeFileSync('upload_error.log', error.stack + '\n\n' + JSON.stringify(error, Object.getOwnPropertyNames(error), 2));
+    const status = error.status || error.code || (error.response && error.response.status) || 500;
+    res.status(status).json({ message: error.message || 'File upload failed' });
   }
 };
 

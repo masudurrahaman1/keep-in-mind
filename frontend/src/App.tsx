@@ -13,14 +13,17 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Heartbeat from './components/Heartbeat';
 import BackgroundSync from './components/BackgroundSync';
 import { Skeleton } from './components/Skeleton';
+import { Capacitor } from '@capacitor/core';
 import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 import { Agentation } from 'agentation';
 
-// Initialize Capacitor Google Auth
+// Initialize Capacitor Google Auth only on Native platforms to avoid Google iframe/CSP errors on Web
 try {
-  GoogleAuth.initialize({
-    clientId: "725462917918-68b6s3ihho559pnbljq57ea577o4n9ff.apps.googleusercontent.com",
-  });
+  if (Capacitor.isNativePlatform()) {
+    GoogleAuth.initialize({
+      clientId: "725462917918-68b6s3ihho559pnbljq57ea577o4n9ff.apps.googleusercontent.com",
+    });
+  }
 } catch (e) {
   console.warn('Google Auth failed to initialize:', e);
 }

@@ -286,7 +286,6 @@ export default function VaultCategory() {
             </button>
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">{formattedCategory}</h1>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">{getCategorySubtext(formattedCategory)}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -310,14 +309,6 @@ export default function VaultCategory() {
 
         {/* Security Indicators */}
         <div className="flex items-center gap-3 mt-1 mb-4 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-emerald-200 dark:border-emerald-500/20 shadow-sm">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            Cloud Synced
-          </div>
-          <div className="flex items-center gap-1.5 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 px-2.5 py-1 rounded-lg text-[10px] font-bold border border-purple-200 dark:border-purple-500/20 shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-            AES-256 Protected
-          </div>
           <div className="text-[10px] font-medium text-neutral-400 ml-auto flex items-center gap-1">
              <FileText size={10} /> {documents.length} Files
           </div>

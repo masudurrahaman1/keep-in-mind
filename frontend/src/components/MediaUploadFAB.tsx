@@ -30,13 +30,16 @@ export default function MediaUploadFAB({ onFilesSelect, isLoading }: MediaUpload
   };
 
   const handleActionClick = (type: 'image' | 'video' | 'document') => {
-    if (type === 'image') setAcceptType('image/*');
-    else if (type === 'video') setAcceptType('video/*');
-    else setAcceptType('.pdf,.doc,.docx,.xls,.xlsx,.txt,application/pdf');
-    // Small timeout to ensure acceptType is updated before picker opens
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 50);
+    let newAccept = '';
+    if (type === 'image') newAccept = 'image/*';
+    else if (type === 'video') newAccept = 'video/*';
+    else newAccept = '.pdf,.doc,.docx,.xls,.xlsx,.txt,application/pdf';
+    
+    setAcceptType(newAccept);
+    if (fileInputRef.current) {
+      fileInputRef.current.accept = newAccept;
+      fileInputRef.current.click();
+    }
     setIsOpen(false);
   };
 

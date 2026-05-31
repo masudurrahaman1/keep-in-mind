@@ -45,7 +45,7 @@ const createDriveFolder = async (drive, name, parentId = null) => {
 
   try {
     const file = await drive.files.create({
-      resource: fileMetadata,
+      requestBody: fileMetadata,
       fields: 'id',
     });
     return file.data.id;
@@ -162,7 +162,7 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
         if (rootRes.data.files.length > 0) {
           rootFolderId = rootRes.data.files[0].id;
         } else {
-          const rootFolder = await drive.files.create({ resource: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+          const rootFolder = await drive.files.create({ requestBody: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
           rootFolderId = rootFolder.data.id;
         }
         user.rootFolderId = rootFolderId;
@@ -177,7 +177,7 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
       if (catRes.data.files.length > 0) {
         parentFolderId = catRes.data.files[0].id;
       } else {
-        const catFolder = await drive.files.create({ resource: { name: safeCategory, parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+        const catFolder = await drive.files.create({ requestBody: { name: safeCategory, parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
         parentFolderId = catFolder.data.id;
       }
       
@@ -202,7 +202,7 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
     };
 
     const response = await drive.files.create({
-      resource: fileMetadata,
+      requestBody: fileMetadata,
       media: media,
       fields: 'id, name, webViewLink, iconLink, thumbnailLink'
     });
