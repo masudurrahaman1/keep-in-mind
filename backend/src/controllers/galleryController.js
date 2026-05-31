@@ -24,11 +24,11 @@ const uploadMedia = async (req, res) => {
   try {
     const drive = getDriveClient(req.user);
 
-    // 1. Get or Create the 'Keep In Mind' Folder
+    // 1. Get or Create the 'KeepInMind' Folder
     console.log('[Upload] Checking for root folder...');
     let parentFolderId;
     const folderRes = await drive.files.list({
-      q: "name = 'Keep In Mind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
       fields: 'files(id)',
       spaces: 'drive',
     });
@@ -38,7 +38,7 @@ const uploadMedia = async (req, res) => {
       console.log(`[Upload] Root folder found: ${parentFolderId}`);
     } else {
       console.log('[Upload] Creating root folder...');
-      const folderMetadata = { name: 'Keep In Mind', mimeType: 'application/vnd.google-apps.folder' };
+      const folderMetadata = { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' };
       const folder = await drive.files.create({ resource: folderMetadata, fields: 'id' });
       parentFolderId = folder.data.id;
       console.log(`[Upload] Created root folder: ${parentFolderId}`);
@@ -294,7 +294,7 @@ const getGalleryStorage = async (req, res) => {
 
     // 1. Find root folder
     const rootRes = await drive.files.list({
-      q: "name = 'Keep In Mind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
       fields: 'files(id)',
       spaces: 'drive',
     });

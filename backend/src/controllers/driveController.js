@@ -50,12 +50,12 @@ const syncToDrive = async (req, res) => {
     auth.setCredentials({ access_token: googleAccessToken });
     const drive = google.drive({ version: 'v3', auth });
 
-    // 1. Find or Create the 'Keep In Mind' Folder (with retries)
+    // 1. Find or Create the 'KeepInMind' Folder (with retries)
     let folderId;
     try {
-      console.log('[Drive Sync] Verifying/Creating Keep In Mind folder...');
+      console.log('[Drive Sync] Verifying/Creating KeepInMind folder...');
       const folderResponse = await withRetry(() => drive.files.list({
-        q: "name = 'Keep In Mind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
         fields: 'files(id)',
         spaces: 'drive',
       }));
@@ -64,7 +64,7 @@ const syncToDrive = async (req, res) => {
         folderId = folderResponse.data.files[0].id;
         console.log('Folder ID:', folderId, '(Existing)');
       } else {
-        const folderMetadata = { name: 'Keep In Mind', mimeType: 'application/vnd.google-apps.folder' };
+        const folderMetadata = { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' };
         const folder = await withRetry(() => drive.files.create({ resource: folderMetadata, fields: 'id' }));
         folderId = folder.data.id;
         console.log('Folder ID:', folderId, '(Created)');
@@ -210,9 +210,9 @@ const fetchFromDrive = async (req, res) => {
     auth.setCredentials({ access_token: googleAccessToken });
     const drive = google.drive({ version: 'v3', auth });
 
-    // 1. Find the 'Keep In Mind' Folder
+    // 1. Find the 'KeepInMind' Folder
     const folderResponse = await drive.files.list({
-      q: "name = 'Keep In Mind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
       fields: 'files(id)',
       spaces: 'drive',
     });
