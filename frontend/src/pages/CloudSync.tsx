@@ -140,7 +140,7 @@ export default function CloudSync() {
   };
 
   return (
-    <div className="min-h-full bg-[#FFF9ED] dark:bg-neutral-900 pb-28">
+    <div className="min-h-full bg-white dark:bg-neutral-900 pb-28">
 
       {/* ── Header ────────────────────────────────── */}
       <div className="flex items-center px-4 pt-6 pb-3 relative">

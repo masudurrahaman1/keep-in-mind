@@ -6,7 +6,7 @@ export default function TermsOfService() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-full flex flex-col bg-[#FFF9ED] dark:bg-[#111318]">
+    <div className="min-h-full flex flex-col bg-white dark:bg-[#111318]">
       {/* Header */}
       <div className="flex items-center gap-4 px-4 py-4 bg-white/80 dark:bg-[#1A1C20]/80 backdrop-blur-md sticky top-0 z-50 border-b border-black/5 dark:border-white/5">
         <button

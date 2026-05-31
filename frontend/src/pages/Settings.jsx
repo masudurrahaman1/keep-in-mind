@@ -243,16 +243,8 @@ export default function Settings() {
     finally { setIsFetching(false); }
   };
 
-  const bgMap = {
-    yellow: 'bg-[#FFF9ED]',
-    blue: 'bg-[#F0F7FF]',
-    green: 'bg-[#F0FDF4]',
-    purple: 'bg-[#FAF5FF]',
-  };
-  const activeBg = bgMap[themeColor] || 'bg-[#FFF9ED]';
-
   return (
-    <div className={`min-h-full ${activeBg} dark:bg-neutral-900 pb-28 flex flex-col`}>
+    <div className="min-h-full bg-white dark:bg-neutral-900 pb-28 flex flex-col">
 
       {/* Header */}
       <div className="flex items-center justify-between p-5 sticky top-0 z-10 glass border-b border-outline-variant/20">

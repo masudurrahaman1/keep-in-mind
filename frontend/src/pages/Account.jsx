@@ -50,7 +50,7 @@ export default function Account() {
   ];
 
   return (
-    <div className="min-h-full flex flex-col bg-[#FFF9ED] dark:bg-neutral-900 pb-24 overflow-y-auto">
+    <div className="min-h-full flex flex-col bg-white dark:bg-neutral-900 pb-24 overflow-y-auto">
 
       {/* ── Gradient Header ─────────────────────────────────────────── */}
       <div
