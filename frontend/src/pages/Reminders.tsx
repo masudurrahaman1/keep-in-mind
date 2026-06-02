@@ -106,6 +106,11 @@ export default function Reminders() {
     const reminder = reminders.find(r => (r._id || r.id) === id);
     if (!reminder) return;
 
+    const currentCompleted = reminder.completed;
+    
+    // Optimistic update for instant UI feedback
+    setReminders(prev => prev.map(r => ((r._id || r.id) === id ? { ...r, completed: !currentCompleted } : r)));
+
     if (token) {
       try {
         const res = await fetch(`${API_BASE}/reminders/${id}`, {
@@ -114,17 +119,17 @@ export default function Reminders() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
           },
-          body: JSON.stringify({ completed: !reminder.completed })
+          body: JSON.stringify({ completed: !currentCompleted })
         });
-        if (res.ok) {
-          const updated = await res.json();
-          setReminders(reminders.map(r => ((r._id || r.id) === id ? updated : r)));
+        if (!res.ok) {
+          // Revert on failure
+          setReminders(prev => prev.map(r => ((r._id || r.id) === id ? { ...r, completed: currentCompleted } : r)));
         }
       } catch (error) {
         console.error('Error toggling reminder:', error);
+        // Revert on failure
+        setReminders(prev => prev.map(r => ((r._id || r.id) === id ? { ...r, completed: currentCompleted } : r)));
       }
-    } else {
-      setReminders(reminders.map(r => ((r.id || r._id) === id ? { ...r, completed: !r.completed } : r)));
     }
   };
 

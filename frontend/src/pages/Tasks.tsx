@@ -66,6 +66,9 @@ export default function Tasks() {
   }, [tasks, token, storageKey]);
 
   const toggleTask = async (id: string | number, currentCompleted: boolean) => {
+    // Optimistic update for instant UI feedback
+    setTasks(prevTasks => prevTasks.map(t => ((t._id || t.id) === id ? { ...t, completed: !currentCompleted } : t)));
+
     if (token) {
       try {
         const res = await fetch(`${API_BASE}/tasks/${id}`, {
@@ -76,35 +79,38 @@ export default function Tasks() {
           },
           body: JSON.stringify({ completed: !currentCompleted })
         });
-        if (res.ok) {
-          const updatedTask = await res.json();
-          setTasks(tasks.map(t => ((t._id || t.id) === id ? updatedTask : t)));
+        if (!res.ok) {
+          // Revert on failure
+          setTasks(prevTasks => prevTasks.map(t => ((t._id || t.id) === id ? { ...t, completed: currentCompleted } : t)));
         }
       } catch (error) {
         console.error('Error toggling task:', error);
+        // Revert on failure
+        setTasks(prevTasks => prevTasks.map(t => ((t._id || t.id) === id ? { ...t, completed: currentCompleted } : t)));
       }
-    } else {
-      // Guest mode
-      setTasks(tasks.map(t => ((t.id || t._id) === id ? { ...t, completed: !t.completed } : t)));
     }
   };
 
   const deleteTask = async (id: string | number) => {
+    const taskToDelete = tasks.find(t => (t._id || t.id) === id);
+    
+    // Optimistic delete
+    setTasks(prevTasks => prevTasks.filter(t => (t._id || t.id) !== id));
+
     if (token) {
       try {
         const res = await fetch(`${API_BASE}/tasks/${id}`, {
           method: 'DELETE',
           headers: { Authorization: `Bearer ${token}` }
         });
-        if (res.ok) {
-          setTasks(tasks.filter(t => (t._id || t.id) !== id));
+        if (!res.ok && taskToDelete) {
+          // Revert on failure
+          setTasks(prevTasks => [...prevTasks, taskToDelete]);
         }
       } catch (error) {
         console.error('Error deleting task:', error);
+        if (taskToDelete) setTasks(prevTasks => [...prevTasks, taskToDelete]);
       }
-    } else {
-      // Guest mode
-      setTasks(tasks.filter(t => (t.id || t._id) !== id));
     }
   };
 
