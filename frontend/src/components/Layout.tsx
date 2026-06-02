@@ -65,7 +65,7 @@ export default function Layout() {
         {showFab && (
           <button
             onClick={() => navigate(fabTarget)}
-            className="fixed bottom-24 right-5 md:bottom-8 md:right-8 w-14 h-14 bg-[#FFC107] hover:bg-[#F5B000] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#FFC107]/40 transition-all active:scale-90 z-50"
+            className="fixed bottom-24 right-5 md:bottom-8 md:right-8 w-14 h-14 bg-primary hover:bg-primary/90 text-on-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/30 transition-all active:scale-90 z-50"
           >
             <Plus size={26} strokeWidth={3} />
           </button>
