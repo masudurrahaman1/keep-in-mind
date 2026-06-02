@@ -2,10 +2,41 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, ChevronRight, Edit2, Crown, BarChart2, Star, Archive, HelpCircle, Info, Trash2, Cloud } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
+import { useTheme } from '../context/ThemeContext';
 
 export default function Account() {
   const navigate = useNavigate();
   const { user, signOut, googleAccessToken } = useAuth();
+  const { themeColor } = usePreferences();
+  const { theme } = useTheme();
+
+  const isDark = theme === 'dark' || theme === 'amoled' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+
+  const lightGradients = {
+    yellow: 'linear-gradient(135deg, #FFE8B6 0%, #FFD682 50%, #FFC14A 100%)',
+    blue:   'linear-gradient(135deg, #DBEAFE 0%, #93C5FD 50%, #3B82F6 100%)',
+    green:  'linear-gradient(135deg, #D1FAE5 0%, #6EE7B7 50%, #10B981 100%)',
+    purple: 'linear-gradient(135deg, #EDE9FE 0%, #C4B5FD 50%, #8B5CF6 100%)',
+    rose:   'linear-gradient(135deg, #FFE4E6 0%, #FDA4AF 50%, #F43F5E 100%)',
+    orange: 'linear-gradient(135deg, #FFEDD5 0%, #FDBA74 50%, #F97316 100%)'
+  };
+
+  const darkGradients = {
+    yellow: 'linear-gradient(135deg, #78350f 0%, #92400e 50%, #b45309 100%)',
+    blue:   'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1d4ed8 100%)',
+    green:  'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
+    purple: 'linear-gradient(135deg, #4c1d95 0%, #5b21b6 50%, #6d28d9 100%)',
+    rose:   'linear-gradient(135deg, #881337 0%, #9f1239 50%, #be123c 100%)',
+    orange: 'linear-gradient(135deg, #7c2d12 0%, #9a3412 50%, #c2410c 100%)'
+  };
+
+  const headerGradient = isDark 
+    ? (darkGradients[themeColor] || darkGradients.yellow)
+    : (lightGradients[themeColor] || lightGradients.yellow);
+
+  const colorMap = { yellow: '#FBC02D', blue: '#007AFF', green: '#34C759', purple: '#AF52DE', rose: '#FF2D55', orange: '#FF9500' };
+  const initialsColor = colorMap[themeColor] || '#FBC02D';
 
   const profileKey = user ? `keep-in-mind-profile-${user._id}` : 'keep-in-mind-profile-guest';
 
@@ -54,8 +85,8 @@ export default function Account() {
 
       {/* ── Gradient Header ─────────────────────────────────────────── */}
       <div
-        className="relative flex flex-col items-center px-6 pt-14 pb-10 rounded-b-[40px] shadow-sm"
-        style={{ background: 'linear-gradient(135deg, #FFE8B6 0%, #FFD682 50%, #FFC14A 100%)' }}
+        className="relative flex flex-col items-center px-6 pt-14 pb-10 rounded-b-[40px] shadow-sm transition-colors duration-300"
+        style={{ background: headerGradient }}
       >
         {/* Decorative stars */}
         <span className="absolute top-20 left-10 text-white/40 text-xl select-none">✦</span>
@@ -65,24 +96,24 @@ export default function Account() {
 
         {/* Edit button */}
         <button
-          className="absolute top-14 right-6 text-neutral-700 hover:text-[#FF9E4A] transition-colors"
+          className="absolute top-14 right-6 text-neutral-700 dark:text-neutral-300 hover:text-white transition-colors"
           onClick={() => {}}
         >
           <Edit2 size={18} />
         </button>
 
         {/* Avatar */}
-        <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg overflow-hidden bg-white flex items-center justify-center mb-4">
+        <div className="w-32 h-32 rounded-full border-4 border-white dark:border-neutral-800 shadow-lg overflow-hidden bg-white dark:bg-neutral-800 flex items-center justify-center mb-4 transition-colors duration-300">
           {profile.avatar ? (
             <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
           ) : (
-            <span className="text-3xl font-bold text-[#FF9E4A]">{initials}</span>
+            <span className="text-3xl font-bold" style={{ color: initialsColor }}>{initials}</span>
           )}
         </div>
 
         {/* Name & Email */}
-        <h1 className="text-2xl font-bold text-neutral-900 mb-1">{profile.name}</h1>
-        <p className="text-sm text-neutral-600">{profile.email}</p>
+        <h1 className="text-2xl font-bold text-neutral-900 dark:text-white mb-1 transition-colors">{profile.name}</h1>
+        <p className="text-sm text-neutral-700 dark:text-neutral-300 transition-colors">{profile.email}</p>
       </div>
 
       {/* ── Main Content ─────────────────────────────────────────────── */}
