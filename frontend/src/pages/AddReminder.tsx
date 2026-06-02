@@ -89,7 +89,7 @@ export default function AddReminder() {
     <div className="max-w-3xl mx-auto w-full flex flex-col min-h-screen bg-background relative z-10">
       
       {/* Header */}
-      <div className="flex items-center justify-between p-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
+      <div className="flex items-center justify-between py-2 px-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
         <button 
           onClick={() => navigate(-1)}
           className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container rounded-full transition-colors"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical } from 'lucide-react';
+import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Sidebar';
 
@@ -13,12 +13,21 @@ interface TaskType {
   completed: boolean;
 }
 
+type FilterTab = 'All' | 'To Do' | 'Completed';
+
 export default function Tasks() {
   const { user, token } = useAuth();
   const storageKey = user ? `keep-in-mind-tasks-${user._id}` : 'keep-in-mind-tasks-guest';
 
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<FilterTab>('All');
+
+  const filteredTasks = tasks.filter(t => {
+    if (activeTab === 'To Do') return !t.completed;
+    if (activeTab === 'Completed') return t.completed;
+    return true;
+  });
 
   // Load initial tasks
   useEffect(() => {
@@ -169,80 +178,89 @@ export default function Tasks() {
         <div className="absolute left-[-10%] top-[-10%] w-32 h-32 sm:w-40 sm:h-40 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
       </div>
 
-      {/* LIST HEADER */}
-      {tasks.length > 0 && (
-        <div className="flex items-center justify-between mb-4 px-1">
-          <div className="flex items-center gap-2 text-on-surface font-bold">
-            <ListTodo size={20} className="text-primary" />
-            <span>All Tasks</span>
-          </div>
-          <button className="flex items-center gap-1 px-3 py-1.5 bg-surface-container rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">
-            <span>Recent</span>
-            <ChevronDown size={14} />
+      {/* FILTER TABS */}
+      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2 mb-6 px-1">
+        {(['All', 'To Do', 'Completed'] as FilterTab[]).map(tab => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={cn(
+              "px-5 py-2 rounded-[20px] text-sm font-semibold transition-all whitespace-nowrap border",
+              activeTab === tab 
+                ? "bg-primary-container text-primary border-primary/20" 
+                : "bg-surface text-on-surface-variant border-outline-variant/30 hover:bg-surface-container"
+            )}
+          >
+            {tab}
           </button>
-        </div>
-      )}
+        ))}
+      </div>
 
       {/* TASKS LIST */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-4">
         {loading ? (
           <div className="py-12 text-center text-on-surface-variant">Loading tasks...</div>
         ) : (
           <AnimatePresence>
-            {tasks.map(task => {
+            {filteredTasks.map(task => {
               const taskId = task._id || task.id;
               if (!taskId) return null;
 
               return (
                 <motion.div
                   key={taskId}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-surface rounded-[24px] p-4 sm:p-5 shadow-sm border border-outline-variant/20 flex items-center justify-between group select-none touch-none hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => toggleTask(taskId, task.completed)}
+                  className="bg-surface rounded-2xl p-4 shadow-sm border border-outline-variant/20 flex items-center justify-between gap-3 group hover:shadow-md transition-all"
                 >
-                  <div className="flex items-center gap-4 flex-1 overflow-hidden pr-4">
-                    <button
-                      className={cn(
-                        'w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 duration-300',
-                        task.completed
-                          ? 'bg-primary text-on-primary shadow-md shadow-primary/30 scale-105'
-                          : 'border-2 border-outline-variant/40 group-hover:border-primary text-transparent scale-100'
-                      )}
-                    >
-                      <Check size={16} strokeWidth={4} />
-                    </button>
-                    <span
-                      className={cn(
-                        'text-[15px] font-bold transition-all truncate',
-                        task.completed
-                          ? 'text-on-surface-variant line-through opacity-60'
-                          : 'text-on-surface'
-                      )}
-                    >
-                      {task.text}
-                    </span>
+                  {/* Checkbox */}
+                  <button 
+                    onClick={() => toggleTask(taskId, task.completed)}
+                    className="w-6 h-6 flex items-center justify-center shrink-0 text-outline-variant hover:text-primary transition-colors"
+                  >
+                    {task.completed ? (
+                      <CheckCircle2 size={24} className="fill-primary text-on-primary" />
+                    ) : (
+                      <Circle size={24} strokeWidth={2} />
+                    )}
+                  </button>
+
+                  {/* Icon & Details */}
+                  <div className="flex items-center gap-4 flex-1 overflow-hidden pr-2">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                      <ListTodo size={20} />
+                    </div>
+                    
+                    <div className="flex flex-col gap-1 overflow-hidden">
+                      <h4 className={cn(
+                        "text-[15px] font-bold leading-tight truncate",
+                        task.completed ? "text-on-surface-variant line-through opacity-70" : "text-on-surface"
+                      )}>
+                        {task.text}
+                      </h4>
+                      <div className="flex items-center gap-2">
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md tracking-wider bg-surface-container text-on-surface-variant">
+                          General
+                        </span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                     <div className="hidden sm:flex px-3 py-1 bg-primary/10 text-primary rounded-full items-center gap-1.5 border border-primary/10">
-                       <Calendar size={12} />
-                       <span className="text-xs font-bold whitespace-nowrap">May 20</span>
-                     </div>
-                     
-                     <button
-                       onClick={(e) => {
-                         e.stopPropagation();
-                         deleteTask(taskId);
-                       }}
-                       className="w-8 h-8 flex items-center justify-center text-outline hover:text-error hover:bg-error/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-                     >
-                       <Trash2 size={16} />
-                     </button>
-                     <button className="w-8 h-8 flex items-center justify-center text-outline hover:bg-surface-container rounded-full transition-colors sm:hidden group-hover:hidden">
-                       <MoreVertical size={16} />
-                     </button>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteTask(taskId);
+                      }}
+                      className="w-8 h-8 flex items-center justify-center text-outline hover:text-error hover:bg-error/10 rounded-full transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                    <button className="w-8 h-8 flex items-center justify-center text-outline hover:bg-surface-container rounded-full transition-colors">
+                      <MoreVertical size={16} />
+                    </button>
                   </div>
                 </motion.div>
               );
@@ -250,13 +268,17 @@ export default function Tasks() {
           </AnimatePresence>
         )}
 
-        {!loading && tasks.length === 0 && (
+        {!loading && filteredTasks.length === 0 && (
           <div className="py-12 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4">
-              <Check size={30} className="text-outline" />
+            <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4 text-outline">
+              <CheckCircle2 size={30} />
             </div>
-            <h4 className="text-lg font-bold text-on-surface mb-1">All done!</h4>
-            <p className="text-xs text-on-surface-variant">You have no pending tasks.</p>
+            <h4 className="text-lg font-bold text-on-surface mb-1">
+              {activeTab === 'Completed' ? 'No completed tasks' : activeTab === 'To Do' ? 'All caught up!' : 'No tasks yet'}
+            </h4>
+            <p className="text-xs text-on-surface-variant">
+              {activeTab === 'Completed' ? 'Check off some tasks to see them here.' : 'Add a new task to get started.'}
+            </p>
           </div>
         )}
       </div>

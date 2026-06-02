@@ -700,18 +700,18 @@ export default function Gallery() {
       )}
 
       {/* ── Security Banner ──────────────────────── */}
-      <div className={`bg-gradient-to-r ${activeTheme.bg} rounded-3xl p-5 relative overflow-hidden flex items-center justify-between border shadow-sm mb-4`}>
+      <div className={`bg-gradient-to-r ${activeTheme.bg} rounded-2xl sm:rounded-3xl p-3 sm:p-5 relative overflow-hidden flex items-center justify-between border shadow-sm mb-4`}>
         {/* Background Graphic */}
-        <LockKeyhole size={100} className={`absolute -bottom-8 right-8 ${activeTheme.iconWatermark} rotate-12 pointer-events-none`} />
+        <LockKeyhole className={`absolute -bottom-6 right-4 sm:-bottom-8 sm:right-8 w-16 h-16 sm:w-[100px] sm:h-[100px] ${activeTheme.iconWatermark} rotate-12 pointer-events-none`} />
         
-        <div className="flex items-start gap-3 sm:gap-4 relative z-10 max-w-[70%]">
-          <div className={`w-10 h-10 rounded-full ${activeTheme.iconBg} flex items-center justify-center shrink-0 border`}>
-            <ShieldAlert size={20} />
+        <div className="flex items-start gap-2 sm:gap-4 relative z-10 max-w-[80%] sm:max-w-[70%]">
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${activeTheme.iconBg} flex items-center justify-center shrink-0 border`}>
+            <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
           <div>
-            <h3 className={`text-sm font-bold ${activeTheme.textMain} mb-1`}>Your data is 100% secure</h3>
-            <p className={`text-xs ${activeTheme.textSub} mb-3`}>End-to-end encrypted & stored safely in cloud.</p>
-            <button className={`text-[10px] uppercase font-bold tracking-wider ${activeTheme.btn} px-3 py-1.5 rounded-full transition-colors`}>
+            <h3 className={`text-xs sm:text-sm font-bold ${activeTheme.textMain} mb-0.5 sm:mb-1`}>Your data is 100% secure</h3>
+            <p className={`text-[10px] sm:text-xs ${activeTheme.textSub} leading-tight sm:leading-normal mb-2 sm:mb-3`}>End-to-end encrypted & stored safely in cloud.</p>
+            <button className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-wider ${activeTheme.btn} px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-colors`}>
               Learn more
             </button>
           </div>
