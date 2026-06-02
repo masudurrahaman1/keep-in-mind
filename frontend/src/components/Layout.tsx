@@ -49,7 +49,7 @@ export default function Layout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-        {location.pathname !== '/account' && !location.pathname.startsWith('/vault') && location.pathname !== '/gallery' && !location.pathname.startsWith('/reminders') && !location.pathname.startsWith('/tasks') && location.pathname !== '/about' && location.pathname !== '/privacy-policy' && location.pathname !== '/terms-of-service' && location.pathname !== '/cloud-sync' && location.pathname !== '/help' && (
+        {location.pathname !== '/account' && !location.pathname.startsWith('/vault') && location.pathname !== '/gallery' && !location.pathname.startsWith('/tasks') && location.pathname !== '/about' && location.pathname !== '/privacy-policy' && location.pathname !== '/terms-of-service' && location.pathname !== '/cloud-sync' && location.pathname !== '/help' && (
           <TopBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}

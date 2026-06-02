@@ -3,8 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Plus, Bell, Clock, Calendar, Stethoscope, Phone, 
-  BookOpen, Flag, MoreVertical, RotateCw, ListFilter, 
-  Moon, CheckCircle2, Flame, Trash2
+  BookOpen, MoreVertical, RotateCw, ListFilter, 
+  Moon, CheckCircle2, Circle
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Sidebar';
@@ -13,7 +13,7 @@ import { format, isPast, isToday, isTomorrow, parseISO, startOfWeek, endOfWeek, 
 export type ReminderCategory = 'Health' | 'Personal' | 'Education' | 'Work' | 'Other';
 export type ReminderPriority = 'Normal' | 'High Priority';
 export type ReminderRepeat = 'Does not repeat' | 'Daily' | 'Weekly' | 'Monthly';
-export type FilterTab = 'All' | 'Upcoming' | 'Completed' | 'Snoozed';
+export type FilterTab = 'All' | 'Today' | 'Upcoming' | 'Completed';
 
 export interface Reminder {
   id?: number | string;
@@ -29,23 +29,32 @@ export interface Reminder {
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
-const getCategoryIcon = (category: ReminderCategory, isSnoozed: boolean) => {
-  if (isSnoozed) return <Moon size={20} className="text-purple-500" />;
+const getCategoryIcon = (category: ReminderCategory) => {
   switch (category) {
-    case 'Health': return <Stethoscope size={20} className="text-[#FF9E4A]" />;
-    case 'Personal': return <Phone size={20} className="text-[#FFC107]" />;
-    case 'Education': return <BookOpen size={20} className="text-blue-400" />;
-    default: return <Bell size={20} className="text-gray-400" />;
+    case 'Health': return <Stethoscope size={24} className="text-blue-500" />;
+    case 'Personal': return <BookOpen size={24} className="text-purple-600" />;
+    case 'Education': return <BookOpen size={24} className="text-blue-400" />;
+    case 'Work': return <Calendar size={24} className="text-indigo-500" />;
+    default: return <Phone size={24} className="text-green-600" />; // Default icon for mindfulness/other
   }
 };
 
-const getCategoryColor = (category: ReminderCategory, isSnoozed: boolean) => {
-  if (isSnoozed) return 'bg-purple-50 dark:bg-purple-900/20';
+const getCategoryColor = (category: ReminderCategory) => {
   switch (category) {
-    case 'Health': return 'bg-orange-50 dark:bg-orange-900/20';
-    case 'Personal': return 'bg-yellow-50 dark:bg-yellow-900/20';
+    case 'Health': return 'bg-blue-100 dark:bg-blue-900/30';
+    case 'Personal': return 'bg-purple-100 dark:bg-purple-900/30';
     case 'Education': return 'bg-blue-50 dark:bg-blue-900/20';
-    default: return 'bg-gray-50 dark:bg-gray-800';
+    case 'Work': return 'bg-indigo-100 dark:bg-indigo-900/30';
+    default: return 'bg-green-100 dark:bg-green-900/30';
+  }
+};
+
+const getCategoryTagColor = (category: ReminderCategory) => {
+  switch (category) {
+    case 'Health': return 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400';
+    case 'Personal': return 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400';
+    case 'Work': return 'bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400';
+    default: return 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'; // Mindfulness
   }
 };
 
@@ -54,7 +63,14 @@ export default function Reminders() {
   const navigate = useNavigate();
   const storageKey = user ? `keep-in-mind-reminders-v2-${user._id}` : 'keep-in-mind-reminders-v2-guest';
 
-  const [reminders, setReminders] = useState<Reminder[]>([]);
+  const [reminders, setReminders] = useState<Reminder[]>([
+    // Mock data for visual preview
+    { id: 1, text: 'Drink water', time: new Date().toISOString(), category: 'Health', priority: 'Normal', repeat: 'Daily', completed: false },
+    { id: 2, text: 'Read a few pages', time: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(), category: 'Personal', priority: 'Normal', repeat: 'Daily', completed: false },
+    { id: 3, text: 'Meditation', time: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), category: 'Other', priority: 'Normal', repeat: 'Daily', completed: false },
+    { id: 4, text: 'Project submission', time: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(), category: 'Work', priority: 'High Priority', repeat: 'Does not repeat', completed: false },
+    { id: 5, text: 'Morning workout', time: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), category: 'Health', priority: 'Normal', repeat: 'Daily', completed: true },
+  ]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
 
@@ -69,9 +85,7 @@ export default function Reminders() {
           });
           if (res.ok) {
             const data = await res.json();
-            setReminders(data);
-          } else {
-            console.error('Failed to fetch reminders from server');
+            if (data.length > 0) setReminders(data);
           }
         } catch (error) {
           console.error('Error fetching reminders:', error);
@@ -81,7 +95,7 @@ export default function Reminders() {
       } else {
         // Guest mode fallback
         const saved = localStorage.getItem(storageKey);
-        setReminders(saved ? JSON.parse(saved) : []);
+        if (saved) setReminders(JSON.parse(saved));
       }
     };
 
@@ -120,67 +134,14 @@ export default function Reminders() {
       setReminders(reminders.map(r => ((r.id || r._id) === id ? { ...r, completed: !r.completed } : r)));
     }
   };
-  
-  const deleteReminder = async (id: string | number) => {
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE}/reminders/${id}`, {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (res.ok) {
-          setReminders(reminders.filter(r => (r._id || r.id) !== id));
-        }
-      } catch (error) {
-        console.error('Error deleting reminder:', error);
-      }
-    } else {
-      setReminders(reminders.filter(r => (r.id || r._id) !== id));
-    }
-  };
-
-  const undoSnooze = async (id: string | number) => {
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE}/reminders/${id}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ snoozedUntil: null })
-        });
-        if (res.ok) {
-          const updated = await res.json();
-          setReminders(reminders.map(r => ((r._id || r.id) === id ? updated : r)));
-        }
-      } catch (error) {
-        console.error('Error un-snoozing reminder:', error);
-      }
-    } else {
-      setReminders(reminders.map(r => ((r.id || r._id) === id ? { ...r, snoozedUntil: undefined } : r)));
-    }
-  };
-
-  // Stats
-  const now = new Date();
-  const weekStart = startOfWeek(now);
-  const weekEnd = endOfWeek(now);
-  const totalUpcoming = reminders.filter(r => !r.completed && !r.snoozedUntil).length;
-  const totalCompleted = reminders.filter(r => r.completed).length;
-  const completedThisWeek = reminders.filter(r => r.completed && isWithinInterval(parseISO(r.time), { start: weekStart, end: weekEnd })).length;
 
   // Filtering
   const filteredReminders = reminders.filter(r => {
     if (activeTab === 'Completed') return r.completed;
-    if (activeTab === 'Snoozed') return r.snoozedUntil && !r.completed;
-    if (activeTab === 'Upcoming') return !r.completed && !r.snoozedUntil;
+    if (activeTab === 'Today') return isToday(parseISO(r.time)) && !r.completed;
+    if (activeTab === 'Upcoming') return !isToday(parseISO(r.time)) && !isPast(parseISO(r.time)) && !r.completed;
     return true; // All
   }).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-
-  const todayReminders = filteredReminders.filter(r => isToday(parseISO(r.time)) && !r.snoozedUntil && !r.completed);
-  const upcomingReminders = filteredReminders.filter(r => !isToday(parseISO(r.time)) && !r.snoozedUntil && !r.completed);
-  const snoozedReminders = filteredReminders.filter(r => r.snoozedUntil && !r.completed);
 
   const formatTimeText = (isoString: string) => {
     const date = parseISO(isoString);
@@ -190,242 +151,115 @@ export default function Reminders() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2 space-y-6">
-      
-      {/* HEADER BANNER */}
-      <div className="w-full bg-[#FFF9E5] dark:from-[#2C2415] dark:to-[#42361C] rounded-[24px] p-6 relative overflow-hidden shadow-sm shrink-0">
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
-          <div className="w-full md:w-1/2">
-            <h2 className="text-[22px] font-bold text-gray-900 dark:text-amber-100 leading-tight mb-1 flex items-center gap-2">
-              Good morning, {user?.name?.split(' ')[0] || 'User'}! <span className="text-xl">👋</span>
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-amber-200/80 mb-6">
-              You have {totalUpcoming} upcoming reminders today.
-            </p>
-            
-            <div className="flex items-center gap-6">
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center text-yellow-600 dark:text-yellow-400 font-bold mb-1">
-                  {reminders.length}
-                </div>
-                <span className="text-xs text-gray-500 font-medium">Total</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 font-bold mb-1">
-                  {totalCompleted}
-                </div>
-                <span className="text-xs text-gray-500 font-medium">Completed</span>
-              </div>
-              <div className="flex flex-col items-center">
-                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 font-bold mb-1">
-                  {completedThisWeek}
-                </div>
-                <span className="text-xs text-gray-500 font-medium">This week</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="hidden md:flex absolute right-0 top-0 bottom-0 w-1/2 items-center justify-end pr-4 pointer-events-none opacity-90">
-             <div className="relative w-32 h-32">
-                <div className="absolute right-8 top-4 w-20 h-20 bg-gradient-to-br from-yellow-300 to-yellow-500 rounded-[40%] rotate-12 blur-[1px] shadow-lg flex items-center justify-center">
-                  <Bell size={40} className="text-white fill-white" />
-                </div>
-                <div className="absolute right-0 bottom-4 w-16 h-16 bg-white dark:bg-gray-800 rounded-xl -rotate-6 shadow-xl flex items-center justify-center border border-gray-100 dark:border-gray-700">
-                  <Calendar size={28} className="text-blue-500" />
-                </div>
-                <div className="absolute top-2 right-2 w-2 h-2 bg-yellow-400 rotate-45" />
-                <div className="absolute bottom-8 right-28 w-1.5 h-1.5 bg-orange-400 rotate-45" />
-             </div>
-          </div>
-        </div>
+    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-4">
+
+      {/* Header Text */}
+      <div className="mb-6">
+        <h1 className="text-4xl font-extrabold text-on-surface mb-2 tracking-tight">Reminders</h1>
+        <p className="text-on-surface-variant font-medium text-sm flex items-center gap-1">
+          Stay on track, one reminder at a time. <span className="text-primary">💜</span>
+        </p>
       </div>
 
       {/* FILTER TABS */}
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
-        {(['All', 'Upcoming', 'Completed', 'Snoozed'] as FilterTab[]).map(tab => (
+      <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2 mb-6">
+        {(['All', 'Today', 'Upcoming', 'Completed'] as FilterTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={cn(
-              "flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors whitespace-nowrap",
+              "px-5 py-2 rounded-[20px] text-sm font-semibold transition-all whitespace-nowrap border",
               activeTab === tab 
-                ? "bg-yellow-50 dark:bg-yellow-900/20 text-[#FFC107] border border-[#FFC107]/30" 
-                : "bg-white dark:bg-[#1A1C20] text-gray-600 dark:text-gray-300 border border-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+                ? "bg-primary-container text-primary border-primary/20" 
+                : "bg-surface text-on-surface-variant border-outline-variant/30 hover:bg-surface-container"
             )}
           >
-            {tab === 'All' && <ListFilter size={14} />}
-            {tab === 'Upcoming' && <Clock size={14} />}
-            {tab === 'Completed' && <CheckCircle2 size={14} />}
-            {tab === 'Snoozed' && <Moon size={14} />}
             {tab}
           </button>
         ))}
-        <div className="flex-1" />
-        <button className="p-2 bg-white dark:bg-[#1A1C20] text-gray-600 dark:text-gray-300 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-          <ListFilter size={18} />
-        </button>
       </div>
 
       {/* REMINDERS LIST */}
-      <div className="flex flex-col gap-6">
-        {(() => {
-          const renderCards = (list: Reminder[], title?: string) => {
-            if (list.length === 0) return null;
-            return (
-              <div className="flex flex-col gap-3">
-                {title && (
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-4 bg-[#FFC107] rounded-full" />
-                      <h3 className="text-[15px] font-bold text-gray-900 dark:text-gray-100">{title}</h3>
-                    </div>
-                    <button className="text-xs font-semibold text-[#FFC107] hover:underline">View all</button>
-                  </div>
+      <div className="flex flex-col gap-4">
+        <AnimatePresence>
+          {filteredReminders.map(reminder => (
+            <motion.div
+              key={reminder._id || reminder.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-surface rounded-2xl p-4 shadow-sm border border-outline-variant/20 flex items-center justify-between gap-3 group"
+            >
+              {/* Checkbox */}
+              <button 
+                onClick={() => toggleComplete(reminder._id || reminder.id!)}
+                className="w-6 h-6 flex items-center justify-center shrink-0 text-outline-variant hover:text-primary transition-colors"
+              >
+                {reminder.completed ? (
+                  <CheckCircle2 size={24} className="fill-primary text-on-primary" />
+                ) : (
+                  <Circle size={24} strokeWidth={2} />
                 )}
-                <AnimatePresence>
-                  {list.map(reminder => (
-                    <motion.div
-                      key={reminder._id || reminder.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="bg-white dark:bg-[#1A1C20] rounded-[20px] p-4 shadow-sm border border-black/5 dark:border-white/5 flex items-center justify-between gap-4 group"
-                    >
-                      <div className="flex items-center gap-4 flex-1">
-                        <div className={cn("w-12 h-12 rounded-full flex items-center justify-center shrink-0", getCategoryColor(reminder.category, !!reminder.snoozedUntil))}>
-                          {getCategoryIcon(reminder.category, !!reminder.snoozedUntil)}
-                        </div>
-                        <div className="flex flex-col">
-                          <h4 className={cn(
-                            "text-[15px] font-bold mb-0.5",
-                            reminder.completed ? "text-gray-400 line-through" : "text-gray-900 dark:text-gray-100"
-                          )}>
-                            {reminder.text}
-                          </h4>
-                          <div className="flex items-center gap-1.5 text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
-                            <Clock size={12} className={reminder.snoozedUntil ? "text-purple-400" : "text-[#FFC107]"} />
-                            {formatTimeText(reminder.time)}
-                            
-                            {reminder.snoozedUntil && (
-                              <span className="ml-1 text-purple-500">
-                                Snoozed until {formatTimeText(reminder.snoozedUntil)}
-                              </span>
-                            )}
-                            
-                            {reminder.repeat !== 'Does not repeat' && !reminder.snoozedUntil && (
-                              <span className="flex items-center gap-1 ml-2">
-                                <RotateCw size={10} /> {reminder.repeat}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-center gap-2 mt-0.5">
-                            {reminder.priority === 'High Priority' && (
-                              <span className="px-2 py-0.5 bg-red-50 dark:bg-red-900/20 text-red-500 text-[10px] font-bold rounded-md uppercase tracking-wider">
-                                High Priority
-                              </span>
-                            )}
-                            <span className="px-2 py-0.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] font-bold rounded-md uppercase tracking-wider">
-                              {reminder.category}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+              </button>
 
-                      <div className="flex items-center gap-1">
-                        {reminder.snoozedUntil ? (
-                          <button 
-                            onClick={() => undoSnooze(reminder._id || reminder.id!)}
-                            className="px-3 py-1.5 bg-purple-50 dark:bg-purple-900/20 text-purple-600 text-xs font-bold rounded-full hover:bg-purple-100 transition-colors"
-                          >
-                            Undo
-                          </button>
-                        ) : (
-                          <button 
-                            onClick={() => toggleComplete(reminder._id || reminder.id!)}
-                            className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-green-500 rounded-full transition-colors"
-                            title="Mark as completed"
-                          >
-                            <CheckCircle2 size={18} className={reminder.completed ? "fill-green-100 text-green-500" : ""} />
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => deleteReminder(reminder._id || reminder.id!)}
-                          className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-red-500 rounded-full transition-colors"
-                          title="Delete reminder"
-                        >
-                          <Trash2 size={18} />
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-              </div>
-            );
-          };
-
-          if (activeTab === 'All') {
-            return (
-              <>
-                {renderCards(todayReminders, 'Today')}
-                {renderCards(upcomingReminders, 'Upcoming')}
-                {renderCards(snoozedReminders, 'Snoozed')}
-                {reminders.length === 0 && (
-                  <div className="py-12 flex flex-col items-center text-center">
-                    <p className="text-gray-500">No Reminders yet.</p>
-                  </div>
-                )}
-              </>
-            );
-          } else {
-            return renderCards(filteredReminders);
-          }
-        })()}
-      </div>
-
-      {/* STREAK BANNER */}
-      <div className="bg-[#FFF9E5] dark:bg-yellow-900/10 rounded-[20px] p-4 flex items-center justify-between mt-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white dark:bg-[#1A1C20] rounded-full shadow-sm flex items-center justify-center shrink-0">
-            <Flame size={20} className="text-orange-500 fill-orange-500" />
-          </div>
-          <div>
-            <h4 className="text-[14px] font-bold text-gray-900 dark:text-gray-100 flex items-center gap-1">
-              You're on a streak! <Flame size={14} className="text-orange-500 fill-orange-500" />
-            </h4>
-            <p className="text-[11px] text-gray-500">Great job staying consistent.</p>
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-3 md:gap-4 shrink-0">
-          <div className="hidden sm:flex items-center gap-1.5">
-            {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, i) => (
-              <div key={i} className="flex flex-col items-center gap-1">
-                <div className={cn(
-                  "w-5 h-5 rounded-full flex items-center justify-center text-[10px]",
-                  i < 5 ? "bg-[#FFC107] text-white" : "bg-yellow-200 text-yellow-600"
-                )}>
-                  {i < 5 && <CheckCircle2 size={12} strokeWidth={3} />}
+              {/* Icon & Details */}
+              <div className="flex items-center gap-4 flex-1">
+                <div className={cn("w-14 h-14 rounded-full flex items-center justify-center shrink-0", getCategoryColor(reminder.category))}>
+                  {getCategoryIcon(reminder.category)}
                 </div>
-                <span className="text-[9px] font-bold text-gray-400">{day}</span>
+                
+                <div className="flex flex-col gap-1">
+                  <h4 className={cn(
+                    "text-[15px] font-bold leading-tight",
+                    reminder.completed ? "text-on-surface-variant line-through" : "text-on-surface"
+                  )}>
+                    {reminder.text}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "px-2 py-0.5 text-[10px] font-bold rounded-md tracking-wider",
+                      getCategoryTagColor(reminder.category === 'Other' ? 'Work' : reminder.category) // Map 'Other' to a default tag color for visual
+                    )}>
+                      {reminder.category === 'Other' ? 'Mindfulness' : reminder.category}
+                    </span>
+                  </div>
+                </div>
               </div>
-            ))}
+
+              {/* Time & Action */}
+              <div className="flex items-center gap-2 text-xs font-semibold text-on-surface-variant">
+                <Clock size={14} className="opacity-50" />
+                <span className="min-w-[70px] text-right">{formatTimeText(reminder.time)}</span>
+                
+                {reminder.completed ? (
+                  <CheckCircle2 size={18} className="text-green-500 ml-1" />
+                ) : (
+                  <Bell size={18} className="text-primary ml-1" />
+                )}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+        
+        {filteredReminders.length === 0 && (
+          <div className="py-12 flex flex-col items-center text-center">
+            <p className="text-on-surface-variant">No Reminders yet.</p>
           </div>
-          <div className="flex flex-col items-center sm:pl-3 sm:border-l border-yellow-200 dark:border-yellow-900/50">
-            <span className="text-lg font-black text-gray-900 dark:text-gray-100 leading-none">12</span>
-            <span className="text-[9px] font-bold text-gray-500 uppercase">Day<br/>streak</span>
-          </div>
-        </div>
+        )}
       </div>
 
-      {/* FLOATING ACTION BUTTON */}
-      <button 
-        onClick={() => navigate('/reminders/new')}
-        className="fixed bottom-24 right-6 md:bottom-10 md:right-10 w-14 h-14 bg-[#FFC107] text-white rounded-full flex items-center justify-center hover:bg-[#F5B000] hover:scale-105 transition-all shadow-lg z-50 group"
-        title="Add Reminder"
-      >
-        <Plus size={28} strokeWidth={2.5} className="group-hover:rotate-90 transition-transform duration-300" />
-      </button>
+      {/* Decorative Bottom Area */}
+      <div className="mt-12 mb-8 flex flex-col items-center justify-center text-center">
+        <div className="text-5xl mb-4 relative">
+          🪴
+          <div className="absolute -top-1 -right-2 text-xl">✨</div>
+          <div className="absolute top-2 -left-2 text-sm">✨</div>
+        </div>
+        <h4 className="text-[15px] font-bold text-on-surface mb-1">Small steps every day</h4>
+        <p className="text-xs text-on-surface-variant">
+          lead to big changes. <span className="text-primary">💜</span>
+        </p>
+      </div>
 
     </div>
   );

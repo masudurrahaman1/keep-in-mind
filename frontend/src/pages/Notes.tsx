@@ -598,132 +598,134 @@ export default function Notes() {
           </button>
         </div>
 
-        <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
-          <AnimatePresence>
-            {allNotes.map((note) => {
-              const isList = note.type === 'list';
-              let listItems: any[] = [];
-              if (isList && note.content) {
-                try {
-                  listItems = JSON.parse(note.content);
-                } catch {
-                  listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
+        {allNotes.length > 0 && (
+          <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
+            <AnimatePresence>
+              {allNotes.map((note) => {
+                const isList = note.type === 'list';
+                let listItems: any[] = [];
+                if (isList && note.content) {
+                  try {
+                    listItems = JSON.parse(note.content);
+                  } catch {
+                    listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
+                  }
                 }
-              }
-              const isDrawing = note.type === 'drawing';
+                const isDrawing = note.type === 'drawing';
 
-              return (
-                <motion.div
-                  layoutId={`note-${note._id || note.id}`}
-                  key={note._id || note.id}
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  onClick={(e) => handleNoteClick(e, note)}
-                  onMouseDown={(e) => startPress(e, note)}
-                  onMouseUp={cancelPress}
-                  onMouseLeave={cancelPress}
-                  onTouchStart={(e) => startPress(e, note)}
-                  onTouchEnd={cancelPress}
-                  onTouchMove={cancelPress}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    if (!isLongPressTriggered.current) {
-                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                      setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
-                      isLongPressTriggered.current = true;
-                    }
-                  }}
-                  className="break-inside-avoid mb-3 inline-block w-full bg-white dark:bg-[#1A1C20] rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
-                >
-                  {isDrawing && note.content && note.content.startsWith('data:image') && (
-                    <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
-                      <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-
-                  <div className="p-4 flex flex-col flex-1">
-                    <div className="flex items-start justify-between mb-2 gap-2">
-                      <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
-                        {note.title}
-                      </h4>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                          setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
-                        }}
-                        className="p-1 -mt-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition-colors shrink-0"
-                      >
-                        <MoreVertical size={16} />
-                      </button>
-                    </div>
-
-                    {isList ? (
-                      <div className="space-y-1.5 mb-3">
-                        {listItems.slice(0, 3).map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
-                            <div className={cn(
-                              "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
-                              item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
-                            )}>
-                              {item.checked && (
-                                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                              )}
-                            </div>
-                            <span className={cn("truncate", item.checked && "line-through opacity-50")}>
-                              {item.text}
-                            </span>
-                          </div>
-                        ))}
+                return (
+                  <motion.div
+                    layoutId={`note-${note._id || note.id}`}
+                    key={note._id || note.id}
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    onClick={(e) => handleNoteClick(e, note)}
+                    onMouseDown={(e) => startPress(e, note)}
+                    onMouseUp={cancelPress}
+                    onMouseLeave={cancelPress}
+                    onTouchStart={(e) => startPress(e, note)}
+                    onTouchEnd={cancelPress}
+                    onTouchMove={cancelPress}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      if (!isLongPressTriggered.current) {
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
+                        isLongPressTriggered.current = true;
+                      }
+                    }}
+                    className="break-inside-avoid mb-3 inline-block w-full bg-white dark:bg-[#1A1C20] rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
+                  >
+                    {isDrawing && note.content && note.content.startsWith('data:image') && (
+                      <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
+                        <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
                       </div>
-                    ) : (
-                      !isDrawing && (
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
-                          {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
-                        </p>
-                      )
                     )}
 
-                    <div className="mt-auto pt-2 flex flex-col gap-2">
-                      {note.category && (
-                        <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
-                          {note.category}
-                        </span>
-                      )}
-                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                        {(() => {
-                          try {
-                            const date = parseISO(note.date);
-                            if (isNaN(date.getTime())) return note.date;
-                            if (isToday(date)) return format(date, 'h:mm a');
-                            if (isYesterday(date)) return 'Yesterday';
-                            return format(date, 'MMM d, yyyy');
-                          } catch { return note.date; }
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </AnimatePresence>
+                    <div className="p-4 flex flex-col flex-1">
+                      <div className="flex items-start justify-between mb-2 gap-2">
+                        <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
+                          {note.title}
+                        </h4>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                            setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
+                          }}
+                          className="p-1 -mt-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition-colors shrink-0"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
+                      </div>
 
-          {allNotes.length === 0 && PinnedNotesCount(pinnedNotes) === 0 && (
-            <div className="py-12 flex flex-col items-center text-center">
-              <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
-                <FileText size={30} className="text-gray-400" />
-              </div>
-              <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">It's empty here</h4>
-              <p className="text-xs text-gray-500 max-w-[240px] leading-relaxed">
-                Create your first note by clicking the button below.
-              </p>
+                      {isList ? (
+                        <div className="space-y-1.5 mb-3">
+                          {listItems.slice(0, 3).map((item: any) => (
+                            <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
+                              <div className={cn(
+                                "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
+                                item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
+                              )}>
+                                {item.checked && (
+                                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                  </svg>
+                                )}
+                              </div>
+                              <span className={cn("truncate", item.checked && "line-through opacity-50")}>
+                                {item.text}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        !isDrawing && (
+                          <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
+                            {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
+                          </p>
+                        )
+                      )}
+
+                      <div className="mt-auto pt-2 flex flex-col gap-2">
+                        {note.category && (
+                          <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
+                            {note.category}
+                          </span>
+                        )}
+                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
+                          {(() => {
+                            try {
+                              const date = parseISO(note.date);
+                              if (isNaN(date.getTime())) return note.date;
+                              if (isToday(date)) return format(date, 'h:mm a');
+                              if (isYesterday(date)) return 'Yesterday';
+                              return format(date, 'MMM d, yyyy');
+                            } catch { return note.date; }
+                          })()}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {allNotes.length === 0 && PinnedNotesCount(pinnedNotes) === 0 && (
+          <div className="py-16 flex flex-col items-center justify-center text-center w-full">
+            <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-5 text-on-surface-variant">
+              <FileText size={30} />
             </div>
-          )}
-        </div>
+            <h4 className="text-xl font-bold text-on-surface mb-2 tracking-tight">It's empty here</h4>
+            <p className="text-sm text-on-surface-variant max-w-[260px] leading-relaxed">
+              Create your first note by clicking the button below.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Floating Action Button (FAB) matching the mockup */}
