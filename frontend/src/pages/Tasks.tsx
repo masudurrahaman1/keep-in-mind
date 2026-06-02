@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Check, Trash2 } from 'lucide-react';
+import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { usePreferences } from '../context/PreferencesContext';
 import { cn } from '../components/Sidebar';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -16,67 +15,10 @@ interface TaskType {
 
 export default function Tasks() {
   const { user, token } = useAuth();
-  const { themeColor } = usePreferences();
   const storageKey = user ? `keep-in-mind-tasks-${user._id}` : 'keep-in-mind-tasks-guest';
 
-  const themeMap = {
-    yellow: {
-      headerBg: 'bg-[#FEF7D6] dark:from-[#2C2415] dark:to-[#42361C]',
-      textDark: 'dark:text-amber-100',
-      textDarkSub: 'dark:text-amber-200/80',
-      glow: 'bg-yellow-300',
-      check: 'bg-[#FFC107] text-white',
-      checkBorder: 'hover:border-[#FFC107]'
-    },
-    blue: {
-      headerBg: 'bg-[#E5F1FF] dark:from-[#112440] dark:to-[#173055]',
-      textDark: 'dark:text-blue-100',
-      textDarkSub: 'dark:text-blue-200/80',
-      glow: 'bg-blue-300',
-      check: 'bg-[#007AFF] text-white',
-      checkBorder: 'hover:border-[#007AFF]'
-    },
-    green: {
-      headerBg: 'bg-[#E6F8ED] dark:from-[#133020] dark:to-[#1A402A]',
-      textDark: 'dark:text-emerald-100',
-      textDarkSub: 'dark:text-emerald-200/80',
-      glow: 'bg-emerald-300',
-      check: 'bg-[#34C759] text-white',
-      checkBorder: 'hover:border-[#34C759]'
-    },
-    purple: {
-      headerBg: 'bg-[#F4EBFF] dark:from-[#2D1B42] dark:to-[#3C2458]',
-      textDark: 'dark:text-purple-100',
-      textDarkSub: 'dark:text-purple-200/80',
-      glow: 'bg-purple-300',
-      check: 'bg-[#AF52DE] text-white',
-      checkBorder: 'hover:border-[#AF52DE]'
-    },
-    rose: {
-      headerBg: 'bg-[#FFE5E9] dark:from-[#40121D] dark:to-[#5A1A2A]',
-      textDark: 'dark:text-rose-100',
-      textDarkSub: 'dark:text-rose-200/80',
-      glow: 'bg-rose-300',
-      check: 'bg-[#FF2D55] text-white',
-      checkBorder: 'hover:border-[#FF2D55]'
-    },
-    orange: {
-      headerBg: 'bg-[#FFF0D4] dark:from-[#4A2012] dark:to-[#6B2F1A]',
-      textDark: 'dark:text-orange-100',
-      textDarkSub: 'dark:text-orange-200/80',
-      glow: 'bg-orange-300',
-      check: 'bg-[#FF9500] text-white',
-      checkBorder: 'hover:border-[#FF9500]'
-    }
-  };
-  const activeTheme = themeMap[themeColor] || themeMap.yellow;
-
   const [tasks, setTasks] = useState<TaskType[]>([]);
-  const [newTask, setNewTask] = useState('');
   const [loading, setLoading] = useState(false);
-  const [activeDeleteTaskId, setActiveDeleteTaskId] = useState<string | number | null>(null);
-
-  const pressTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Load initial tasks
   useEffect(() => {
@@ -123,52 +65,6 @@ export default function Tasks() {
     }
   }, [tasks, token, storageKey]);
 
-  // Click outside listener to dismiss visible delete buttons
-  useEffect(() => {
-    const handleGlobalClick = () => {
-      setActiveDeleteTaskId(null);
-    };
-    window.addEventListener('click', handleGlobalClick);
-    return () => window.removeEventListener('click', handleGlobalClick);
-  }, []);
-
-  const handleAddTask = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!newTask.trim()) return;
-
-    const taskText = newTask.trim();
-    setNewTask('');
-
-    if (token) {
-      try {
-        const res = await fetch(`${API_BASE}/tasks`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
-          body: JSON.stringify({ text: taskText })
-        });
-        if (res.ok) {
-          const savedTask = await res.json();
-          setTasks([savedTask, ...tasks]);
-        }
-      } catch (error) {
-        console.error('Error adding task:', error);
-      }
-    } else {
-      // Guest mode
-      setTasks([
-        {
-          id: Date.now(),
-          text: taskText,
-          completed: false
-        },
-        ...tasks
-      ]);
-    }
-  };
-
   const toggleTask = async (id: string | number, currentCompleted: boolean) => {
     if (token) {
       try {
@@ -212,64 +108,84 @@ export default function Tasks() {
     }
   };
 
-  // Long press event handlers
-  const startPress = (e: React.MouseEvent | React.TouchEvent, id: string | number) => {
-    e.stopPropagation(); // Avoid triggering global clicks
-    cancelPress();
-    pressTimer.current = setTimeout(() => {
-      setActiveDeleteTaskId(id);
-      // Trigger a light vibration if supported on mobile
-      if (navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-    }, 350); // 350ms hold time
-  };
-
-  const cancelPress = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
   const completedCount = tasks.filter(t => t.completed).length;
+  const progress = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
+  
+  const radius = 38;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
+    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-32 pt-2">
       {/* HEADER BANNER */}
-      <div
-        className={`w-full ${activeTheme.headerBg} rounded-[28px] p-6 mb-8 relative overflow-hidden shadow-sm shrink-0`}
-        style={{ height: '144px' }}
-      >
-        <div className="relative z-10 w-2/3">
-          <h2 className={`text-[22px] font-bold text-gray-900 ${activeTheme.textDark} leading-tight mb-1`}>
-            Your Tasks 📝
+      <div className="w-full bg-gradient-to-br from-primary/10 to-primary/5 rounded-[32px] p-6 sm:p-8 mb-8 relative overflow-hidden shadow-sm border border-primary/10 shrink-0 flex items-center justify-between">
+        <div className="relative z-10 flex flex-col items-start max-w-[60%]">
+          <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 text-2xl shadow-inner border border-primary/10">
+            📝
+          </div>
+          <h2 className="text-[28px] sm:text-[32px] font-black text-on-surface leading-tight mb-2">
+            Your Tasks
           </h2>
-          <p className={`text-sm text-gray-600 ${activeTheme.textDarkSub}`}>
-            {completedCount} of {tasks.length} completed
+          <p className="text-sm text-on-surface-variant font-medium mb-5">
+            {progress === 100 && tasks.length > 0 
+              ? "Let's keep going! You're all set. 🚀" 
+              : "Stay on top of your daily goals. ✨"}
           </p>
+          <div className="bg-surface/80 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-primary/10 shadow-sm">
+            <CheckCircle2 size={16} className="text-primary" />
+            <span className="text-xs font-bold text-primary">
+              {completedCount} of {tasks.length} completed
+            </span>
+          </div>
         </div>
-        {/* Decorative glow */}
-        <div className={`absolute right-[-10px] bottom-[-20px] w-32 h-32 ${activeTheme.glow} rounded-full opacity-20 blur-2xl pointer-events-none`} />
-        {/* Progress Circle Visual */}
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 w-20 h-20 rounded-full border-8 border-white/40 flex items-center justify-center">
-          <span className="font-bold text-gray-800 text-lg">
-            {tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0}%
-          </span>
+        
+        {/* Progress Circle */}
+        <div className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex flex-col items-center justify-center bg-surface/50 backdrop-blur-md rounded-full shadow-sm border border-white/40 dark:border-white/5 mr-2">
+          <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none drop-shadow-md" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r={radius} className="fill-none stroke-primary/20" strokeWidth="8" />
+            <circle 
+              cx="50" cy="50" r={radius} 
+              className="fill-none stroke-primary transition-all duration-1000 ease-out drop-shadow-sm" 
+              strokeWidth="8" 
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeDashoffset}
+            />
+          </svg>
+          <div className="flex flex-col items-center justify-center text-center z-10">
+            <span className="text-2xl sm:text-3xl font-black text-on-surface leading-none mb-1">{progress}%</span>
+            <span className="text-[9px] sm:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Completed</span>
+          </div>
         </div>
+
+        {/* Decorative elements */}
+        <div className="absolute right-[-20%] bottom-[-20%] w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute left-[-10%] top-[-10%] w-40 h-40 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
       </div>
+
+      {/* LIST HEADER */}
+      {tasks.length > 0 && (
+        <div className="flex items-center justify-between mb-4 px-1">
+          <div className="flex items-center gap-2 text-on-surface font-bold">
+            <ListTodo size={20} className="text-primary" />
+            <span>All Tasks</span>
+          </div>
+          <button className="flex items-center gap-1 px-3 py-1.5 bg-surface-container rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors">
+            <span>Recent</span>
+            <ChevronDown size={14} />
+          </button>
+        </div>
+      )}
 
       {/* TASKS LIST */}
       <div className="flex flex-col gap-3">
         {loading ? (
-          <div className="py-12 text-center text-gray-500">Loading tasks...</div>
+          <div className="py-12 text-center text-on-surface-variant">Loading tasks...</div>
         ) : (
           <AnimatePresence>
             {tasks.map(task => {
               const taskId = task._id || task.id;
               if (!taskId) return null;
-
-              const isDeleteVisible = activeDeleteTaskId === taskId;
 
               return (
                 <motion.div
@@ -277,61 +193,51 @@ export default function Tasks() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-white dark:bg-[#1A1C20] rounded-[20px] p-4 shadow-sm border border-black/5 dark:border-white/5 flex items-center justify-between group select-none touch-none"
-                  onMouseDown={(e) => startPress(e, taskId)}
-                  onMouseUp={cancelPress}
-                  onMouseLeave={cancelPress}
-                  onTouchStart={(e) => startPress(e, taskId)}
-                  onTouchEnd={cancelPress}
-                  onTouchMove={cancelPress}
+                  className="bg-surface rounded-[24px] p-4 sm:p-5 shadow-sm border border-outline-variant/20 flex items-center justify-between group select-none touch-none hover:shadow-md transition-all cursor-pointer"
+                  onClick={() => toggleTask(taskId, task.completed)}
                 >
-                  <div
-                    className="flex items-center gap-4 flex-1 cursor-pointer"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleTask(taskId, task.completed);
-                    }}
-                  >
+                  <div className="flex items-center gap-4 flex-1 overflow-hidden pr-4">
                     <button
                       className={cn(
-                        'w-6 h-6 rounded-md flex items-center justify-center transition-colors shrink-0',
+                        'w-8 h-8 rounded-xl flex items-center justify-center transition-all shrink-0 duration-300',
                         task.completed
-                          ? activeTheme.check
-                          : `border-2 border-gray-300 dark:border-gray-600 text-transparent ${activeTheme.checkBorder}`
+                          ? 'bg-primary text-on-primary shadow-md shadow-primary/30 scale-105'
+                          : 'border-2 border-outline-variant/40 group-hover:border-primary text-transparent scale-100'
                       )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleTask(taskId, task.completed);
-                      }}
                     >
-                      <Check size={14} strokeWidth={4} />
+                      <Check size={16} strokeWidth={4} />
                     </button>
                     <span
                       className={cn(
-                        'text-sm font-medium transition-all',
+                        'text-[15px] font-bold transition-all truncate',
                         task.completed
-                          ? 'text-gray-400 dark:text-gray-500 line-through'
-                          : 'text-gray-800 dark:text-gray-200'
+                          ? 'text-on-surface-variant line-through opacity-60'
+                          : 'text-on-surface'
                       )}
                     >
                       {task.text}
                     </span>
                   </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      deleteTask(taskId);
-                    }}
-                    className={cn(
-                      'p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-xl transition-all shrink-0',
-                      isDeleteVisible
-                        ? 'opacity-100 scale-100'
-                        : 'opacity-0 group-hover:opacity-100 pointer-events-auto sm:pointer-events-auto'
-                    )}
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                  <div className="flex items-center gap-3 shrink-0">
+                     <div className="hidden sm:flex px-3 py-1 bg-primary/10 text-primary rounded-full items-center gap-1.5 border border-primary/10">
+                       <Calendar size={12} />
+                       <span className="text-xs font-bold whitespace-nowrap">May 20</span>
+                     </div>
+                     
+                     <button
+                       onClick={(e) => {
+                         e.stopPropagation();
+                         deleteTask(taskId);
+                       }}
+                       className="w-8 h-8 flex items-center justify-center text-outline hover:text-error hover:bg-error/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                     >
+                       <Trash2 size={16} />
+                     </button>
+                     <button className="w-8 h-8 flex items-center justify-center text-outline hover:bg-surface-container rounded-full transition-colors sm:hidden group-hover:hidden">
+                       <MoreVertical size={16} />
+                     </button>
+                  </div>
                 </motion.div>
               );
             })}
@@ -340,11 +246,11 @@ export default function Tasks() {
 
         {!loading && tasks.length === 0 && (
           <div className="py-12 flex flex-col items-center text-center">
-            <div className="w-16 h-16 bg-gray-100 dark:bg-white/5 rounded-full flex items-center justify-center mb-4">
-              <Check size={30} className="text-gray-400" />
+            <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center mb-4">
+              <Check size={30} className="text-outline" />
             </div>
-            <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-1">All done!</h4>
-            <p className="text-xs text-gray-500">You have no pending tasks.</p>
+            <h4 className="text-lg font-bold text-on-surface mb-1">All done!</h4>
+            <p className="text-xs text-on-surface-variant">You have no pending tasks.</p>
           </div>
         )}
       </div>

@@ -62,10 +62,21 @@ export default function MediaCard({
   };
   
   const isValidToken = googleAccessToken && googleAccessToken !== 'undefined' && googleAccessToken !== 'null';
-  const thumbnailUrl = media.thumbnailUrl || (media.fileId && isValidToken 
-    ? `${API_BASE}${streamEndpoint}/${media.fileId}?token=${googleAccessToken}&thumbnail=true`
-    : null);
-  const [thumbnailError, setThumbnailError] = useState(false);
+  
+  // State for tracking thumbnail load strategy
+  const [thumbState, setThumbState] = useState<'direct' | 'proxy' | 'error'>(media.thumbnailUrl ? 'direct' : 'proxy');
+  
+  const getThumbnailUrl = () => {
+    if (thumbState === 'direct' && media.thumbnailUrl) {
+      return media.thumbnailUrl;
+    }
+    if (thumbState === 'proxy' && media.fileId && isValidToken) {
+      return `${API_BASE}${streamEndpoint}/${media.fileId}?token=${googleAccessToken}&thumbnail=true`;
+    }
+    return null;
+  };
+  
+  const currentUrl = getThumbnailUrl();
   
   const formatSize = (bytes: number) => {
     if (!bytes) return '0 B';
@@ -101,12 +112,19 @@ export default function MediaCard({
     >
       {/* Thumbnail Layer */}
       <div className="absolute inset-0">
-        {thumbnailUrl && !thumbnailError ? (
+        {currentUrl && thumbState !== 'error' ? (
           <img
-            src={thumbnailUrl}
+            src={currentUrl}
             alt={media.fileName}
+            referrerPolicy="no-referrer"
             className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-            onError={() => setThumbnailError(true)}
+            onError={() => {
+              if (thumbState === 'direct') {
+                setThumbState('proxy'); // Fallback to proxy
+              } else {
+                setThumbState('error'); // Give up
+              }
+            }}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-on-surface-variant/30 bg-surface-container-high">

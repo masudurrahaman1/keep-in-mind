@@ -156,10 +156,7 @@ const initializeUserDrive = async (userId) => {
   }
 };
 
-/**
- * Uploads a file buffer to Google Drive in the specified category folder
- */
-const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, category) => {
+const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, category, isRetry = false) => {
   try {
     const user = await User.findById(userId);
     if (!user || !user.googleAccessToken) {
@@ -245,6 +242,25 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
 
     return response.data;
   } catch (error) {
+    const isNotFound = error.code === 404 || error.status === 404 || (error.message && error.message.includes('File not found'));
+    
+    if (isNotFound && !isRetry) {
+      console.log(`[DriveService] Parent folder not found for category "${category}". Clearing DB references and retrying...`);
+      const user = await User.findById(userId);
+      const schemaFieldMap = {
+        'Government IDs': 'governmentFolderId', 'Education': 'educationFolderId',
+        'Medical': 'medicalFolderId', 'Banking': 'bankingFolderId',
+        'Property': 'propertyFolderId', 'Others': 'othersFolderId',
+        'Notes': 'notesFolderId', 'Backups': 'backupsFolderId',
+        'Encrypted': 'encryptedFolderId', 'KeepInMind': 'rootFolderId'
+      };
+      const targetField = schemaFieldMap[category] || schemaFieldMap['Others'];
+      user[targetField] = null;
+      user.rootFolderId = null; // Clear root folder ID too, just in case that's what was deleted
+      await user.save();
+      return uploadFileToDrive(userId, fileBuffer, originalName, mimeType, category, true);
+    }
+
     console.error('Error uploading file to Drive:', error.message);
     throw error;
   }

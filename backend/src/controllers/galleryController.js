@@ -393,15 +393,20 @@ const streamMedia = async (req, res) => {
         return res.status(404).json({ message: 'Thumbnail not available' });
       }
 
-      // Fetch the actual thumbnail image bits using the auth client
-      const thumbRes = await auth.request({
-        url: thumbUrl,
-        responseType: 'arraybuffer'
-      });
+      try {
+        // Fetch the actual thumbnail image bits using the auth client
+        const thumbRes = await auth.request({
+          url: thumbUrl,
+          responseType: 'arraybuffer'
+        });
 
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-      res.send(Buffer.from(thumbRes.data));
+        res.setHeader('Content-Type', 'image/jpeg');
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.send(Buffer.from(thumbRes.data));
+      } catch (thumbErr) {
+        console.warn(`[Stream] Thumbnail fetch failed for ${fileId}:`, thumbErr.message);
+        return res.status(404).json({ message: 'Thumbnail expired or unavailable' });
+      }
       return;
     }
 
@@ -436,7 +441,7 @@ const streamMedia = async (req, res) => {
   } catch (error) {
     console.error(`[Streaming Failed] ${fileId}:`, error.message);
     if (!res.headersSent) {
-      const status = error.response?.status || 500;
+      const status = error.status || error.code || error.response?.status || 500;
       res.status(status).json({ 
         message: status === 401 ? '401 Unauthorized: Google token expired' : 'Streaming failed', 
         error: error.message 

@@ -201,6 +201,42 @@ html[data-theme-color="purple"] {
   --tertiary: #60A5FA;
 }
 
+/* Rose Theme */
+[data-theme="light"][data-theme-color="rose"],
+html[data-theme-color="rose"] {
+  --primary: #FF2D55;
+  --primary-container: #FFE5EA;
+  --on-primary: #FFFFFF;
+  --secondary: #007AFF;
+  --tertiary: #AF52DE;
+}
+[data-theme="dark"][data-theme-color="rose"],
+[data-theme="amoled"][data-theme-color="rose"] {
+  --primary: #FB7185;
+  --primary-container: #881337;
+  --on-primary: #FFF1F2;
+  --secondary: #60A5FA;
+  --tertiary: #C084FC;
+}
+
+/* Orange Theme */
+[data-theme="light"][data-theme-color="orange"],
+html[data-theme-color="orange"] {
+  --primary: #FF9500;
+  --primary-container: #FFEFD6;
+  --on-primary: #FFFFFF;
+  --secondary: #34C759;
+  --tertiary: #007AFF;
+}
+[data-theme="dark"][data-theme-color="orange"],
+[data-theme="amoled"][data-theme-color="orange"] {
+  --primary: #FBBF24;
+  --primary-container: #78350F;
+  --on-primary: #FFFBEB;
+  --secondary: #4ADE80;
+  --tertiary: #60A5FA;
+}
+
 /* ── Dynamic Fonts ───────────────────────────────────────────── */
 [data-font="inter"] {
   --font-active: var(--font-inter);
