@@ -28,6 +28,27 @@ const getDriveClient = (user) => {
     refresh_token: user.googleRefreshToken
   });
 
+  // Listen for automatic token refresh and save new tokens to MongoDB
+  oauth2Client.on('tokens', async (tokens) => {
+    try {
+      let updated = false;
+      if (tokens.refresh_token) {
+        user.googleRefreshToken = tokens.refresh_token;
+        updated = true;
+      }
+      if (tokens.access_token) {
+        user.googleAccessToken = tokens.access_token;
+        updated = true;
+      }
+      if (updated) {
+        await user.save();
+        console.log(`[DriveService] Automatically refreshed and saved Google tokens for user ${user._id}`);
+      }
+    } catch (err) {
+      console.error(`[DriveService] Failed to save refreshed tokens for user ${user._id}:`, err);
+    }
+  });
+
   return google.drive({ version: 'v3', auth: oauth2Client });
 };
 
