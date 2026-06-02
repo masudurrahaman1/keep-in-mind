@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Calendar, RotateCw, Flag, Plus, ArrowLeft, Tag } from 'lucide-react';
+import { 
+  ArrowLeft, FileText, Calendar, Clock, 
+  RotateCw, Bell, Edit3, ChevronRight,
+  Stethoscope, BookOpen, Briefcase, User, MoreHorizontal 
+} from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 import CustomDatePicker from '../components/CustomDatePicker';
-import CustomDropdown from '../components/CustomDropdown';
+
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function AddReminder() {
@@ -15,9 +19,18 @@ export default function AddReminder() {
   const [newReminderTime, setNewReminderTime] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [repeat, setRepeat] = useState('Does not repeat');
-  const [priority, setPriority] = useState('Normal');
-  const [category, setCategory] = useState('Personal');
+  const [priority, setPriority] = useState('Normal'); // Kept for backend compatibility
+  const [category, setCategory] = useState('Health');
+  const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
+
+  const categories = [
+    { name: 'Health', icon: Stethoscope },
+    { name: 'Personal', icon: BookOpen },
+    { name: 'Work', icon: Briefcase },
+    { name: 'Mindfulness', icon: User },
+    { name: 'Other', icon: MoreHorizontal }
+  ];
 
   const handleAddReminder = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -36,9 +49,10 @@ export default function AddReminder() {
           body: JSON.stringify({
             text: newReminderText.trim(),
             time: new Date(newReminderTime).toISOString(),
-            category,
+            category: category === 'Mindfulness' ? 'Other' : category, // Map for backend compatibility
             priority,
-            repeat
+            repeat,
+            notes
           })
         });
         if (res.ok) {
@@ -59,10 +73,11 @@ export default function AddReminder() {
         id: Date.now(),
         text: newReminderText.trim(),
         time: new Date(newReminderTime).toISOString(),
-        category,
+        category: category === 'Mindfulness' ? 'Other' : category,
         priority,
         repeat,
-        completed: false
+        completed: false,
+        notes
       });
       reminders.sort((a: any, b: any) => new Date(a.time).getTime() - new Date(b.time).getTime());
       localStorage.setItem(storageKey, JSON.stringify(reminders));
@@ -71,102 +86,173 @@ export default function AddReminder() {
   };
 
   return (
-    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pt-6 pb-28 space-y-6">
+    <div className="max-w-3xl mx-auto w-full flex flex-col min-h-screen bg-background relative z-10">
       
-      <div className="bg-white/80 dark:bg-[#1A1C20]/80 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 shadow-xl border border-gray-200/50 dark:border-white/5 relative overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between p-4 sticky top-0 z-20 bg-background/80 backdrop-blur-md">
+        <button 
+          onClick={() => navigate(-1)}
+          className="w-10 h-10 flex items-center justify-center text-on-surface hover:bg-surface-container rounded-full transition-colors"
+        >
+          <ArrowLeft size={24} />
+        </button>
+        <h1 className="text-[17px] font-bold text-on-surface absolute left-1/2 -translate-x-1/2">
+          Add Reminder
+        </h1>
+        <div className="w-10 h-10" /> {/* Spacer for centering */}
+      </div>
+
+      <div className="px-4 pb-28 pt-2 space-y-4">
         
-        {/* Subtle decorative gradient background */}
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#FFC107]/20 dark:bg-[#FFC107]/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="space-y-8 relative z-10">
-          <input 
-            type="text"
-            value={newReminderText}
-            onChange={(e) => setNewReminderText(e.target.value)}
-            placeholder="What do you need to remember?"
-            autoFocus
-            className="w-full bg-transparent border-none text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 placeholder:text-gray-300 dark:placeholder:text-gray-600 focus:ring-0 p-0 outline-none transition-shadow"
-          />
-
-          <div className="space-y-3">
-            <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-              Details
-            </label>
-            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-              {/* Date & Time */}
-              <div className="relative">
-                <button 
-                  onClick={() => setShowDatePicker(true)}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm border
-                    ${newReminderTime 
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/30' 
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 border-gray-200 dark:border-gray-700/50'}`}
-                >
-                  <Calendar size={16} />
-                  {newReminderTime ? format(parseISO(newReminderTime), 'MMM d, h:mm a') : 'Select Date'}
-                </button>
-              </div>
-              
-              {/* Repeat */}
-              <CustomDropdown
-                value={repeat}
-                onChange={setRepeat}
-                options={['Does not repeat', 'Daily', 'Weekly', 'Monthly']}
-                trigger={
-                  <button className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm border pointer-events-none
-                    ${repeat !== 'Does not repeat' 
-                      ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-900/30' 
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700/50'}`}
-                  >
-                    <RotateCw size={16} /> {repeat === 'Does not repeat' ? 'Repeat' : repeat}
-                  </button>
-                }
-              />
-              
-              {/* Priority */}
-              <CustomDropdown
-                value={priority}
-                onChange={setPriority}
-                options={['Normal', 'High Priority']}
-                trigger={
-                  <button className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm border pointer-events-none
-                    ${priority !== 'Normal' 
-                      ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-900/30' 
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700/50'}`}
-                  >
-                    <Flag size={16} /> {priority === 'Normal' ? 'Priority' : priority}
-                  </button>
-                }
-              />
-
-              {/* Category */}
-              <CustomDropdown
-                value={category}
-                onChange={setCategory}
-                options={['Personal', 'Health', 'Education', 'Work', 'Other']}
-                trigger={
-                  <button className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm border pointer-events-none
-                    ${category !== 'Personal' 
-                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/30' 
-                      : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-gray-200 dark:border-gray-700/50'}`}
-                  >
-                    <Tag size={16} /> {category}
-                  </button>
-                }
-              />
-            </div>
-          </div>
-
-          <div className="pt-8">
-            <button 
-              onClick={handleAddReminder}
-              disabled={!newReminderText.trim() || !newReminderTime || saving}
-              className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-[#FFC107] to-[#FF9800] text-white rounded-2xl font-bold text-lg hover:from-[#F5B000] hover:to-[#F57C00] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#FFC107]/30 transform active:scale-[0.98]"
-            >
-              <Plus size={20} strokeWidth={3} /> {saving ? 'Saving...' : 'Save Reminder'}
-            </button>
+        {/* Title Section */}
+        <div className="bg-surface rounded-3xl p-4 shadow-sm border border-outline-variant/20">
+          <label className="block text-sm font-bold text-on-surface mb-3 ml-1">Title</label>
+          <div className="flex items-center gap-3 bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/30">
+            <FileText size={20} className="text-outline shrink-0" />
+            <input 
+              type="text"
+              value={newReminderText}
+              onChange={(e) => setNewReminderText(e.target.value)}
+              placeholder="e.g., Drink water"
+              className="w-full bg-transparent border-none text-base text-on-surface placeholder:text-outline focus:ring-0 p-0 outline-none"
+            />
           </div>
         </div>
+
+        {/* Category Section */}
+        <div className="bg-surface rounded-3xl p-5 shadow-sm border border-outline-variant/20">
+          <label className="block text-sm font-bold text-on-surface mb-4 ml-1">Category</label>
+          <div className="flex justify-between items-center gap-2">
+            {categories.map((cat) => {
+              const Icon = cat.icon;
+              const isSelected = category === cat.name;
+              return (
+                <div key={cat.name} className="flex flex-col items-center gap-2">
+                  <button
+                    onClick={() => setCategory(cat.name)}
+                    className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${
+                      isSelected 
+                        ? 'bg-primary text-on-primary shadow-md scale-105' 
+                        : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                    }`}
+                  >
+                    <Icon size={24} />
+                  </button>
+                  <span className={`text-[11px] font-bold ${isSelected ? 'text-primary' : 'text-on-surface-variant'}`}>
+                    {cat.name}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Date & Time Section */}
+        <div className="bg-surface rounded-3xl p-2 shadow-sm border border-outline-variant/20 flex flex-col">
+          <h3 className="text-sm font-bold text-on-surface px-4 pt-3 pb-1">Date & Time</h3>
+          
+          <button 
+            onClick={() => setShowDatePicker(true)}
+            className="flex items-center justify-between p-4 hover:bg-surface-container/50 rounded-2xl transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Calendar size={20} className="text-primary" />
+              <span className="text-sm font-bold text-on-surface">Date</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-on-surface-variant">
+                {newReminderTime ? format(parseISO(newReminderTime), 'MMM d, yyyy') : 'Select date'}
+              </span>
+              <ChevronRight size={18} className="text-outline" />
+            </div>
+          </button>
+          
+          <div className="h-[1px] bg-outline-variant/20 mx-4" />
+          
+          <button 
+            onClick={() => setShowDatePicker(true)}
+            className="flex items-center justify-between p-4 hover:bg-surface-container/50 rounded-2xl transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Clock size={20} className="text-primary" />
+              <span className="text-sm font-bold text-on-surface">Time</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-on-surface-variant">
+                {newReminderTime ? format(parseISO(newReminderTime), 'h:mm a') : 'Select time'}
+              </span>
+              <ChevronRight size={18} className="text-outline" />
+            </div>
+          </button>
+        </div>
+
+        {/* Repeat Section */}
+        <div className="bg-surface rounded-3xl p-2 shadow-sm border border-outline-variant/20 flex flex-col">
+          <h3 className="text-sm font-bold text-on-surface px-4 pt-3 pb-1">Repeat</h3>
+          <button 
+            onClick={() => {
+              const options = ['Does not repeat', 'Daily', 'Weekly', 'Monthly'];
+              const currentIndex = options.indexOf(repeat);
+              setRepeat(options[(currentIndex + 1) % options.length]);
+            }}
+            className="flex items-center justify-between p-4 hover:bg-surface-container/50 rounded-2xl transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <RotateCw size={20} className="text-primary" />
+              <span className="text-sm font-bold text-on-surface">Repeat</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-on-surface-variant">
+                {repeat === 'Does not repeat' ? 'Never' : repeat}
+              </span>
+              <ChevronRight size={18} className="text-outline" />
+            </div>
+          </button>
+        </div>
+
+        {/* Remind Me Section */}
+        <div className="bg-surface rounded-3xl p-2 shadow-sm border border-outline-variant/20 flex flex-col">
+          <h3 className="text-sm font-bold text-on-surface px-4 pt-3 pb-1">Remind Me</h3>
+          <button className="flex items-center justify-between p-4 hover:bg-surface-container/50 rounded-2xl transition-colors">
+            <div className="flex items-center gap-3">
+              <Bell size={20} className="text-primary" />
+              <span className="text-sm font-bold text-on-surface">Remind Me</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-on-surface-variant">
+                At time
+              </span>
+              <ChevronRight size={18} className="text-outline" />
+            </div>
+          </button>
+        </div>
+
+        {/* Notes Section */}
+        <div className="bg-surface rounded-3xl p-4 shadow-sm border border-outline-variant/20">
+          <label className="block text-sm font-bold text-on-surface mb-3 ml-1">Notes <span className="font-normal text-on-surface-variant">(Optional)</span></label>
+          <div className="flex items-start gap-3 bg-surface-container-lowest rounded-2xl p-3.5 border border-outline-variant/30">
+            <Edit3 size={20} className="text-outline shrink-0 mt-0.5" />
+            <textarea 
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add a note..."
+              rows={3}
+              className="w-full bg-transparent border-none text-base text-on-surface placeholder:text-outline focus:ring-0 p-0 outline-none resize-none"
+            />
+          </div>
+        </div>
+
+        {/* Save Button */}
+        <div className="pt-2">
+          <button 
+            onClick={handleAddReminder}
+            disabled={!newReminderText.trim() || !newReminderTime || saving}
+            className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-on-primary rounded-[20px] font-bold text-[17px] hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-[0.98]"
+          >
+            {saving ? 'Saving...' : 'Save Reminder'}
+          </button>
+        </div>
+
       </div>
 
       {showDatePicker && (

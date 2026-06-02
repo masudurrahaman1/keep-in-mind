@@ -63,14 +63,7 @@ export default function Reminders() {
   const navigate = useNavigate();
   const storageKey = user ? `keep-in-mind-reminders-v2-${user._id}` : 'keep-in-mind-reminders-v2-guest';
 
-  const [reminders, setReminders] = useState<Reminder[]>([
-    // Mock data for visual preview
-    { id: 1, text: 'Drink water', time: new Date().toISOString(), category: 'Health', priority: 'Normal', repeat: 'Daily', completed: false },
-    { id: 2, text: 'Read a few pages', time: new Date(Date.now() + 1000 * 60 * 60 * 2).toISOString(), category: 'Personal', priority: 'Normal', repeat: 'Daily', completed: false },
-    { id: 3, text: 'Meditation', time: new Date(Date.now() + 1000 * 60 * 60 * 24).toISOString(), category: 'Other', priority: 'Normal', repeat: 'Daily', completed: false },
-    { id: 4, text: 'Project submission', time: new Date(Date.now() + 1000 * 60 * 60 * 48).toISOString(), category: 'Work', priority: 'High Priority', repeat: 'Does not repeat', completed: false },
-    { id: 5, text: 'Morning workout', time: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), category: 'Health', priority: 'Normal', repeat: 'Daily', completed: true },
-  ]);
+  const [reminders, setReminders] = useState<Reminder[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
 
@@ -85,7 +78,7 @@ export default function Reminders() {
           });
           if (res.ok) {
             const data = await res.json();
-            if (data.length > 0) setReminders(data);
+            setReminders(data);
           }
         } catch (error) {
           console.error('Error fetching reminders:', error);
@@ -95,7 +88,7 @@ export default function Reminders() {
       } else {
         // Guest mode fallback
         const saved = localStorage.getItem(storageKey);
-        if (saved) setReminders(JSON.parse(saved));
+        setReminders(saved ? JSON.parse(saved) : []);
       }
     };
 
