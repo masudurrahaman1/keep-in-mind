@@ -118,29 +118,29 @@ export default function Tasks() {
   return (
     <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-32 pt-2">
       {/* HEADER BANNER */}
-      <div className="w-full bg-gradient-to-br from-primary/10 to-primary/5 rounded-[32px] p-6 sm:p-8 mb-8 relative overflow-hidden shadow-sm border border-primary/10 shrink-0 flex items-center justify-between">
+      <div className="w-full bg-gradient-to-br from-primary/10 to-primary/5 rounded-[28px] sm:rounded-[32px] p-5 sm:p-8 mb-6 sm:mb-8 relative overflow-hidden shadow-sm border border-primary/10 shrink-0 flex items-center justify-between">
         <div className="relative z-10 flex flex-col items-start max-w-[60%]">
-          <div className="w-12 h-12 rounded-2xl bg-primary/20 flex items-center justify-center mb-4 text-2xl shadow-inner border border-primary/10">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-primary/20 flex items-center justify-center mb-2 sm:mb-4 text-xl sm:text-2xl shadow-inner border border-primary/10">
             📝
           </div>
-          <h2 className="text-[28px] sm:text-[32px] font-black text-on-surface leading-tight mb-2">
+          <h2 className="text-2xl sm:text-[32px] font-black text-on-surface leading-tight mb-1 sm:mb-2">
             Your Tasks
           </h2>
-          <p className="text-sm text-on-surface-variant font-medium mb-5">
+          <p className="text-xs sm:text-sm text-on-surface-variant font-medium mb-3 sm:mb-5">
             {progress === 100 && tasks.length > 0 
               ? "Let's keep going! You're all set. 🚀" 
               : "Stay on top of your daily goals. ✨"}
           </p>
-          <div className="bg-surface/80 backdrop-blur-md rounded-full px-3 py-1.5 flex items-center gap-2 border border-primary/10 shadow-sm">
-            <CheckCircle2 size={16} className="text-primary" />
-            <span className="text-xs font-bold text-primary">
+          <div className="bg-surface/80 backdrop-blur-md rounded-full px-3 py-1 sm:py-1.5 flex items-center gap-1.5 sm:gap-2 border border-primary/10 shadow-sm">
+            <CheckCircle2 size={14} className="text-primary sm:w-4 sm:h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-primary">
               {completedCount} of {tasks.length} completed
             </span>
           </div>
         </div>
         
         {/* Progress Circle */}
-        <div className="relative z-10 w-28 h-28 sm:w-32 sm:h-32 shrink-0 flex flex-col items-center justify-center bg-surface/50 backdrop-blur-md rounded-full shadow-sm border border-white/40 dark:border-white/5 mr-2">
+        <div className="relative z-10 w-24 h-24 sm:w-32 sm:h-32 shrink-0 flex flex-col items-center justify-center bg-surface/50 backdrop-blur-md rounded-full shadow-sm border border-white/40 dark:border-white/5 mr-0 sm:mr-2">
           <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none drop-shadow-md" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r={radius} className="fill-none stroke-primary/20" strokeWidth="8" />
             <circle 
@@ -153,14 +153,14 @@ export default function Tasks() {
             />
           </svg>
           <div className="flex flex-col items-center justify-center text-center z-10">
-            <span className="text-2xl sm:text-3xl font-black text-on-surface leading-none mb-1">{progress}%</span>
-            <span className="text-[9px] sm:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Completed</span>
+            <span className="text-xl sm:text-3xl font-black text-on-surface leading-none mb-0.5 sm:mb-1">{progress}%</span>
+            <span className="text-[8px] sm:text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Completed</span>
           </div>
         </div>
 
         {/* Decorative elements */}
-        <div className="absolute right-[-20%] bottom-[-20%] w-64 h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute left-[-10%] top-[-10%] w-40 h-40 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute right-[-20%] bottom-[-20%] w-48 h-48 sm:w-64 sm:h-64 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute left-[-10%] top-[-10%] w-32 h-32 sm:w-40 sm:h-40 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
       </div>
 
       {/* LIST HEADER */}
