@@ -17,7 +17,7 @@ router.get('/', protect, async (req, res) => {
 // POST add a new task
 router.post('/', protect, async (req, res) => {
   try {
-    const { text } = req.body;
+    const { text, category, priority, notes } = req.body;
     if (!text || !text.trim()) {
       return res.status(400).json({ message: 'Task text is required' });
     }
@@ -25,7 +25,10 @@ router.post('/', protect, async (req, res) => {
     const newTask = new Task({
       user: req.user._id,
       text: text.trim(),
-      completed: false
+      completed: false,
+      category,
+      priority,
+      notes
     });
 
     await newTask.save();
@@ -39,10 +42,13 @@ router.post('/', protect, async (req, res) => {
 // PATCH toggle or update a task
 router.patch('/:id', protect, async (req, res) => {
   try {
-    const { completed, text } = req.body;
+    const { completed, text, category, priority, notes } = req.body;
     const updateData = {};
     if (completed !== undefined) updateData.completed = completed;
     if (text !== undefined) updateData.text = text;
+    if (category !== undefined) updateData.category = category;
+    if (priority !== undefined) updateData.priority = priority;
+    if (notes !== undefined) updateData.notes = notes;
 
     const task = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user._id },

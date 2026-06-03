@@ -13,6 +13,18 @@ const taskSchema = new mongoose.Schema({
   completed: {
     type: Boolean,
     default: false
+  },
+  category: {
+    type: String,
+    default: 'Other'
+  },
+  priority: {
+    type: String,
+    default: 'No Priority'
+  },
+  notes: {
+    type: String,
+    default: ''
   }
 }, {
   timestamps: true

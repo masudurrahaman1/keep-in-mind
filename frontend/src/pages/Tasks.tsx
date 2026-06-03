@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock } from 'lucide-react';
+import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock, FileText, Briefcase, BookOpen, Dumbbell, Smile, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Sidebar';
 
@@ -11,9 +11,11 @@ interface TaskType {
   _id?: string;
   text: string;
   completed: boolean;
+  category?: string;
+  priority?: string;
 }
 
-type FilterTab = 'All' | 'To Do' | 'Completed';
+type FilterTab = 'All' | 'To Do' | 'Completed' | 'Past Task';
 
 export default function Tasks() {
   const { user, token } = useAuth();
@@ -22,10 +24,12 @@ export default function Tasks() {
   const [tasks, setTasks] = useState<TaskType[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
+  const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
 
   const filteredTasks = tasks.filter(t => {
     if (activeTab === 'To Do') return !t.completed;
     if (activeTab === 'Completed') return t.completed;
+    if (activeTab === 'Past Task') return t.completed; // Placeholder logic for Past Tasks
     return true;
   });
 
@@ -180,7 +184,7 @@ export default function Tasks() {
 
       {/* FILTER TABS */}
       <div className="flex items-center gap-3 overflow-x-auto no-scrollbar py-2 mb-6 px-1">
-        {(['All', 'To Do', 'Completed'] as FilterTab[]).map(tab => (
+        {(['All', 'To Do', 'Completed', 'Past Task'] as FilterTab[]).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -205,6 +209,18 @@ export default function Tasks() {
             {filteredTasks.map(task => {
               const taskId = task._id || task.id;
               if (!taskId) return null;
+              
+              const categoryMap: Record<string, any> = {
+                'Design': { icon: FileText, color: 'text-indigo-500', bg: 'bg-indigo-50 border-indigo-100' },
+                'Work': { icon: Briefcase, color: 'text-orange-500', bg: 'bg-orange-50 border-orange-100' },
+                'Personal': { icon: BookOpen, color: 'text-purple-500', bg: 'bg-purple-50 border-purple-100' },
+                'Health': { icon: Dumbbell, color: 'text-blue-500', bg: 'bg-blue-50 border-blue-100' },
+                'Mindfulness': { icon: Smile, color: 'text-green-500', bg: 'bg-green-50 border-green-100' },
+                'Other': { icon: MoreHorizontal, color: 'text-gray-500', bg: 'bg-gray-50 border-gray-200' },
+              };
+              const catData = categoryMap[task.category || 'Other'] || { icon: ListTodo, color: 'text-primary', bg: 'bg-primary/10 border-primary/20' };
+              const Icon = catData.icon;
+
 
               return (
                 <motion.div
@@ -227,21 +243,24 @@ export default function Tasks() {
                   </button>
 
                   {/* Icon & Details */}
-                  <div className="flex items-center gap-4 flex-1 overflow-hidden pr-2">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                      <ListTodo size={20} />
+                  <div 
+                    className="flex items-center gap-4 flex-1 overflow-hidden pr-2 cursor-pointer"
+                    onClick={() => setSelectedTask(task)}
+                  >
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 border ${catData.bg} dark:bg-opacity-10 dark:border-gray-700`}>
+                      <Icon size={20} className={catData.color} />
                     </div>
                     
                     <div className="flex flex-col gap-1 overflow-hidden">
                       <h4 className={cn(
-                        "text-[15px] font-bold leading-tight truncate",
+                        "text-[15px] font-bold leading-tight line-clamp-4",
                         task.completed ? "text-on-surface-variant line-through opacity-70" : "text-on-surface"
                       )}>
                         {task.text}
                       </h4>
                       <div className="flex items-center gap-2">
-                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md tracking-wider bg-surface-container text-on-surface-variant">
-                          General
+                        <span className="px-2 py-0.5 text-[10px] font-bold rounded-md tracking-wider bg-surface-container text-on-surface-variant uppercase">
+                          {task.category || 'General'}
                         </span>
                       </div>
                     </div>
@@ -282,6 +301,58 @@ export default function Tasks() {
           </div>
         )}
       </div>
+
+      {/* Task Details Modal */}
+      <AnimatePresence>
+        {selectedTask && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+              onClick={() => setSelectedTask(null)}
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="relative w-full max-w-lg bg-surface dark:bg-[#1e1e1e] rounded-3xl p-6 shadow-xl border border-outline-variant/20 z-10 overflow-hidden flex flex-col max-h-[80vh]"
+            >
+              <div className="flex justify-between items-start mb-4 shrink-0">
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 text-xs font-bold rounded-lg bg-primary/10 text-primary uppercase tracking-wider">
+                    {selectedTask.category || 'General'}
+                  </span>
+                </div>
+                <button 
+                  onClick={() => setSelectedTask(null)}
+                  className="w-8 h-8 flex items-center justify-center rounded-full bg-surface-container hover:bg-outline-variant/20 transition-colors text-outline"
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className="overflow-y-auto custom-scrollbar flex-1 -mx-2 px-2">
+                <h3 className="text-xl font-bold text-on-surface mb-6 leading-relaxed whitespace-pre-wrap">
+                  {selectedTask.text}
+                </h3>
+                
+                {selectedTask.notes && (
+                  <div className="bg-surface-container/50 rounded-2xl p-4 border border-outline-variant/10">
+                    <h4 className="text-sm font-bold text-on-surface-variant mb-2 flex items-center gap-2">
+                      <FileText size={16} /> Notes
+                    </h4>
+                    <p className="text-sm text-on-surface whitespace-pre-wrap leading-relaxed">
+                      {selectedTask.notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

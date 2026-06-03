@@ -57,7 +57,7 @@ export default function Layout() {
             onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           />
         )}
-        <main className={`flex-1 overflow-y-auto w-full max-w-7xl mx-auto p-3 sm:p-4 md:p-6 pb-24 md:pb-6 relative custom-scrollbar overflow-x-hidden ${location.pathname === '/account' || location.pathname === '/gallery' || location.pathname === '/about' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service' || location.pathname === '/cloud-sync' || location.pathname === '/help' || location.pathname.startsWith('/settings') || location.pathname === '/reminders/new' ? '!p-0 !max-w-none' : ''}`}>
+        <main className={`flex-1 overflow-y-auto w-full max-w-7xl mx-auto p-3 sm:p-4 md:p-6 pb-24 md:pb-6 relative custom-scrollbar overflow-x-hidden ${location.pathname === '/account' || location.pathname === '/gallery' || location.pathname === '/about' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service' || location.pathname === '/cloud-sync' || location.pathname === '/help' || location.pathname.startsWith('/settings') || location.pathname === '/reminders/new' || location.pathname === '/tasks/new' ? '!p-0 !max-w-none' : ''}`}>
           <Outlet context={{ searchQuery }} />
         </main>
 
