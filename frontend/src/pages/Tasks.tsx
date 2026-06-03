@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock, FileText, Briefcase, BookOpen, Dumbbell, Smile, MoreHorizontal, Pencil } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Sidebar';
+import Checkbox from '../components/Checkbox';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -18,6 +20,7 @@ interface TaskType {
 type FilterTab = 'All' | 'To Do' | 'Completed' | 'Past Task';
 
 export default function Tasks() {
+  const navigate = useNavigate();
   const { user, token } = useAuth();
   const storageKey = user ? `keep-in-mind-tasks-${user._id}` : 'keep-in-mind-tasks-guest';
 
@@ -239,16 +242,11 @@ export default function Tasks() {
                   className="bg-surface rounded-2xl p-4 shadow-sm border border-outline-variant/20 flex items-center justify-between gap-3 group hover:shadow-md transition-all"
                 >
                   {/* Checkbox */}
-                  <button 
-                    onClick={() => toggleTask(taskId, task.completed)}
-                    className="w-6 h-6 flex items-center justify-center shrink-0 text-outline-variant hover:text-primary transition-colors"
-                  >
-                    {task.completed ? (
-                      <CheckCircle2 size={24} className="fill-primary text-on-primary" />
-                    ) : (
-                      <Circle size={24} strokeWidth={2} />
-                    )}
-                  </button>
+                  <Checkbox 
+                    checked={task.completed} 
+                    onChange={() => toggleTask(taskId, task.completed)} 
+                    className="shrink-0 cursor-pointer"
+                  />
 
                   {/* Icon & Details */}
                   <div 
@@ -301,7 +299,7 @@ export default function Tasks() {
                             <button 
                               className="px-4 py-3 text-left text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-3"
                               onClick={() => {
-                                // Edit placeholder
+                                navigate('/tasks/new', { state: { task } });
                                 setActiveDropdown(null);
                               }}
                             >

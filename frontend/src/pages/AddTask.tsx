@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   ArrowLeft, FileText, Briefcase, BookOpen, Dumbbell, 
   Smile, MoreHorizontal, Calendar, Clock, Pencil, ChevronRight
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import StarBorder from '../components/StarBorder';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -19,12 +20,15 @@ const CATEGORIES = [
 
 export default function AddTask() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, token } = useAuth();
   
-  const [taskText, setTaskText] = useState('');
-  const [category, setCategory] = useState('Design');
+  const editingTask = location.state?.task;
+
+  const [taskText, setTaskText] = useState(editingTask?.text || '');
+  const [category, setCategory] = useState(editingTask?.category || 'Design');
   const [saving, setSaving] = useState(false);
-  const [notes, setNotes] = useState('');
+  const [notes, setNotes] = useState(editingTask?.notes || '');
 
   const handleSave = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -40,8 +44,11 @@ export default function AddTask() {
 
     if (token) {
       try {
-        const res = await fetch(`${API_BASE}/tasks`, {
-          method: 'POST',
+        const method = editingTask ? 'PATCH' : 'POST';
+        const url = editingTask ? `${API_BASE}/tasks/${editingTask._id || editingTask.id}` : `${API_BASE}/tasks`;
+        
+        const res = await fetch(url, {
+          method,
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`
@@ -60,13 +67,19 @@ export default function AddTask() {
       // Guest mode
       const storageKey = user ? `keep-in-mind-tasks-${user._id}` : 'keep-in-mind-tasks-guest';
       const saved = localStorage.getItem(storageKey);
-      const tasks = saved ? JSON.parse(saved) : [];
-      tasks.unshift({
-        id: Date.now(),
-        text: taskText.trim(),
-        completed: false,
-        ...taskData
-      });
+      let tasks = saved ? JSON.parse(saved) : [];
+      
+      if (editingTask) {
+        tasks = tasks.map((t: any) => (t._id || t.id) === (editingTask._id || editingTask.id) ? { ...t, ...taskData } : t);
+      } else {
+        tasks.unshift({
+          id: Date.now(),
+          text: taskText.trim(),
+          completed: false,
+          ...taskData
+        });
+      }
+      
       localStorage.setItem(storageKey, JSON.stringify(tasks));
       navigate('/tasks');
     }
@@ -79,7 +92,7 @@ export default function AddTask() {
         <button onClick={() => navigate(-1)} className="p-2 -ml-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors">
           <ArrowLeft size={24} className="text-gray-800 dark:text-gray-200" />
         </button>
-        <h1 className="text-[20px] font-bold text-gray-900 dark:text-white">Add Task</h1>
+        <h1 className="text-[20px] font-bold text-gray-900 dark:text-white">{editingTask ? 'Edit Task' : 'Add Task'}</h1>
         <div className="w-10"></div>
       </div>
 
@@ -165,13 +178,17 @@ export default function AddTask() {
       </div>
 
       <div className="px-5 pb-8 max-w-lg mx-auto mt-6">
-        <button 
+        <StarBorder 
+          as="button"
           onClick={handleSave}
           disabled={!taskText.trim() || saving}
-          className="w-full block py-4 bg-[#6c5dd3] hover:bg-[#5b4eb8] text-white rounded-[20px] font-bold text-[16px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#6c5dd3]/20"
+          color="white"
+          speed="3s"
+          thickness={1}
+          className="w-full block disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-[#6c5dd3]/20"
         >
-          {saving ? 'Saving...' : 'Save Task'}
-        </button>
+          {saving ? 'Saving...' : (editingTask ? 'Update Task' : 'Save Task')}
+        </StarBorder>
       </div>
 
     </div>

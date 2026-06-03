@@ -16,6 +16,7 @@ import RenameModal from '../modals/RenameModal';
 import ConfirmDeleteModal from '../modals/ConfirmDeleteModal';
 import { UploadStatus } from '../components/UploadProgressCard';
 import UploadActivityCenter from '../components/UploadActivityCenter';
+import Loader from '../components/Loader';
 
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -577,7 +578,7 @@ export default function Gallery() {
               onClick={() => setIsActivityOpen(!isActivityOpen)}
               className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
             >
-              <Bell size={20} className="text-neutral-700 dark:text-neutral-300" />
+              <Loader />
               {uploadQueue.length > 0 && (
                 <span className={`absolute top-2 right-2.5 w-2 h-2 ${activeTheme.notifDot} rounded-full border border-white dark:border-neutral-800`}></span>
               )}
