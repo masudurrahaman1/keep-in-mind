@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock, FileText, Briefcase, BookOpen, Dumbbell, Smile, MoreHorizontal } from 'lucide-react';
+import { Check, Trash2, CheckCircle2, ListTodo, ChevronDown, Calendar, MoreVertical, Circle, Clock, FileText, Briefcase, BookOpen, Dumbbell, Smile, MoreHorizontal, Pencil } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { cn } from '../components/Sidebar';
 
@@ -25,6 +25,7 @@ export default function Tasks() {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<FilterTab>('All');
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<string | number | null>(null);
 
   const filteredTasks = tasks.filter(t => {
     if (activeTab === 'To Do') return !t.completed;
@@ -32,6 +33,13 @@ export default function Tasks() {
     if (activeTab === 'Past Task') return t.completed; // Placeholder logic for Past Tasks
     return true;
   });
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => setActiveDropdown(null);
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, []);
 
   // Load initial tasks
   useEffect(() => {
@@ -267,19 +275,51 @@ export default function Tasks() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
+                  <div className="flex items-center gap-1 shrink-0 relative">
+
+                    <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        deleteTask(taskId);
+                        setActiveDropdown(activeDropdown === taskId ? null : taskId);
                       }}
-                      className="w-8 h-8 flex items-center justify-center text-outline hover:text-error hover:bg-error/10 rounded-full transition-colors opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+                      className="w-8 h-8 flex items-center justify-center text-outline hover:bg-surface-container rounded-full transition-colors"
                     >
-                      <Trash2 size={16} />
-                    </button>
-                    <button className="w-8 h-8 flex items-center justify-center text-outline hover:bg-surface-container rounded-full transition-colors">
                       <MoreVertical size={16} />
                     </button>
+
+                    {/* Dropdown Menu */}
+                    <AnimatePresence>
+                      {activeDropdown === taskId && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                          className="absolute right-0 top-10 mt-2 w-36 bg-surface dark:bg-[#1e1e1e] border border-outline-variant/20 rounded-xl shadow-lg z-50 overflow-hidden"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex flex-col py-1">
+                            <button 
+                              className="px-4 py-3 text-left text-sm font-semibold text-on-surface hover:bg-surface-container transition-colors flex items-center gap-3"
+                              onClick={() => {
+                                // Edit placeholder
+                                setActiveDropdown(null);
+                              }}
+                            >
+                              <Pencil size={16} className="text-primary" /> Edit
+                            </button>
+                            <button 
+                              className="px-4 py-3 text-left text-sm font-semibold text-error hover:bg-error/10 transition-colors flex items-center gap-3"
+                              onClick={() => {
+                                deleteTask(taskId);
+                                setActiveDropdown(null);
+                              }}
+                            >
+                              <Trash2 size={16} /> Delete
+                            </button>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </motion.div>
               );
