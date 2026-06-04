@@ -619,13 +619,15 @@ export default function Gallery() {
             <div 
               key={i} 
               onClick={() => navigate(cat.path)}
-              className="bg-white dark:bg-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-sm transition-all active:scale-95"
+              className="bg-white dark:bg-neutral-800 rounded-xl sm:rounded-3xl p-2.5 sm:p-5 border border-neutral-100 dark:border-neutral-700 flex flex-row sm:flex-col items-center sm:justify-center text-left sm:text-center cursor-pointer hover:shadow-sm transition-all active:scale-95 gap-3 sm:gap-0"
             >
-              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 ${cat.color}`}>
-                <cat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
+              <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl flex items-center justify-center shrink-0 sm:mb-3 ${cat.color}`}>
+                <cat.icon className="w-4 h-4 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white mb-0.5 sm:mb-1">{cat.name}</h3>
-              <p className="text-[10px] sm:text-xs text-neutral-400">{cat.count} documents</p>
+              <div className="flex flex-col flex-1 min-w-0">
+                <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white mb-0 sm:mb-1 truncate">{cat.name}</h3>
+                <p className="text-[10px] sm:text-xs text-neutral-400 truncate">{cat.count} docs</p>
+              </div>
             </div>
           ))}
         </div>
@@ -791,8 +793,9 @@ const StyledWrapper = styled.div`
   .input {
     width: 100%;
     max-width: 150px;
-    padding: 8px 10px 8px 36px;
+    padding: 6px 10px 6px 36px;
     font-size: 14px;
+    font-weight: 300;
     border-radius: 9999px;
     border: solid 1px var(--tw-border-neutral-300, #d4d4d8);
     transition: all .2s ease-in-out;

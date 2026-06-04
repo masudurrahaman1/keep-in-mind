@@ -19,7 +19,7 @@ interface DocumentListCardProps {
 }
 
 export default function DocumentListCard({ 
-  media, onSelect, onDelete, onRename, streamEndpoint,
+  media, onSelect, onDelete, onRename, streamEndpoint = '/gallery/stream',
   isSelected, isSelectionMode, onToggleSelect, onLongPress
 }: DocumentListCardProps) {
   const { token } = useAuth();
@@ -56,7 +56,7 @@ export default function DocumentListCard({
   };
 
   const isValidToken = !!(token && token !== 'undefined' && token !== 'null');
-  const imgUrl = media.thumbnailUrl || (streamEndpoint && isValidToken ? `${API_BASE}${streamEndpoint}/${media.fileId || media._id}?token=${token}` : null);
+  const imgUrl = media.thumbnailUrl || (streamEndpoint && isValidToken ? `${API_BASE}${streamEndpoint}/${media.fileId || media._id}?token=${token}` : media.fileUrl);
 
   const timerRef = React.useRef<NodeJS.Timeout>();
   

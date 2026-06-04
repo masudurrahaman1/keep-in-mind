@@ -38,8 +38,8 @@ const StyledWrapper = styled.div`
   .checkbox-wrapper-31 {
     position: relative;
     display: inline-block;
-    width: 24px;
-    height: 24px;
+    width: 21.6px;
+    height: 21.6px;
   }
 
   .checkbox-wrapper-31 .background {
