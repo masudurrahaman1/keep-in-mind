@@ -129,15 +129,15 @@ export default function DocumentListCard({
 
       {/* Details Side */}
       <div className="flex-1 min-w-0 flex flex-col py-0 sm:py-1">
-        <div className="flex justify-between items-start mb-1.5 sm:mb-2">
-          <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 line-clamp-2 break-words pr-2 sm:pr-4">
+        <div className="flex justify-between items-start mb-1.5 sm:mb-2 gap-2">
+          <h4 className="flex-1 min-w-0 text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate">
             {media.fileName.split('.').slice(0, -1).join('.') || media.fileName}
           </h4>
           
           {!isSelectionMode && (
-            <div className="flex items-center">
-              {/* Actions (Hover) */}
-              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
+            <div className="flex items-center shrink-0">
+              {/* Actions (Hover) - Hidden on mobile to save space for filename */}
+              <div className="hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
                 <button
                   onClick={handleShare}
                   className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-primary transition-colors"
