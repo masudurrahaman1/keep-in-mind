@@ -92,7 +92,7 @@ export default function DocumentListCard({
       onMouseDown={startPress}
       onMouseUp={cancelPress}
       onMouseLeave={cancelPress}
-      className={`group relative flex flex-row gap-2 sm:gap-4 p-2 sm:p-4 bg-white dark:bg-[#1C1C1E] rounded-xl sm:rounded-3xl shadow-sm border cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-2 sm:mb-4 select-none
+      className={`group relative flex flex-row gap-2 sm:gap-4 p-2 sm:p-4 bg-white dark:bg-[#1C1C1E] sm:rounded-3xl shadow-sm border-y border-x-0 sm:border cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-2 sm:mb-4 select-none
         ${isSelected ? 'border-primary ring-2 ring-primary/20 dark:ring-primary/40' : 'border-neutral-100 dark:border-neutral-800'}`}
     >
       {/* Thumbnail Side */}
