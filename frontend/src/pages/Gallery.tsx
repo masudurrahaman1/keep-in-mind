@@ -650,6 +650,7 @@ export default function Gallery() {
               <DocumentListCard 
                 key={item._id} 
                 media={item} 
+                streamEndpoint="/gallery/stream"
                 onDelete={handleDelete} 
                 onRename={handleRename}
                 onSelect={() => {
