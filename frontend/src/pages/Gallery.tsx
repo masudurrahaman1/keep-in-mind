@@ -592,11 +592,14 @@ export default function Gallery() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <svg fill="currentColor" className="text-neutral-400 dark:text-neutral-500" width="20px" height="20px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+              <svg fill="currentColor" className="text-neutral-400 dark:text-neutral-500" width="16px" height="16px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
                 <path d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z" fillRule="evenodd" />
               </svg>
             </div>
           </StyledWrapper>
+          <button className="w-9 h-9 sm:w-10 sm:h-10 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl flex items-center justify-center border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 active:scale-95 transition-all shrink-0">
+            <SlidersHorizontal size={16} />
+          </button>
         </div>
       </div>
 
@@ -787,8 +790,9 @@ const StyledWrapper = styled.div`
 
   .input {
     width: 100%;
-    max-width: 100%;
-    padding: 8px 12px 8px 36px;
+    max-width: 150px;
+    padding: 8px 10px 8px 36px;
+    font-size: 14px;
     border-radius: 9999px;
     border: solid 1px var(--tw-border-neutral-300, #d4d4d8);
     transition: all .2s ease-in-out;
@@ -803,12 +807,11 @@ const StyledWrapper = styled.div`
     top: 50%;
     left: 12px;
     transform: translate(0, -50%);
-    width: 16px;
-    height: 16px;
   }
 
   .input:focus {
     opacity: 1;
+    max-width: 250px;
   }
 
   @media (prefers-color-scheme: dark) {
