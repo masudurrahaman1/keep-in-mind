@@ -331,7 +331,7 @@ export default function VaultCategory() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col mb-8 mt-2">
+      <div className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl pt-2 pb-4 -mx-1.5 px-4 sm:-mx-5 sm:px-5 md:-mx-6 md:px-6 flex flex-col mb-6">
         {isSelectionMode ? (
           <div className="flex items-center justify-between mb-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl px-4 py-3 border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
             <div className="flex items-center gap-3">
