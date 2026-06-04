@@ -10,6 +10,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import MediaCard from '../components/MediaCard';
+import DocumentListCard from '../components/DocumentListCard';
 import axios from 'axios';
 import MediaUploadFAB from '../components/MediaUploadFAB';
 import MediaViewer from '../modals/MediaViewer';
@@ -643,10 +644,10 @@ export default function Gallery() {
           <p className="text-neutral-500 text-sm font-medium">Syncing vault...</p>
         </div>
       ) : filteredMedia.length > 0 ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-8">
+        <div className="flex flex-col gap-3 mb-8">
           <AnimatePresence mode="popLayout">
             {filteredMedia.map((item, index) => (
-              <MediaCard 
+              <DocumentListCard 
                 key={item._id} 
                 media={item} 
                 onDelete={handleDelete} 
@@ -655,9 +656,6 @@ export default function Gallery() {
                   if (isSelectionMode) toggleSelection(item._id);
                   else setSelectedMediaIndex(index);
                 }}
-                isTrashMode={filterType === 'trash'}
-                onRestore={handleRestore}
-                onPermanentDelete={handlePermanentDelete}
                 isSelected={selectedIds.has(item._id)}
                 isSelectionMode={isSelectionMode}
                 onToggleSelect={() => toggleSelection(item._id)}
