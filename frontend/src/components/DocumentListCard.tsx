@@ -130,7 +130,7 @@ export default function DocumentListCard({
       {/* Details Side */}
       <div className="flex-1 min-w-0 flex flex-col py-0 sm:py-1">
         <div className="flex justify-between items-start mb-1.5 sm:mb-2">
-          <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate pr-2 sm:pr-4">
+          <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 line-clamp-2 break-words pr-2 sm:pr-4">
             {media.fileName.split('.').slice(0, -1).join('.') || media.fileName}
           </h4>
           
