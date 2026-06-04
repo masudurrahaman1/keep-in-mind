@@ -279,21 +279,25 @@ export default function VaultCategory() {
       title: `Delete ${selectedFileIds.size} Document${selectedFileIds.size > 1 ? 's' : ''}`,
       message: `Are you sure you want to delete ${selectedFileIds.size} document${selectedFileIds.size > 1 ? 's' : ''} from your Vault and Google Drive? This action cannot be undone.`,
       onConfirm: async () => {
-        try {
-          const idsToDelete = Array.from(selectedFileIds);
+        const idsToDelete = Array.from(selectedFileIds);
+        
+        // Optimistic UI Update - immediately remove from view
+        setDocuments(prev => prev.filter(m => !idsToDelete.includes(m._id)));
+        setSelectedFileIds(new Set());
+        
+        // Run network requests in background so the UI doesn't freeze
+        (async () => {
           for (const id of idsToDelete) {
-            const res = await fetch(`${API_BASE}/documents/${id}`, {
-              method: 'DELETE',
-              headers: { 'Authorization': `Bearer ${token}` }
-            });
-            if (res.ok) {
-              setDocuments(prev => prev.filter(m => m._id !== id));
+            try {
+              await fetch(`${API_BASE}/documents/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+              });
+            } catch (err) {
+              console.error(`Background deletion failed for ${id}:`, err);
             }
           }
-          setSelectedFileIds(new Set());
-        } catch (err) {
-          console.error('Bulk delete failed', err);
-        }
+        })();
       }
     });
     setIsConfirmModalOpen(true);
