@@ -608,12 +608,12 @@ export default function Gallery() {
         <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-4">Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           {[
-            { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government IDs'] || 3, path: '/vault/government-ids' },
-            { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Banking'] || 4, path: '/vault/banking' },
-            { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 2, path: '/vault/insurance' },
-            { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 3, path: '/vault/education' },
-            { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Medical'] || 2, path: '/vault/medical' },
-            { icon: Folder, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 5, path: '/vault/others' },
+            { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government IDs'] || 0, path: '/vault/government-ids' },
+            { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Banking'] || 0, path: '/vault/banking' },
+            { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 0, path: '/vault/insurance' },
+            { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 0, path: '/vault/education' },
+            { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Medical'] || 0, path: '/vault/medical' },
+            { icon: Folder, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 0, path: '/vault/others' },
           ].map((cat, i) => (
             <div 
               key={i} 

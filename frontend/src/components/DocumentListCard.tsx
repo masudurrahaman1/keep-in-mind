@@ -12,9 +12,16 @@ interface DocumentListCardProps {
   onDelete: (id: string) => void;
   onRename: (id: string, currentName: string) => void;
   streamEndpoint?: string;
+  isSelected?: boolean;
+  isSelectionMode?: boolean;
+  onToggleSelect?: () => void;
+  onLongPress?: () => void;
 }
 
-export default function DocumentListCard({ media, onSelect, onDelete, onRename, streamEndpoint }: DocumentListCardProps) {
+export default function DocumentListCard({ 
+  media, onSelect, onDelete, onRename, streamEndpoint,
+  isSelected, isSelectionMode, onToggleSelect, onLongPress
+}: DocumentListCardProps) {
   const { token } = useAuth();
   const isVideo = media.fileType?.startsWith('video/') || media.fileName?.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
   const isPdf = media.fileType?.includes('pdf') || media.fileName?.toLowerCase().endsWith('.pdf');
@@ -51,14 +58,42 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
   const isValidToken = !!(token && token !== 'undefined' && token !== 'null');
   const imgUrl = media.thumbnailUrl || (streamEndpoint && isValidToken ? `${API_BASE}${streamEndpoint}/${media.fileId || media._id}?token=${token}` : null);
 
+  const timerRef = React.useRef<NodeJS.Timeout>();
+  
+  const startPress = () => {
+    if (isSelectionMode) return;
+    timerRef.current = setTimeout(() => {
+      onLongPress?.();
+    }, 500);
+  };
+
+  const cancelPress = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isSelectionMode) {
+      onToggleSelect?.();
+    } else {
+      onSelect();
+    }
+  };
+
   return (
     <motion.div
       layout
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      onClick={onSelect}
-      className="group relative flex flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white dark:bg-[#1C1C1E] rounded-2xl sm:rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-800 cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-3 sm:mb-4"
+      onClick={handleCardClick}
+      onTouchStart={startPress}
+      onTouchEnd={cancelPress}
+      onTouchMove={cancelPress}
+      onMouseDown={startPress}
+      onMouseUp={cancelPress}
+      onMouseLeave={cancelPress}
+      className={`group relative flex flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white dark:bg-[#1C1C1E] rounded-2xl sm:rounded-3xl shadow-sm border cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-3 sm:mb-4 select-none
+        ${isSelected ? 'border-primary ring-2 ring-primary/20 dark:ring-primary/40' : 'border-neutral-100 dark:border-neutral-800'}`}
     >
       {/* Thumbnail Side */}
       <div className="w-28 sm:w-48 md:w-64 aspect-square sm:aspect-[3/2] shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center relative">
@@ -79,6 +114,17 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
         <div className="w-full h-full flex flex-col items-center justify-center absolute inset-0 bg-neutral-50 dark:bg-neutral-800/50" style={{ display: (isImage || isPdf || isVideo) && imgUrl ? 'none' : 'flex' }}>
           {getIcon()}
         </div>
+
+        {/* Selection Indicator Overlay */}
+        {isSelectionMode && (
+          <div className="absolute inset-0 bg-black/10 dark:bg-black/20 z-10 rounded-xl sm:rounded-2xl flex items-start justify-start p-2">
+            <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors shadow-sm
+              ${isSelected ? 'bg-primary border-primary text-white' : 'border-white/80 bg-black/20'}`}
+            >
+              {isSelected && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Details Side */}
@@ -88,36 +134,38 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
             {media.fileName.split('.').slice(0, -1).join('.') || media.fileName}
           </h4>
           
-          <div className="flex items-center">
-            {/* Actions (Hover) */}
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
-              <button
-                onClick={handleShare}
-                className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-primary transition-colors"
-                title="Share"
-              >
-                <Share2 size={16} />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
-                className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"
-                title="Rename"
-              >
-                <Pencil size={16} />
-              </button>
-              <button
-                onClick={(e) => { e.stopPropagation(); onDelete(media._id); }}
-                className="p-1.5 hover:bg-error/10 rounded-full text-error transition-colors"
-                title="Delete"
-              >
-                <Trash2 size={16} />
+          {!isSelectionMode && (
+            <div className="flex items-center">
+              {/* Actions (Hover) */}
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
+                <button
+                  onClick={handleShare}
+                  className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-primary transition-colors"
+                  title="Share"
+                >
+                  <Share2 size={16} />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
+                  className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"
+                  title="Rename"
+                >
+                  <Pencil size={16} />
+                </button>
+                <button
+                  onClick={(e) => { e.stopPropagation(); onDelete(media._id); }}
+                  className="p-1.5 hover:bg-error/10 rounded-full text-error transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            
+              <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-1 sm:-mr-2">
+                <MoreVertical size={18} className="sm:w-5 sm:h-5" />
               </button>
             </div>
-            
-            <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-1 sm:-mr-2">
-              <MoreVertical size={18} className="sm:w-5 sm:h-5" />
-            </button>
-          </div>
+          )}
         </div>
         
         {/* Type badge */}

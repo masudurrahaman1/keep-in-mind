@@ -48,6 +48,9 @@ export default function VaultCategory() {
     onConfirm: () => Promise<void>
   } | null>(null);
 
+  const [selectedFileIds, setSelectedFileIds] = useState<Set<string>>(new Set());
+  const isSelectionMode = selectedFileIds.size > 0;
+
   const formattedCategory = (categoryId || '')
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -271,6 +274,31 @@ export default function VaultCategory() {
     }
   };
 
+  const handleBulkDelete = () => {
+    setConfirmConfig({
+      title: `Delete ${selectedFileIds.size} Document${selectedFileIds.size > 1 ? 's' : ''}`,
+      message: `Are you sure you want to delete ${selectedFileIds.size} document${selectedFileIds.size > 1 ? 's' : ''} from your Vault and Google Drive? This action cannot be undone.`,
+      onConfirm: async () => {
+        try {
+          const idsToDelete = Array.from(selectedFileIds);
+          for (const id of idsToDelete) {
+            const res = await fetch(`${API_BASE}/documents/${id}`, {
+              method: 'DELETE',
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+              setDocuments(prev => prev.filter(m => m._id !== id));
+            }
+          }
+          setSelectedFileIds(new Set());
+        } catch (err) {
+          console.error('Bulk delete failed', err);
+        }
+      }
+    });
+    setIsConfirmModalOpen(true);
+  };
+
   const filteredMedia = documents.filter(item => 
     item.fileName.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -300,40 +328,65 @@ export default function VaultCategory() {
       </AnimatePresence>
 
       <div className="flex flex-col mb-8 mt-2">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate(-1)}
-              className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            >
-              <ArrowLeft size={24} className="text-neutral-700 dark:text-neutral-300" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">{formattedCategory}</h1>
-            </div>
-            {isGoogleConnected && (
+        {isSelectionMode ? (
+          <div className="flex items-center justify-between mb-4 bg-indigo-50 dark:bg-indigo-500/10 rounded-2xl px-4 py-3 border border-indigo-100 dark:border-indigo-500/20 shadow-sm">
+            <div className="flex items-center gap-3">
               <button 
-                onClick={syncWithDrive}
-                disabled={isSyncing}
-                className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition-colors"
-                title="Sync with Google Drive"
+                onClick={() => setSelectedFileIds(new Set())}
+                className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
               >
-                <RefreshCw size={18} className={isSyncing ? "animate-spin text-indigo-500" : ""} />
+                <XIcon size={24} className="text-neutral-700 dark:text-neutral-300" />
               </button>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="text-[10px] font-medium text-neutral-400 flex items-center gap-1">
-               <FileText size={10} /> {documents.length} Files
+              <h1 className="text-xl font-bold text-neutral-900 dark:text-white leading-tight">
+                {selectedFileIds.size} Selected
+              </h1>
             </div>
-            <UploadActivityCenter 
-              isOpen={isActivityOpen} 
-              onClose={() => setIsActivityOpen(false)} 
-              queue={uploadQueue}
-              history={uploadHistory}
-            />
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleBulkDelete}
+                className="p-2 rounded-full hover:bg-error/10 text-error transition-colors"
+                title="Delete Selected"
+              >
+                <Trash2 size={20} />
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => navigate(-1)}
+                className="p-2 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+              >
+                <ArrowLeft size={24} className="text-neutral-700 dark:text-neutral-300" />
+              </button>
+              <div>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">{formattedCategory}</h1>
+              </div>
+              {isGoogleConnected && (
+                <button 
+                  onClick={syncWithDrive}
+                  disabled={isSyncing}
+                  className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition-colors"
+                  title="Sync with Google Drive"
+                >
+                  <RefreshCw size={18} className={isSyncing ? "animate-spin text-indigo-500" : ""} />
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="text-[10px] font-medium text-neutral-400 flex items-center gap-1">
+                 <FileText size={10} /> {documents.length} Files
+              </div>
+              <UploadActivityCenter 
+                isOpen={isActivityOpen} 
+                onClose={() => setIsActivityOpen(false)} 
+                queue={uploadQueue}
+                history={uploadHistory}
+              />
+            </div>
+          </div>
+        )}
 
 
 
@@ -409,6 +462,22 @@ export default function VaultCategory() {
                 onRename={handleRename}
                 onSelect={() => setSelectedMediaIndex(index)}
                 streamEndpoint="/documents/stream"
+                isSelected={selectedFileIds.has(item._id)}
+                isSelectionMode={isSelectionMode}
+                onToggleSelect={() => {
+                  setSelectedFileIds(prev => {
+                    const next = new Set(prev);
+                    if (next.has(item._id)) next.delete(item._id);
+                    else next.add(item._id);
+                    return next;
+                  });
+                }}
+                onLongPress={() => {
+                  if (!isSelectionMode) {
+                    setSelectedFileIds(new Set([item._id]));
+                    if (navigator.vibrate) navigator.vibrate(50);
+                  }
+                }}
               />
             ))}
           </AnimatePresence>
