@@ -528,7 +528,7 @@ export default function Editor() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpenAddPanel(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60]"
+              className="fixed inset-0 bg-black/40 z-[60]"
             />
 
             {/* Bottom Sheet */}
@@ -676,7 +676,7 @@ export default function Editor() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowFormatPanel(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60]"
+              className="fixed inset-0 bg-black/40 z-[60]"
             />
             <motion.div
               initial={{ translateY: '100%' }}
@@ -790,7 +790,7 @@ export default function Editor() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowVoicePanel(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-[60]"
+              className="fixed inset-0 bg-black/40 z-[60]"
             />
             <motion.div
               initial={{ translateY: '100%' }}
