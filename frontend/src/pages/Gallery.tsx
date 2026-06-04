@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Loader2, Image as ImagePlaceholder, History, Trash2, CloudOff, X as XIcon,
   ShieldCheck, Bell, SlidersHorizontal, FileText, Cloud, Lock, IdCard, GraduationCap,
-  SquareActivity, Building2, Home, Folder, ArrowRight, ShieldAlert, LockKeyhole, Plus
+  SquareActivity, Building2, Home, Layers, ArrowRight, ShieldAlert, LockKeyhole, Plus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
@@ -613,7 +613,7 @@ export default function Gallery() {
             { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 0, path: '/vault/insurance' },
             { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 0, path: '/vault/education' },
             { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Medical'] || 0, path: '/vault/medical' },
-            { icon: Folder, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 0, path: '/vault/others' },
+            { icon: Layers, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 0, path: '/vault/others' },
           ].map((cat, i) => (
             <div 
               key={i} 
