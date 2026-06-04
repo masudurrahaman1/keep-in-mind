@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Loader2, Image as ImagePlaceholder, History, Trash2, CloudOff, X as XIcon,
@@ -562,27 +563,13 @@ export default function Gallery() {
       </AnimatePresence>
 
       {/* ── Header ───────────────────────────────── */}
-      <div className="flex flex-col mb-8 mt-2">
+      <div className="flex flex-col mb-6 mt-2">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 ${activeTheme.topIconBg} rounded-xl flex items-center justify-center shadow-sm border`}>
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">Secure Vault</h1>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 font-medium">Your important documents. Safe. Private. Always with you.</p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white leading-tight tracking-tight">Documents</h1>
+            <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium mt-1">Store and manage your important documents</p>
           </div>
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsActivityOpen(!isActivityOpen)}
-              className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            >
-              <Loader />
-              {uploadQueue.length > 0 && (
-                <span className={`absolute top-2 right-2.5 w-2 h-2 ${activeTheme.notifDot} rounded-full border border-white dark:border-neutral-800`}></span>
-              )}
-            </button>
             <UploadActivityCenter 
               isOpen={isActivityOpen} 
               onClose={() => setIsActivityOpen(false)} 
@@ -594,17 +581,22 @@ export default function Gallery() {
 
         {/* Search Bar */}
         <div className="flex items-center gap-3 mt-2">
-          <div className="flex-1 bg-white dark:bg-neutral-800 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border border-neutral-100 dark:border-neutral-700 focus-within:border-amber-400 transition-colors">
-            <Search size={18} className="text-neutral-400 shrink-0" />
-            <input 
-              type="text" 
-              placeholder="Search your documents..." 
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none text-sm w-full text-neutral-800 dark:text-neutral-200 placeholder:text-neutral-400"
-            />
-          </div>
-          <button className="w-12 h-12 bg-white dark:bg-neutral-800 rounded-2xl flex items-center justify-center shadow-sm border border-neutral-100 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 active:scale-95 transition-all">
+          <StyledWrapper>
+            <div className="container-input">
+              <input 
+                type="text" 
+                placeholder="Search" 
+                name="text" 
+                className="input" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <svg fill="currentColor" className="text-neutral-400 dark:text-neutral-500" width="20px" height="20px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                <path d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z" fillRule="evenodd" />
+              </svg>
+            </div>
+          </StyledWrapper>
+          <button className="w-12 h-12 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl flex items-center justify-center border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 active:scale-95 transition-all shrink-0">
             <SlidersHorizontal size={20} />
           </button>
         </div>
@@ -612,38 +604,36 @@ export default function Gallery() {
 
 
       {/* ── Categories Grid ──────────────────────── */}
-      <div className="grid grid-cols-2 gap-3 mb-8">
-        {[
-          { icon: IdCard, color: 'bg-amber-100 text-amber-500', name: 'Government IDs', count: docCounts['Government IDs'] || 0, path: '/vault/government-ids' },
-          { icon: GraduationCap, color: 'bg-emerald-100 text-emerald-500', name: 'Education', count: docCounts['Education'] || 0, path: '/vault/education' },
-          { icon: SquareActivity, color: 'bg-rose-100 text-rose-500', name: 'Medical', count: docCounts['Medical'] || 0, path: '/vault/medical' },
-          { icon: Building2, color: 'bg-blue-100 text-blue-500', name: 'Banking', count: docCounts['Banking'] || 0, path: '/vault/banking' },
-          { icon: Home, color: 'bg-purple-100 text-purple-500', name: 'Property', count: docCounts['Property'] || 0, path: '/vault/property' },
-          { icon: Folder, color: 'bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300', name: 'Others', count: docCounts['Others'] || 0, path: '/vault/others' },
-        ].map((cat, i) => (
-          <div 
-            key={i} 
-            onClick={() => navigate(cat.path)}
-            className="bg-white dark:bg-neutral-800 rounded-2xl p-4 shadow-sm border border-neutral-100 dark:border-neutral-700 flex items-center justify-between cursor-pointer hover:shadow-md transition-shadow active:scale-95 group"
-          >
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${cat.color}`}>
-                <cat.icon size={20} />
+      <div className="mb-8">
+        <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-4">Categories</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {[
+            { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government IDs'] || 3, path: '/vault/government-ids' },
+            { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Banking'] || 4, path: '/vault/banking' },
+            { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 2, path: '/vault/insurance' },
+            { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 3, path: '/vault/education' },
+            { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Medical'] || 2, path: '/vault/medical' },
+            { icon: Folder, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 5, path: '/vault/others' },
+          ].map((cat, i) => (
+            <div 
+              key={i} 
+              onClick={() => navigate(cat.path)}
+              className="bg-white dark:bg-neutral-800 rounded-3xl p-5 border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-sm transition-all active:scale-95"
+            >
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${cat.color}`}>
+                <cat.icon size={24} />
               </div>
-              <div>
-                <h3 className="text-sm font-bold text-neutral-900 dark:text-white">{cat.name}</h3>
-                <p className="text-xs text-neutral-500">{cat.count} Documents</p>
-              </div>
+              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">{cat.name}</h3>
+              <p className="text-xs text-neutral-400">{cat.count} documents</p>
             </div>
-            <ArrowRight size={16} className="text-neutral-400 group-hover:translate-x-1 transition-transform hidden sm:block" />
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* ── Recently Added ───────────────────────── */}
+      {/* ── Recent Documents ───────────────────────── */}
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Recently Added</h2>
-        <button className="text-sm font-bold text-amber-500 hover:text-amber-600 transition-colors">View All</button>
+        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Recent Documents</h2>
+        <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">See all</button>
       </div>
 
       {/* Grid */}
@@ -701,22 +691,15 @@ export default function Gallery() {
       )}
 
       {/* ── Security Banner ──────────────────────── */}
-      <div className={`bg-gradient-to-r ${activeTheme.bg} rounded-2xl sm:rounded-3xl p-3 sm:p-5 relative overflow-hidden flex items-center justify-between border shadow-sm mb-4`}>
-        {/* Background Graphic */}
-        <LockKeyhole className={`absolute -bottom-6 right-4 sm:-bottom-8 sm:right-8 w-16 h-16 sm:w-[100px] sm:h-[100px] ${activeTheme.iconWatermark} rotate-12 pointer-events-none`} />
-        
-        <div className="flex items-start gap-2 sm:gap-4 relative z-10 max-w-[80%] sm:max-w-[70%]">
-          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${activeTheme.iconBg} flex items-center justify-center shrink-0 border`}>
-            <ShieldAlert className="w-4 h-4 sm:w-5 sm:h-5" />
-          </div>
-          <div>
-            <h3 className={`text-xs sm:text-sm font-bold ${activeTheme.textMain} mb-0.5 sm:mb-1`}>Your data is 100% secure</h3>
-            <p className={`text-[10px] sm:text-xs ${activeTheme.textSub} leading-tight sm:leading-normal mb-2 sm:mb-3`}>End-to-end encrypted & stored safely in cloud.</p>
-            <button className={`text-[9px] sm:text-[10px] uppercase font-bold tracking-wider ${activeTheme.btn} px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-colors`}>
-              Learn more
-            </button>
-          </div>
+      <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 flex items-center gap-4 border border-neutral-100 dark:border-neutral-800 shadow-sm mb-4 group cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+        <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10 dark:text-indigo-400 flex items-center justify-center shrink-0">
+          <Lock size={18} />
         </div>
+        <div className="flex-1">
+          <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Your documents are safe and secure</h3>
+          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">We encrypt your files and keep them private.</p>
+        </div>
+        <ArrowRight size={16} className="text-neutral-400 group-hover:translate-x-1 transition-transform" />
       </div>
 
       {/* Animated Upload FAB */}
@@ -799,3 +782,42 @@ export default function Gallery() {
     </div>
   );
 }
+
+const StyledWrapper = styled.div`
+  flex: 1;
+
+  .container-input {
+    position: relative;
+  }
+
+  .input {
+    width: 100%;
+    max-width: 150px;
+    padding: 10px 10px 10px 40px;
+    border-radius: 9999px;
+    border: solid 1px var(--tw-border-neutral-300, #d4d4d8);
+    transition: all .2s ease-in-out;
+    outline: none;
+    opacity: 0.8;
+    background-color: transparent;
+    color: inherit;
+  }
+
+  .container-input svg {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translate(0, -50%);
+  }
+
+  .input:focus {
+    opacity: 1;
+    max-width: 250px;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .input {
+      border-color: #525252;
+    }
+  }
+`;

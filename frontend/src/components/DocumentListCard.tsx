@@ -2,6 +2,9 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { FileText, MoreVertical, Trash2, Pencil, Share2, Download, Image as ImageIcon, Video } from 'lucide-react';
 import { format } from 'date-fns';
+import { useAuth } from '../context/AuthContext';
+
+const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 interface DocumentListCardProps {
   media: any;
@@ -11,7 +14,8 @@ interface DocumentListCardProps {
   streamEndpoint?: string;
 }
 
-export default function DocumentListCard({ media, onSelect, onDelete, onRename }: DocumentListCardProps) {
+export default function DocumentListCard({ media, onSelect, onDelete, onRename, streamEndpoint }: DocumentListCardProps) {
+  const { token } = useAuth();
   const isVideo = media.fileType?.startsWith('video/') || media.fileName?.toLowerCase().match(/\.(mp4|webm|ogg|mov)$/);
   const isPdf = media.fileType?.includes('pdf') || media.fileName?.toLowerCase().endsWith('.pdf');
   const isImage = media.fileType?.startsWith('image/') || media.fileName?.toLowerCase().match(/\.(jpg|jpeg|png|gif|webp)$/);
@@ -32,18 +36,20 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename }
         url: media.fileUrl
       }).catch(console.error);
     } else {
-      // Fallback: Copy to clipboard or open link
       navigator.clipboard.writeText(media.fileUrl);
       alert('Link copied to clipboard!');
     }
   };
 
   const getIcon = () => {
-    if (isPdf) return <div className="w-10 h-10 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0"><span className="text-[10px] font-black tracking-tighter uppercase">PDF</span></div>;
-    if (isVideo) return <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0"><Video size={20} /></div>;
-    if (isImage) return <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0"><ImageIcon size={20} /></div>;
-    return <div className="w-10 h-10 rounded-xl bg-neutral-500/10 text-neutral-500 flex items-center justify-center shrink-0"><FileText size={20} /></div>;
+    if (isPdf) return <div className="w-12 h-12 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center"><span className="text-xs font-black tracking-tighter uppercase">PDF</span></div>;
+    if (isVideo) return <div className="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center"><Video size={24} /></div>;
+    if (isImage) return <div className="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center"><ImageIcon size={24} /></div>;
+    return <div className="w-12 h-12 rounded-xl bg-neutral-500/10 text-neutral-500 flex items-center justify-center"><FileText size={24} /></div>;
   };
+
+  const isValidToken = !!(token && token !== 'undefined' && token !== 'null');
+  const imgUrl = media.thumbnailUrl || (streamEndpoint && isValidToken ? `${API_BASE}${streamEndpoint}/${media.fileId || media._id}?token=${token}` : null);
 
   return (
     <motion.div
@@ -52,49 +58,82 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename }
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={onSelect}
-      className="group relative flex items-center gap-4 p-3 bg-white dark:bg-[#1C1C1E] hover:bg-neutral-50 dark:hover:bg-[#2C2C2E] rounded-2xl cursor-pointer border border-transparent hover:border-neutral-200 dark:hover:border-neutral-700 transition-all duration-200"
+      className="group relative flex flex-row gap-4 p-4 bg-white dark:bg-[#1C1C1E] rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-800 cursor-pointer hover:shadow-md transition-all duration-200 w-full"
     >
-      {/* Icon */}
-      {getIcon()}
-
-      {/* Details */}
-      <div className="flex-1 min-w-0 flex flex-col justify-center">
-        <h4 className="text-sm font-bold text-neutral-900 dark:text-neutral-100 truncate mb-0.5">
-          {media.fileName}
-        </h4>
-        <div className="flex items-center gap-2 text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
-          <span>Modified {format(new Date(media.uploadedAt), 'h:mm a')}</span>
-          <span className="w-1 h-1 rounded-full bg-neutral-300 dark:bg-neutral-600"></span>
-          <span>{formatSize(media.size)}</span>
+      {/* Thumbnail Side */}
+      <div className="w-48 sm:w-64 md:w-72 aspect-[3/2] shrink-0 rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center relative">
+        {(isImage || isPdf || isVideo) && imgUrl ? (
+          <img 
+            src={imgUrl} 
+            alt={media.fileName}
+            className="w-full h-full object-cover"
+            onError={(e) => {
+              // Fallback to icon if image fails to load
+              (e.target as HTMLElement).style.display = 'none';
+              const nextSibling = (e.target as HTMLElement).nextElementSibling as HTMLElement;
+              if (nextSibling) nextSibling.style.display = 'flex';
+            }}
+          />
+        ) : null}
+        
+        <div className="w-full h-full flex flex-col items-center justify-center absolute inset-0 bg-neutral-50 dark:bg-neutral-800/50" style={{ display: (isImage || isPdf || isVideo) && imgUrl ? 'none' : 'flex' }}>
+          {getIcon()}
         </div>
       </div>
 
-      {/* Actions (Hover) */}
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-        <button
-          onClick={handleShare}
-          className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-primary transition-colors"
-          title="Share"
-        >
-          <Share2 size={16} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
-          className="p-2 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"
-          title="Rename"
-        >
-          <Pencil size={16} />
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); onDelete(media._id); }}
-          className="p-2 hover:bg-error/10 rounded-full text-error transition-colors"
-          title="Delete"
-        >
-          <Trash2 size={16} />
-        </button>
-      </div>
+      {/* Details Side */}
+      <div className="flex-1 min-w-0 flex flex-col py-1">
+        <div className="flex justify-between items-start mb-2">
+          <h4 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate pr-4">
+            {media.fileName.split('.').slice(0, -1).join('.') || media.fileName}
+          </h4>
+          
+          <div className="flex items-center">
+            {/* Actions (Hover) */}
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
+              <button
+                onClick={handleShare}
+                className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 hover:text-primary transition-colors"
+                title="Share"
+              >
+                <Share2 size={16} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
+                className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"
+                title="Rename"
+              >
+                <Pencil size={16} />
+              </button>
+              <button
+                onClick={(e) => { e.stopPropagation(); onDelete(media._id); }}
+                className="p-1.5 hover:bg-error/10 rounded-full text-error transition-colors"
+                title="Delete"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+            
+            <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-1">
+              <MoreVertical size={20} />
+            </button>
+          </div>
+        </div>
+        
+        {/* Type badge */}
+        <div className="mb-auto">
+          <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg inline-block">
+            {isImage ? 'Image' : isPdf ? 'PDF' : isVideo ? 'Video' : 'Document'}
+          </span>
+        </div>
 
-      {/* Mobile More Button (always visible on touch devices if hover isn't supported, though Tailwind group-hover handles most. For safety, just let it be hover-based for now) */}
+        {/* Metadata */}
+        <div className="flex flex-col gap-1.5 text-[13px] font-medium text-neutral-500 dark:text-neutral-400 mt-4">
+          <span>{formatSize(media.size)}</span>
+          <span>Modified {format(new Date(media.uploadedAt), 'h:mm a')}</span>
+          <span>{format(new Date(media.uploadedAt), 'dd MMM yyyy')}</span>
+        </div>
+      </div>
     </motion.div>
   );
 }

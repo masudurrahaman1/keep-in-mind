@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Loader2, Image as ImagePlaceholder, ArrowLeft, Search, FileText, 
-  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon 
+  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon, Upload
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import DocumentListCard from '../components/DocumentListCard';
@@ -14,6 +14,7 @@ import RenameModal from '../modals/RenameModal';
 import ConfirmDeleteModal from '../modals/ConfirmDeleteModal';
 import { UploadStatus } from '../components/UploadProgressCard';
 import UploadActivityCenter from '../components/UploadActivityCenter';
+import Loader from '../components/Loader';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -289,15 +290,9 @@ export default function VaultCategory() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsActivityOpen(!isActivityOpen)}
-              className="relative p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-            >
-              <Bell size={20} className="text-neutral-700 dark:text-neutral-300" />
-              {uploadQueue.length > 0 && (
-                <span className="absolute top-2 right-2.5 w-2 h-2 bg-amber-500 rounded-full border border-white dark:border-neutral-800"></span>
-              )}
-            </button>
+            <div className="text-[10px] font-medium text-neutral-400 flex items-center gap-1">
+               <FileText size={10} /> {documents.length} Files
+            </div>
             <UploadActivityCenter 
               isOpen={isActivityOpen} 
               onClose={() => setIsActivityOpen(false)} 
@@ -307,12 +302,7 @@ export default function VaultCategory() {
           </div>
         </div>
 
-        {/* Security Indicators */}
-        <div className="flex items-center gap-3 mt-1 mb-4 flex-wrap">
-          <div className="text-[10px] font-medium text-neutral-400 ml-auto flex items-center gap-1">
-             <FileText size={10} /> {documents.length} Files
-          </div>
-        </div>
+
 
         <div className="flex items-center gap-3 mt-2">
           <div className="flex-1 bg-white dark:bg-neutral-800 rounded-2xl px-4 py-3.5 flex items-center gap-3 shadow-sm border border-neutral-100 dark:border-neutral-700 focus-within:border-amber-400 transition-colors">
@@ -332,9 +322,8 @@ export default function VaultCategory() {
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-20 animate-pulse">
-          <Loader2 size={32} className="text-amber-500 animate-spin mb-4" />
-          <p className="text-neutral-500 text-sm font-medium">Decrypting Vault...</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader />
         </div>
       ) : filteredMedia.length > 0 || uploadQueue.length > 0 ? (
         <div className="flex flex-col gap-2 mb-8">
@@ -394,19 +383,72 @@ export default function VaultCategory() {
       ) : (
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="py-20 flex flex-col items-center justify-center text-center px-4 bg-white dark:bg-neutral-800 rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-700 mb-8"
+          className="py-16 flex flex-col items-center justify-center text-center px-4 mb-8"
         >
-          <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mb-4">
-            <FileText size={24} className="text-neutral-400" />
-          </div>
-          <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
-            {searchQuery ? "No matches found" : "Category is empty"}
-          </h2>
-          <p className="text-sm text-neutral-500">
-            {searchQuery 
-              ? "Try searching for something else."
-              : `Upload your first ${formattedCategory} document.`}
-          </p>
+          {searchQuery ? (
+            <>
+              <div className="w-16 h-16 bg-neutral-100 dark:bg-neutral-700 rounded-full flex items-center justify-center mb-4">
+                <FileText size={24} className="text-neutral-400" />
+              </div>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
+                No matches found
+              </h2>
+              <p className="text-sm text-neutral-500">
+                Try searching for something else.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="relative mb-6 mt-4">
+                <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  {/* Sparkles */}
+                  <path d="M20 25 L22 30 L27 32 L22 34 L20 39 L18 34 L13 32 L18 30 Z" fill="#A7F3D0" />
+                  <path d="M80 30 L81 33 L84 34 L81 35 L80 38 L79 35 L76 34 L79 33 Z" fill="#A7F3D0" />
+                  <path d="M35 15 L36 17 L38 18 L36 19 L35 21 L34 19 L32 18 L34 17 Z" fill="#A7F3D0" />
+                  <path d="M60 10 L61.5 14 L65.5 15.5 L61.5 17 L60 21 L58.5 17 L54.5 15.5 L58.5 14 Z" fill="#A7F3D0" />
+                  {/* Document */}
+                  <rect x="30" y="25" width="40" height="50" rx="4" fill="#E5E7EB" />
+                  <rect x="38" y="35" width="24" height="3" rx="1.5" fill="#D1D5DB" />
+                  <rect x="38" y="43" width="24" height="3" rx="1.5" fill="#D1D5DB" />
+                  <rect x="38" y="51" width="16" height="3" rx="1.5" fill="#D1D5DB" />
+                  {/* Folder Back */}
+                  <path d="M20 40 L35 40 L40 45 L80 45 C82.7614 45 85 47.2386 85 50 L85 75 C85 77.7614 82.7614 80 80 80 L20 80 C17.2386 80 15 77.7614 15 75 L15 45 C15 42.2386 17.2386 40 20 40 Z" fill="#A7F3D0" opacity="0.6" />
+                  {/* Folder Front */}
+                  <path d="M15 55 L85 55 L85 75 C85 77.7614 82.7614 80 80 80 L20 80 C17.2386 80 15 77.7614 15 75 L15 55 Z" fill="#D1FAE5" />
+                </svg>
+              </div>
+              <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
+                Keep your {formattedCategory} organized
+              </h2>
+              <p className="text-sm text-neutral-500 mb-6 max-w-[250px]">
+                Add more documents to keep everything in one place.
+              </p>
+              
+              <button 
+                onClick={() => {
+                  const input = document.getElementById('empty-state-upload') as HTMLInputElement;
+                  if (input) input.click();
+                }}
+                className="flex items-center gap-2 bg-[#5B3DF5] hover:bg-[#4828E0] text-white px-6 py-3 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+              >
+                <Upload size={18} />
+                Upload Document
+              </button>
+              <input 
+                type="file" 
+                id="empty-state-upload" 
+                className="hidden" 
+                multiple 
+                onChange={(e) => {
+                  const files = Array.from(e.target.files || []);
+                  if (files.length > 0) {
+                    handleFilesSelect(files);
+                    e.target.value = '';
+                  }
+                }} 
+              />
+            </>
+          )}
         </motion.div>
       )}
 
