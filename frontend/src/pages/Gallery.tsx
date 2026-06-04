@@ -563,11 +563,11 @@ export default function Gallery() {
       </AnimatePresence>
 
       {/* ── Header ───────────────────────────────── */}
-      <div className="flex flex-col mb-6 mt-2">
-        <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col mb-4 sm:mb-6 mt-0 sm:mt-2">
+        <div className="flex items-center justify-between mb-2 sm:mb-4">
           <div>
-            <h1 className="text-3xl font-bold text-neutral-900 dark:text-white leading-tight tracking-tight">Documents</h1>
-            <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium mt-1">Store and manage your important documents</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white leading-tight tracking-tight">Documents</h1>
+            <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 font-medium mt-0.5 sm:mt-1">Store and manage your important documents</p>
           </div>
           <div className="flex items-center gap-3">
             <UploadActivityCenter 
@@ -604,9 +604,9 @@ export default function Gallery() {
 
 
       {/* ── Categories Grid ──────────────────────── */}
-      <div className="mb-8">
-        <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-4">Categories</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">Categories</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {[
             { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government IDs'] || 0, path: '/vault/government-ids' },
             { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Banking'] || 0, path: '/vault/banking' },
@@ -618,13 +618,13 @@ export default function Gallery() {
             <div 
               key={i} 
               onClick={() => navigate(cat.path)}
-              className="bg-white dark:bg-neutral-800 rounded-3xl p-5 border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-sm transition-all active:scale-95"
+              className="bg-white dark:bg-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-sm transition-all active:scale-95"
             >
-              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-3 ${cat.color}`}>
-                <cat.icon size={24} />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 ${cat.color}`}>
+                <cat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-neutral-900 dark:text-white mb-1">{cat.name}</h3>
-              <p className="text-xs text-neutral-400">{cat.count} documents</p>
+              <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white mb-0.5 sm:mb-1">{cat.name}</h3>
+              <p className="text-[10px] sm:text-xs text-neutral-400">{cat.count} documents</p>
             </div>
           ))}
         </div>
