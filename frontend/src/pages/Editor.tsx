@@ -105,18 +105,23 @@ export default function Editor() {
 
   useEffect(() => {
     if (!window.visualViewport) return;
-    const handleResize = () => {
-      const viewportHeight = window.visualViewport!.height;
+    const handleResizeOrScroll = () => {
+      const viewport = window.visualViewport!;
       const fullHeight = window.innerHeight;
-      const heightDiff = fullHeight - viewportHeight;
+      const heightDiff = fullHeight - viewport.height;
       if (heightDiff > 100) {
-        setKeyboardHeight(heightDiff);
+        const bottomOffset = fullHeight - (viewport.offsetTop + viewport.height);
+        setKeyboardHeight(Math.max(0, bottomOffset));
       } else {
         setKeyboardHeight(0);
       }
     };
-    window.visualViewport.addEventListener('resize', handleResize);
-    return () => window.visualViewport?.removeEventListener('resize', handleResize);
+    window.visualViewport.addEventListener('resize', handleResizeOrScroll);
+    window.visualViewport.addEventListener('scroll', handleResizeOrScroll);
+    return () => {
+      window.visualViewport?.removeEventListener('resize', handleResizeOrScroll);
+      window.visualViewport?.removeEventListener('scroll', handleResizeOrScroll);
+    };
   }, []);
 
   useEffect(() => {
