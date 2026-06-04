@@ -115,6 +115,8 @@ export default function Notes() {
 
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [taskCount, setTaskCount] = useState(0);
+  const [reminderCount, setReminderCount] = useState(0);
 
   // Load notes
   useEffect(() => {
@@ -144,6 +146,36 @@ export default function Notes() {
     };
     loadNotes();
   }, [token, storageKey]);
+
+  // Fetch Tasks and Reminders counts
+  useEffect(() => {
+    const fetchCounts = async () => {
+      if (token) {
+        try {
+          const [tasksRes, remRes] = await Promise.all([
+            fetch(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`${API_BASE}/reminders`, { headers: { Authorization: `Bearer ${token}` } })
+          ]);
+          if (tasksRes.ok) {
+            const tasks = await tasksRes.json();
+            setTaskCount(tasks.length);
+          }
+          if (remRes.ok) {
+            const rems = await remRes.json();
+            setReminderCount(rems.length);
+          }
+        } catch (err) {
+          console.error('Error fetching counts:', err);
+        }
+      } else {
+        const savedTasks = localStorage.getItem(`keep-in-mind-tasks-guest`);
+        if (savedTasks) setTaskCount(JSON.parse(savedTasks).length);
+        const savedReminders = localStorage.getItem(`keep-in-mind-reminders-guest`);
+        if (savedReminders) setReminderCount(JSON.parse(savedReminders).length);
+      }
+    };
+    fetchCounts();
+  }, [token]);
 
   // Sync to localStorage only in guest mode or as cache
   useEffect(() => {
@@ -426,15 +458,13 @@ export default function Notes() {
 
               <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
                 <div className="text-xl sm:text-3xl font-bold text-yellow-500 dark:text-yellow-400 leading-none mb-0.5 sm:mb-1">
-                  {localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) 
-                    ? JSON.parse(localStorage.getItem(`keep-in-mind-tasks-${user?._id || 'guest'}`) || '[]').length 
-                    : 0}
+                  {taskCount}
                 </div>
                 <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Tasks</div>
               </div>
 
               <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
-                <div className="text-xl sm:text-3xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5 sm:mb-1">3</div>
+                <div className="text-xl sm:text-3xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5 sm:mb-1">{reminderCount}</div>
                 <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Reminders</div>
               </div>
             </div>

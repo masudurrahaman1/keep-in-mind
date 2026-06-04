@@ -12,6 +12,7 @@ const taskRoutes = require('./routes/taskRoutes');
 const reminderRoutes = require('./routes/reminderRoutes');
 const noteRoutes = require('./routes/noteRoutes');
 const syncRoutes = require('./routes/syncRoutes');
+const folderRoutes = require('./routes/folders');
 
 
 const cookieParser = require('cookie-parser');
@@ -64,6 +65,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/notes', noteRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/folders', folderRoutes);
 
 
 // Health check

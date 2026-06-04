@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Search, Loader2, Image as ImagePlaceholder, History, Trash2, CloudOff, X as XIcon,
   ShieldCheck, Bell, SlidersHorizontal, FileText, Cloud, Lock, IdCard, GraduationCap,
-  SquareActivity, Building2, Home, Layers, ArrowRight, ShieldAlert, LockKeyhole, Plus
+  SquareActivity, Building2, Home, Layers, ArrowRight, ShieldAlert, LockKeyhole, Plus, FolderPlus
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
@@ -16,9 +16,38 @@ import MediaUploadFAB from '../components/MediaUploadFAB';
 import MediaViewer from '../modals/MediaViewer';
 import RenameModal from '../modals/RenameModal';
 import ConfirmDeleteModal from '../modals/ConfirmDeleteModal';
+import CreateFolderModal from '../modals/CreateFolderModal';
 import { UploadStatus } from '../components/UploadProgressCard';
 import UploadActivityCenter from '../components/UploadActivityCenter';
 import Loader from '../components/Loader';
+import { FolderActionsSheet } from '../components/FolderActionsSheet';
+import { useLongPress } from '../hooks/useLongPress';
+import RenameFolderModal from '../modals/RenameFolderModal';
+
+const FolderCard = ({ cf, docCount, onClick, onLongPress }: { cf: any, docCount: number, onClick: () => void, onLongPress: () => void }) => {
+  const longPressProps = useLongPress(
+    (e) => {
+      onLongPress();
+    },
+    onClick,
+    { delay: 500, shouldPreventDefault: true }
+  );
+
+  return (
+    <div 
+      {...longPressProps}
+      className="bg-white dark:bg-neutral-800 rounded-xl sm:rounded-3xl p-2.5 sm:p-5 border border-neutral-100 dark:border-neutral-700 flex flex-row sm:flex-col items-center sm:justify-center text-left sm:text-center cursor-pointer hover:shadow-sm transition-all active:scale-95 gap-3 sm:gap-0"
+    >
+      <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-2xl flex items-center justify-center shrink-0 sm:mb-3 ${cf.colorClass || 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400'}`}>
+        <FolderPlus className="w-4 h-4 sm:w-6 sm:h-6" />
+      </div>
+      <div className="flex flex-col flex-1 min-w-0 w-full overflow-hidden">
+        <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white mb-0 sm:mb-1 truncate max-w-full">{cf.name}</h3>
+        <p className="text-[10px] sm:text-xs text-neutral-400 truncate max-w-full">{docCount || 0} docs</p>
+      </div>
+    </div>
+  );
+};
 
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -119,6 +148,10 @@ export default function Gallery() {
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [mediaToRename, setMediaToRename] = useState<{ id: string, name: string } | null>(null);
 
+  // Custom Folders State
+  const [customFolders, setCustomFolders] = useState<any[]>([]);
+  const [isCreateFolderModalOpen, setIsCreateFolderModalOpen] = useState(false);
+
   // Confirm Delete Modal State
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState<{ 
@@ -127,6 +160,45 @@ export default function Gallery() {
     onConfirm: () => Promise<void>,
     isBulk: boolean 
   } | null>(null);
+
+  // Folder Actions State
+  const [selectedFolder, setSelectedFolder] = useState<any | null>(null);
+  const [isFolderSheetOpen, setIsFolderSheetOpen] = useState(false);
+  const [isRenameFolderModalOpen, setIsRenameFolderModalOpen] = useState(false);
+
+  const handleRenameFolder = async (folderId: string, newName: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/folders/${folderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+      });
+      if (res.ok) {
+        fetchCustomFolders();
+      }
+    } catch (err) {
+      console.error('Failed to rename folder:', err);
+    }
+  };
+
+  const handleDeleteFolder = async (folder: any) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/folders/${folder._id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchCustomFolders();
+      }
+    } catch (err) {
+      console.error('Failed to delete folder:', err);
+    }
+  };
 
   const handleAuthError = (err: any) => {
     const status = err.status || err.response?.status;
@@ -232,6 +304,41 @@ export default function Gallery() {
     }
   };
 
+  const fetchCustomFolders = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/folders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCustomFolders(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch custom folders:', err);
+    }
+  };
+
+  const handleCreateFolder = async (name: string, colorClass: string) => {
+    if (!token) return;
+    try {
+      const res = await fetch(`${API_BASE}/folders`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ name, colorClass })
+      });
+      if (res.ok) {
+        const newFolder = await res.json();
+        setCustomFolders(prev => [newFolder, ...prev]);
+      }
+    } catch (err) {
+      console.error('Failed to create folder:', err);
+    }
+  };
+
   useEffect(() => {
     if (filterType === 'trash') {
       fetchTrash();
@@ -239,6 +346,7 @@ export default function Gallery() {
       fetchMedia();
       fetchTrashCount(); // keep trash count fresh when browsing active media
       fetchDocCounts();
+      fetchCustomFolders();
     }
   }, [token, filterType]);
 
@@ -581,22 +689,31 @@ export default function Gallery() {
         </div>
 
         {/* Search Bar */}
-        <div className="flex items-center gap-3 mt-2">
-          <StyledWrapper>
-            <div className="container-input">
-              <input 
-                type="text" 
-                placeholder="Search" 
-                name="text" 
-                className="input" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <svg fill="currentColor" className="text-neutral-400 dark:text-neutral-500" width="16px" height="16px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
-                <path d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z" fillRule="evenodd" />
-              </svg>
-            </div>
-          </StyledWrapper>
+        <div className="flex items-center gap-2 sm:gap-3 mt-2">
+          <div className="flex-1 min-w-0">
+            <StyledWrapper>
+              <div className="container-input">
+                <input 
+                  type="text" 
+                  placeholder="Search" 
+                  name="text" 
+                  className="input" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <svg fill="currentColor" className="text-neutral-400 dark:text-neutral-500" width="16px" height="16px" viewBox="0 0 1920 1920" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M790.588 1468.235c-373.722 0-677.647-303.924-677.647-677.647 0-373.722 303.925-677.647 677.647-677.647 373.723 0 677.647 303.925 677.647 677.647 0 373.723-303.924 677.647-677.647 677.647Zm596.781-160.715c120.396-138.692 193.807-319.285 193.807-516.932C1581.176 354.748 1226.428 0 790.588 0S0 354.748 0 790.588s354.748 790.588 790.588 790.588c197.647 0 378.24-73.411 516.932-193.807l516.028 516.142 79.963-79.963-516.142-516.028Z" fillRule="evenodd" />
+                </svg>
+              </div>
+            </StyledWrapper>
+          </div>
+          <button 
+            onClick={() => setIsCreateFolderModalOpen(true)}
+            className="h-9 sm:h-10 px-3 sm:px-4 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl flex items-center justify-center border border-dashed border-neutral-300 dark:border-neutral-600 text-neutral-600 dark:text-neutral-300 active:scale-95 transition-all shrink-0 gap-2 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+          >
+            <FolderPlus size={16} />
+            <span className="text-xs sm:text-sm font-semibold hidden md:inline">Add Folder</span>
+          </button>
           <button className="w-9 h-9 sm:w-10 sm:h-10 bg-neutral-50 dark:bg-neutral-800/50 rounded-xl flex items-center justify-center border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 active:scale-95 transition-all shrink-0">
             <SlidersHorizontal size={16} />
           </button>
@@ -632,6 +749,27 @@ export default function Gallery() {
           ))}
         </div>
       </div>
+
+      {/* ── My Files Grid ──────────────────────── */}
+      {customFolders.length > 0 && (
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">My Files</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
+            {customFolders.map((cf, i) => (
+              <FolderCard 
+                key={cf._id || i}
+                cf={cf}
+                docCount={docCounts[cf.name] || 0}
+                onClick={() => navigate(cf.path || `/vault/${cf.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
+                onLongPress={() => {
+                  setSelectedFolder(cf);
+                  setIsFolderSheetOpen(true);
+                }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Recent Documents ───────────────────────── */}
       <div className="flex items-center justify-between mb-4">
@@ -690,17 +828,7 @@ export default function Gallery() {
         </motion.div>
       )}
 
-      {/* ── Security Banner ──────────────────────── */}
-      <div className="bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl p-4 flex items-center gap-4 border border-neutral-100 dark:border-neutral-800 shadow-sm mb-4 group cursor-pointer hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
-        <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-500 dark:bg-indigo-500/10 dark:text-indigo-400 flex items-center justify-center shrink-0">
-          <Lock size={18} />
-        </div>
-        <div className="flex-1">
-          <h3 className="text-sm font-bold text-neutral-900 dark:text-white">Your documents are safe and secure</h3>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">We encrypt your files and keep them private.</p>
-        </div>
-        <ArrowRight size={16} className="text-neutral-400 group-hover:translate-x-1 transition-transform" />
-      </div>
+
 
       {/* Animated Upload FAB */}
       <MediaUploadFAB 
@@ -727,6 +855,32 @@ export default function Gallery() {
           />
         )}
       </AnimatePresence>
+
+      {/* Create Folder Modal */}
+      <CreateFolderModal
+        isOpen={isCreateFolderModalOpen}
+        onClose={() => setIsCreateFolderModalOpen(false)}
+        onCreate={handleCreateFolder}
+      />
+
+      <FolderActionsSheet
+        isOpen={isFolderSheetOpen}
+        onClose={() => setIsFolderSheetOpen(false)}
+        folder={selectedFolder}
+        onOpenFolder={(f) => navigate(f.path || `/vault/${f.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`)}
+        onRename={() => {
+          setIsRenameFolderModalOpen(true);
+        }}
+        onDelete={handleDeleteFolder}
+      />
+
+      <RenameFolderModal
+        isOpen={isRenameFolderModalOpen}
+        onClose={() => setIsRenameFolderModalOpen(false)}
+        folder={selectedFolder}
+        onRename={handleRenameFolder}
+      />
+
       {/* Delete Confirmation Modal */}
       {confirmConfig && (
         <ConfirmDeleteModal

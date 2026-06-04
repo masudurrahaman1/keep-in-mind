@@ -177,6 +177,49 @@ const initializeUserDrive = async (userId) => {
   }
 };
 
+const ensureCustomFolderInDrive = async (userId, customFolderName) => {
+  const user = await User.findById(userId);
+  if (!user || !user.googleAccessToken) return null;
+  const drive = getDriveClient(user);
+
+  let rootFolderId = user.rootFolderId;
+  if (!rootFolderId) {
+    const rootRes = await drive.files.list({
+      q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+      fields: 'files(id)', spaces: 'drive',
+    });
+    if (rootRes.data.files.length > 0) rootFolderId = rootRes.data.files[0].id;
+    else {
+      const rootFolder = await drive.files.create({ requestBody: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+      rootFolderId = rootFolder.data.id;
+    }
+    user.rootFolderId = rootFolderId;
+    await user.save();
+  }
+
+  let personalFolderId;
+  const personalRes = await drive.files.list({
+    q: `name = 'Personal' and '${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+    fields: 'files(id)', spaces: 'drive',
+  });
+  if (personalRes.data.files.length > 0) personalFolderId = personalRes.data.files[0].id;
+  else {
+    const personalFolder = await drive.files.create({ requestBody: { name: 'Personal', parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+    personalFolderId = personalFolder.data.id;
+  }
+
+  const safeName = customFolderName.replace(/'/g, "\\'");
+  const customRes = await drive.files.list({
+    q: `name = '${safeName}' and '${personalFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
+    fields: 'files(id)', spaces: 'drive',
+  });
+  if (customRes.data.files.length > 0) return customRes.data.files[0].id;
+  else {
+    const customFolder = await drive.files.create({ requestBody: { name: customFolderName, parents: [personalFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+    return customFolder.data.id;
+  }
+};
+
 const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, category, isRetry = false) => {
   try {
     const user = await User.findById(userId);
@@ -186,58 +229,62 @@ const uploadFileToDrive = async (userId, fileBuffer, originalName, mimeType, cat
 
     const drive = getDriveClient(user);
 
-    // Map category to the exact field name in schema
     const schemaFieldMap = {
-      'Government IDs': 'governmentFolderId',
-      'Education': 'educationFolderId',
-      'Medical': 'medicalFolderId',
-      'Banking': 'bankingFolderId',
-      'Property': 'propertyFolderId',
-      'Others': 'othersFolderId',
-      'Notes': 'notesFolderId',
-      'Backups': 'backupsFolderId',
-      'Encrypted': 'encryptedFolderId',
-      'KeepInMind': 'rootFolderId'
+      'Government IDs': 'governmentFolderId', 'Education': 'educationFolderId',
+      'Medical': 'medicalFolderId', 'Banking': 'bankingFolderId',
+      'Property': 'propertyFolderId', 'Others': 'othersFolderId',
+      'Notes': 'notesFolderId', 'Backups': 'backupsFolderId',
+      'Encrypted': 'encryptedFolderId', 'KeepInMind': 'rootFolderId'
     };
 
-    const targetField = schemaFieldMap[category] || schemaFieldMap['Others'];
-    let parentFolderId = user[targetField];
+    const targetField = schemaFieldMap[category];
+    let parentFolderId;
 
-    if (!parentFolderId) {
-      console.log(`[DriveService] Folder ID missing for category "${category}". Resolving dynamically...`);
-      
-      // 1. Ensure root folder exists
-      let rootFolderId = user.rootFolderId;
-      if (!rootFolderId) {
-        const rootRes = await drive.files.list({
-          q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+    if (targetField) {
+      parentFolderId = user[targetField];
+      if (!parentFolderId) {
+        console.log(`[DriveService] Folder ID missing for category "${category}". Resolving dynamically...`);
+        let rootFolderId = user.rootFolderId;
+        if (!rootFolderId) {
+          const rootRes = await drive.files.list({
+            q: "name = 'KeepInMind' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+            fields: 'files(id)', spaces: 'drive',
+          });
+          if (rootRes.data.files.length > 0) rootFolderId = rootRes.data.files[0].id;
+          else {
+            const rootFolder = await drive.files.create({ requestBody: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+            rootFolderId = rootFolder.data.id;
+          }
+          user.rootFolderId = rootFolderId;
+        }
+
+        const safeCategory = category;
+        const catRes = await drive.files.list({
+          q: `name = '${safeCategory.replace(/'/g, "\\'")}' and '${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
           fields: 'files(id)', spaces: 'drive',
         });
-        if (rootRes.data.files.length > 0) {
-          rootFolderId = rootRes.data.files[0].id;
-        } else {
-          const rootFolder = await drive.files.create({ requestBody: { name: 'KeepInMind', mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
-          rootFolderId = rootFolder.data.id;
+        if (catRes.data.files.length > 0) parentFolderId = catRes.data.files[0].id;
+        else {
+          const catFolder = await drive.files.create({ requestBody: { name: safeCategory, parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
+          parentFolderId = catFolder.data.id;
         }
-        user.rootFolderId = rootFolderId;
+        
+        user[targetField] = parentFolderId;
+        await user.save();
       }
-
-      // 2. Ensure category folder exists
-      const safeCategory = category || 'Others';
-      const catRes = await drive.files.list({
-        q: `name = '${safeCategory.replace(/'/g, "\\'")}' and '${rootFolderId}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false`,
-        fields: 'files(id)', spaces: 'drive',
-      });
-      if (catRes.data.files.length > 0) {
-        parentFolderId = catRes.data.files[0].id;
+    } else {
+      const Folder = require('../models/Folder');
+      const folderDoc = await Folder.findOne({ user: userId, name: category });
+      if (folderDoc && folderDoc.driveFolderId) {
+        parentFolderId = folderDoc.driveFolderId;
       } else {
-        const catFolder = await drive.files.create({ requestBody: { name: safeCategory, parents: [rootFolderId], mimeType: 'application/vnd.google-apps.folder' }, fields: 'id' });
-        parentFolderId = catFolder.data.id;
+        parentFolderId = await ensureCustomFolderInDrive(userId, category);
+        if (!parentFolderId) throw new Error('Could not create custom folder in Drive');
+        if (folderDoc) {
+          folderDoc.driveFolderId = parentFolderId;
+          await folderDoc.save();
+        }
       }
-      
-      // Save it back to user doc
-      user[targetField] = parentFolderId;
-      await user.save();
     }
 
     const { Readable } = require('stream');
@@ -323,5 +370,6 @@ module.exports = {
   createDriveFolder,
   uploadFileToDrive,
   renameFileInDrive,
-  deleteFileFromDrive
+  deleteFileFromDrive,
+  ensureCustomFolderInDrive
 };

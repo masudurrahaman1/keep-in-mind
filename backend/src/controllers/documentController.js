@@ -22,11 +22,9 @@ const uploadDocument = async (req, res) => {
       'Property', 'Others', 'Notes', 'Backups', 'Encrypted', 'KeepInMind'
     ];
     
-    let finalCategory = category;
+    let finalCategory = category || 'Others';
     if (isEncrypted === 'true' || isEncrypted === true) {
       finalCategory = 'Encrypted';
-    } else if (!validCategories.includes(category)) {
-      finalCategory = 'Others';
     }
 
     // 1. Upload to Google Drive
@@ -268,8 +266,18 @@ const syncDocumentsByCategory = async (req, res) => {
       'KeepInMind': 'rootFolderId'
     };
 
-    const targetField = schemaFieldMap[decodedCategory] || schemaFieldMap['Others'];
-    const folderId = user[targetField];
+    const targetField = schemaFieldMap[decodedCategory];
+    let folderId;
+
+    if (targetField) {
+      folderId = user[targetField];
+    } else {
+      const Folder = require('../models/Folder');
+      const customFolder = await Folder.findOne({ user: user._id, name: decodedCategory });
+      if (customFolder && customFolder.driveFolderId) {
+        folderId = customFolder.driveFolderId;
+      }
+    }
 
     if (!folderId) {
       return res.json({ message: 'Folder not found in Drive, skipping sync.', deletedCount: 0 });

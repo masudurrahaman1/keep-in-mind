@@ -16,7 +16,6 @@ const documentSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['Government IDs', 'Education', 'Medical', 'Banking', 'Property', 'Others', 'Notes', 'Backups', 'Encrypted', 'KeepInMind'],
     default: 'Others'
   },
   mimeType: {
