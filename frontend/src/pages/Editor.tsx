@@ -698,11 +698,11 @@ export default function Editor() {
               {/* Typography */}
               <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-6 border-b border-on-surface/5 mb-6">
                 {[
-                  { label: 'Title', command: () => editor?.chain().focus().toggleHeading({ level: 1 }).run(), active: editor?.isActive('heading', { level: 1 }) },
-                  { label: 'Subtitle', command: () => editor?.chain().focus().toggleHeading({ level: 2 }).run(), active: editor?.isActive('heading', { level: 2 }) },
-                  { label: 'Heading', command: () => editor?.chain().focus().toggleHeading({ level: 3 }).run(), active: editor?.isActive('heading', { level: 3 }) },
-                  { label: 'Body', command: () => editor?.chain().focus().setParagraph().run(), active: editor?.isActive('paragraph') },
-                  { label: 'Note', command: () => editor?.chain().focus().setParagraph().run(), active: false }, // Small text stub
+                  { label: 'Title', command: () => editor?.chain().toggleHeading({ level: 1 }).run(), active: editor?.isActive('heading', { level: 1 }) },
+                  { label: 'Subtitle', command: () => editor?.chain().toggleHeading({ level: 2 }).run(), active: editor?.isActive('heading', { level: 2 }) },
+                  { label: 'Heading', command: () => editor?.chain().toggleHeading({ level: 3 }).run(), active: editor?.isActive('heading', { level: 3 }) },
+                  { label: 'Body', command: () => editor?.chain().setParagraph().run(), active: editor?.isActive('paragraph') },
+                  { label: 'Note', command: () => editor?.chain().setParagraph().run(), active: false }, // Small text stub
                 ].map((type) => (
                   <button
                     key={type.label}
@@ -720,12 +720,12 @@ export default function Editor() {
               {/* Styles Grid */}
               <div className="grid grid-cols-6 gap-2 mb-2">
                 {[
-                  { icon: <Bold size={18} />, action: () => editor?.chain().focus().toggleBold().run(), active: editor?.isActive('bold') },
-                  { icon: <Italic size={18} />, action: () => editor?.chain().focus().toggleItalic().run(), active: editor?.isActive('italic') },
-                  { icon: <span className="text-lg font-serif line-through">S</span>, action: () => editor?.chain().focus().toggleStrike().run(), active: editor?.isActive('strike') },
+                  { icon: <Bold size={18} />, action: () => editor?.chain().toggleBold().run(), active: editor?.isActive('bold') },
+                  { icon: <Italic size={18} />, action: () => editor?.chain().toggleItalic().run(), active: editor?.isActive('italic') },
+                  { icon: <span className="text-lg font-serif line-through">S</span>, action: () => editor?.chain().toggleStrike().run(), active: editor?.isActive('strike') },
                   { icon: <span className="text-sm font-bold border-b-4 border-primary">A</span>, action: () => {}, active: false },
                   { icon: <span className="text-sm font-bold text-primary">A</span>, action: () => {}, active: false },
-                  { icon: <span className="text-sm font-bold bg-primary/20 p-0.5 rounded">A</span>, action: () => editor?.chain().focus().toggleHighlight().run(), active: editor?.isActive('highlight') },
+                  { icon: <span className="text-sm font-bold bg-primary/20 p-0.5 rounded">A</span>, action: () => editor?.chain().toggleHighlight().run(), active: editor?.isActive('highlight') },
                 ].map((s, i) => (
                   <button
                     key={i}
@@ -743,11 +743,11 @@ export default function Editor() {
               {/* Layout Grid */}
               <div className="grid grid-cols-6 gap-2 mb-6">
                 {[
-                  { icon: <List size={18} />, action: () => editor?.chain().focus().toggleBulletList().run(), active: editor?.isActive('bulletList') },
-                  { icon: <ListOrdered size={18} />, action: () => editor?.chain().focus().toggleOrderedList().run(), active: editor?.isActive('orderedList') },
-                  { icon: <AlignLeft size={18} />, action: () => editor?.chain().focus().setTextAlign('left').run(), active: editor?.isActive({ textAlign: 'left' }) },
-                  { icon: <AlignCenter size={18} />, action: () => editor?.chain().focus().setTextAlign('center').run(), active: editor?.isActive({ textAlign: 'center' }) },
-                  { icon: <AlignRight size={18} />, action: () => editor?.chain().focus().setTextAlign('right').run(), active: editor?.isActive({ textAlign: 'right' }) },
+                  { icon: <List size={18} />, action: () => editor?.chain().toggleBulletList().run(), active: editor?.isActive('bulletList') },
+                  { icon: <ListOrdered size={18} />, action: () => editor?.chain().toggleOrderedList().run(), active: editor?.isActive('orderedList') },
+                  { icon: <AlignLeft size={18} />, action: () => editor?.chain().setTextAlign('left').run(), active: editor?.isActive({ textAlign: 'left' }) },
+                  { icon: <AlignCenter size={18} />, action: () => editor?.chain().setTextAlign('center').run(), active: editor?.isActive({ textAlign: 'center' }) },
+                  { icon: <AlignRight size={18} />, action: () => editor?.chain().setTextAlign('right').run(), active: editor?.isActive({ textAlign: 'right' }) },
                   { icon: <span className="text-lg font-black tracking-tighter">≡</span>, action: () => {}, active: false },
                 ].map((s, i) => (
                   <button

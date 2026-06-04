@@ -619,15 +619,13 @@ export default function Gallery() {
             <div 
               key={i} 
               onClick={() => navigate(cat.path)}
-              className="bg-white dark:bg-neutral-800 rounded-2xl p-2.5 sm:p-3 border border-neutral-100 dark:border-neutral-700 flex items-center gap-3 cursor-pointer hover:shadow-sm transition-all active:scale-95"
+              className="bg-white dark:bg-neutral-800 rounded-2xl sm:rounded-3xl p-3 sm:p-5 border border-neutral-100 dark:border-neutral-700 flex flex-col items-center justify-center text-center cursor-pointer hover:shadow-sm transition-all active:scale-95"
             >
-              <div className={`w-10 h-10 shrink-0 rounded-xl flex items-center justify-center ${cat.color}`}>
-                <cat.icon className="w-5 h-5" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center mb-2 sm:mb-3 ${cat.color}`}>
+                <cat.icon className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <div className="text-left min-w-0 flex-1">
-                <h3 className="text-xs sm:text-sm font-bold text-neutral-900 dark:text-white truncate leading-tight mb-0.5">{cat.name}</h3>
-                <p className="text-[10px] sm:text-xs text-neutral-400 truncate leading-tight">{cat.count} docs</p>
-              </div>
+              <h3 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white mb-0.5 sm:mb-1">{cat.name}</h3>
+              <p className="text-[10px] sm:text-xs text-neutral-400">{cat.count} documents</p>
             </div>
           ))}
         </div>
@@ -652,7 +650,6 @@ export default function Gallery() {
               <DocumentListCard 
                 key={item._id} 
                 media={item} 
-                streamEndpoint="/gallery/stream"
                 onDelete={handleDelete} 
                 onRename={handleRename}
                 onSelect={() => {
