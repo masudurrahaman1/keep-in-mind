@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Loader2, Image as ImagePlaceholder, ArrowLeft, Search, FileText, 
-  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon, Upload, RefreshCw
+  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon, Upload, RefreshCw, CheckSquare
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import DocumentListCard from '../components/DocumentListCard';
@@ -342,6 +342,23 @@ export default function VaultCategory() {
               </h1>
             </div>
             <div className="flex items-center gap-2">
+              <button 
+                onClick={() => {
+                  if (selectedFileIds.size === documents.length) {
+                    setSelectedFileIds(new Set());
+                  } else {
+                    setSelectedFileIds(new Set(documents.map(d => d._id)));
+                  }
+                }}
+                className={`p-2 rounded-full transition-colors ${
+                  selectedFileIds.size === documents.length 
+                    ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400' 
+                    : 'hover:bg-indigo-100 text-indigo-500/70 hover:text-indigo-600 dark:hover:bg-indigo-500/20 dark:text-indigo-400/70 dark:hover:text-indigo-400'
+                }`}
+                title={selectedFileIds.size === documents.length ? "Deselect All" : "Select All"}
+              >
+                <CheckSquare size={20} />
+              </button>
               <button 
                 onClick={handleBulkDelete}
                 className="p-2 rounded-full hover:bg-error/10 text-error transition-colors"
