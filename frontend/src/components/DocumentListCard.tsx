@@ -58,10 +58,10 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       onClick={onSelect}
-      className="group relative flex flex-row gap-4 p-4 bg-white dark:bg-[#1C1C1E] rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-800 cursor-pointer hover:shadow-md transition-all duration-200 w-full"
+      className="group relative flex flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white dark:bg-[#1C1C1E] rounded-2xl sm:rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-800 cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-3 sm:mb-4"
     >
       {/* Thumbnail Side */}
-      <div className="w-48 sm:w-64 md:w-72 aspect-[3/2] shrink-0 rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center relative">
+      <div className="w-28 sm:w-48 md:w-64 aspect-square sm:aspect-[3/2] shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center relative">
         {(isImage || isPdf || isVideo) && imgUrl ? (
           <img 
             src={imgUrl} 
@@ -82,9 +82,9 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
       </div>
 
       {/* Details Side */}
-      <div className="flex-1 min-w-0 flex flex-col py-1">
-        <div className="flex justify-between items-start mb-2">
-          <h4 className="text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate pr-4">
+      <div className="flex-1 min-w-0 flex flex-col py-0 sm:py-1">
+        <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+          <h4 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-neutral-100 truncate pr-2 sm:pr-4">
             {media.fileName.split('.').slice(0, -1).join('.') || media.fileName}
           </h4>
           
@@ -114,24 +114,25 @@ export default function DocumentListCard({ media, onSelect, onDelete, onRename, 
               </button>
             </div>
             
-            <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-1">
-              <MoreVertical size={20} />
+            <button className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 transition-colors p-1 sm:-mr-2">
+              <MoreVertical size={18} className="sm:w-5 sm:h-5" />
             </button>
           </div>
         </div>
         
         {/* Type badge */}
         <div className="mb-auto">
-          <span className="px-2.5 py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-semibold rounded-lg inline-block">
+          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] sm:text-xs font-semibold rounded-md sm:rounded-lg inline-block">
             {isImage ? 'Image' : isPdf ? 'PDF' : isVideo ? 'Video' : 'Document'}
           </span>
         </div>
 
         {/* Metadata */}
-        <div className="flex flex-col gap-1.5 text-[13px] font-medium text-neutral-500 dark:text-neutral-400 mt-4">
+        <div className="flex flex-col gap-1 sm:gap-1.5 text-[11px] sm:text-[13px] font-medium text-neutral-500 dark:text-neutral-400 mt-2 sm:mt-4">
           <span>{formatSize(media.size)}</span>
-          <span>Modified {format(new Date(media.uploadedAt), 'h:mm a')}</span>
-          <span>{format(new Date(media.uploadedAt), 'dd MMM yyyy')}</span>
+          <span className="hidden sm:inline">Modified {format(new Date(media.uploadedAt), 'h:mm a')}</span>
+          <span className="sm:hidden">{format(new Date(media.uploadedAt), 'd MMM yyyy, h:mm a')}</span>
+          <span className="hidden sm:inline">{format(new Date(media.uploadedAt), 'dd MMM yyyy')}</span>
         </div>
       </div>
     </motion.div>
