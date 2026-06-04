@@ -597,9 +597,6 @@ export default function Gallery() {
               </svg>
             </div>
           </StyledWrapper>
-          <button className="w-12 h-12 bg-neutral-50 dark:bg-neutral-800/50 rounded-2xl flex items-center justify-center border border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 active:scale-95 transition-all shrink-0">
-            <SlidersHorizontal size={20} />
-          </button>
         </div>
       </div>
 
@@ -790,8 +787,8 @@ const StyledWrapper = styled.div`
 
   .input {
     width: 100%;
-    max-width: 150px;
-    padding: 10px 10px 10px 40px;
+    max-width: 100%;
+    padding: 8px 12px 8px 36px;
     border-radius: 9999px;
     border: solid 1px var(--tw-border-neutral-300, #d4d4d8);
     transition: all .2s ease-in-out;
@@ -804,13 +801,14 @@ const StyledWrapper = styled.div`
   .container-input svg {
     position: absolute;
     top: 50%;
-    left: 10px;
+    left: 12px;
     transform: translate(0, -50%);
+    width: 16px;
+    height: 16px;
   }
 
   .input:focus {
     opacity: 1;
-    max-width: 250px;
   }
 
   @media (prefers-color-scheme: dark) {
