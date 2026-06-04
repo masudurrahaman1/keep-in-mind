@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, ChevronRight, Edit2, Crown, BarChart2, Star, Archive, HelpCircle, Info, Trash2, Cloud } from 'lucide-react';
+import { LogOut, ChevronRight, Edit2, Crown, Lock, Star, Archive, HelpCircle, Info, Trash2, Cloud } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import { useTheme } from '../context/ThemeContext';
@@ -69,7 +69,7 @@ export default function Account() {
     .slice(0, 2);
 
   const menuGroup1 = [
-    { icon: BarChart2, label: 'My Stats',  color: '#FF9E4A', path: null },
+    { icon: Lock, label: 'Locker',  color: '#FF9E4A', path: '/locker' },
     { icon: Star,      label: 'Favorites', color: '#FDCB58', path: null },
     { icon: Trash2,    label: 'Trash',     color: '#F87171', path: '/trash' },
     { icon: Archive,   label: 'Archived',  color: '#FF9E4A', path: '/archive' },

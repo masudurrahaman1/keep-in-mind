@@ -48,6 +48,7 @@ const ThemeColorSettings = lazy(() => import('./pages/ThemeColorSettings'));
 const Drawing = lazy(() => import('./pages/Drawing'));
 const Editor  = lazy(() => import('./pages/Editor'));
 const ViewNote = lazy(() => import('./pages/ViewNote'));
+const Locker = lazy(() => import('./pages/Locker'));
 const Tasks   = lazy(() => import('./pages/Tasks'));
 const Reminders = lazy(() => import('./pages/Reminders'));
 const AddReminder = lazy(() => import('./pages/AddReminder'));
@@ -154,6 +155,7 @@ export default function App() {
         <Route path="/editor"      element={<ProtectedRoute><Suspense fallback={<PageLoader />}><Editor /></Suspense></ProtectedRoute>}  />
         <Route path="/editor/:id"  element={<ProtectedRoute><Suspense fallback={<PageLoader />}><Editor /></Suspense></ProtectedRoute>}  />
         <Route path="/note/:id"    element={<ProtectedRoute><Suspense fallback={<PageLoader />}><ViewNote /></Suspense></ProtectedRoute>} />
+        <Route path="/locker"      element={<ProtectedRoute><Suspense fallback={<PageLoader />}><Locker /></Suspense></ProtectedRoute>} />
 
         {/* Catch-all */}
         <Route path="*" element={<Navigate to="/" replace />} />
