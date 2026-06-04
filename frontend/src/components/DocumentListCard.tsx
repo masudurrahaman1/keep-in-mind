@@ -136,7 +136,7 @@ export default function DocumentListCard({
           
           {!isSelectionMode && (
             <div className="flex items-center shrink-0">
-              {/* Actions (Hover) - Hidden on mobile to save space for filename */}
+              {/* Actions (Hover) - Hidden on mobile to save space */}
               <div className="hidden sm:flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 mr-2">
                 <button
                   onClick={handleShare}
