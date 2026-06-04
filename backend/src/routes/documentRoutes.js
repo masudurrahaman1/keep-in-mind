@@ -8,7 +8,8 @@ const {
   deleteDocument,
   renameDocument,
   streamDocument,
-  getDocumentCounts
+  getDocumentCounts,
+  syncDocumentsByCategory
 } = require('../controllers/documentController');
 
 const upload = multer({
@@ -18,6 +19,7 @@ const upload = multer({
 
 router.post('/upload', protect, upload.single('file'), uploadDocument);
 router.get('/metrics/counts', protect, getDocumentCounts);
+router.post('/sync/:category', protect, syncDocumentsByCategory);
 router.get('/:category', protect, getDocumentsByCategory);
 router.delete('/:id', protect, deleteDocument);
 router.patch('/:id/rename', protect, renameDocument);

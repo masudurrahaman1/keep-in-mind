@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Loader2, Image as ImagePlaceholder, ArrowLeft, Search, FileText, 
-  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon, Upload
+  Trash2, SlidersHorizontal, Bell, CloudOff, X as XIcon, Upload, RefreshCw
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import DocumentListCard from '../components/DocumentListCard';
@@ -25,6 +25,7 @@ export default function VaultCategory() {
   
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const [uploadQueue, setUploadQueue] = useState<any[]>([]);
   const [uploadHistory, setUploadHistory] = useState<any[]>([]);
@@ -106,6 +107,28 @@ export default function VaultCategory() {
       handleAuthError(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const syncWithDrive = async () => {
+    if (!token || !categoryId || !isGoogleConnected) return;
+    try {
+      setIsSyncing(true);
+      const res = await fetch(`${API_BASE}/documents/sync/${categoryId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.status === 401) {
+        handleAuthError({ status: 401 });
+        return;
+      }
+      if (!res.ok) throw new Error('Sync failed');
+      // After sync, refetch documents to get the updated list
+      await fetchDocuments();
+    } catch (err) {
+      console.error('Failed to sync with Google Drive:', err);
+    } finally {
+      setIsSyncing(false);
     }
   };
 
@@ -288,6 +311,16 @@ export default function VaultCategory() {
             <div>
               <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">{formattedCategory}</h1>
             </div>
+            {isGoogleConnected && (
+              <button 
+                onClick={syncWithDrive}
+                disabled={isSyncing}
+                className="p-1.5 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 text-neutral-500 transition-colors"
+                title="Sync with Google Drive"
+              >
+                <RefreshCw size={18} className={isSyncing ? "animate-spin text-indigo-500" : ""} />
+              </button>
+            )}
           </div>
           <div className="flex items-center gap-3">
             <div className="text-[10px] font-medium text-neutral-400 flex items-center gap-1">

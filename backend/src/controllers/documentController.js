@@ -228,11 +228,89 @@ const streamDocument = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Sync documents with Google Drive (remove DB records if missing from Drive)
+ * @route   POST /api/documents/sync/:category
+ * @access  Private
+ */
+const syncDocumentsByCategory = async (req, res) => {
+  try {
+    const { category } = req.params;
+    
+    const decodedCategory = category
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ')
+      .replace('Ids', 'IDs');
+
+    const user = await User.findById(req.user._id);
+    if (!user.googleAccessToken) {
+      return res.status(401).json({ message: 'Google Drive not connected' });
+    }
+
+    const drive = getDriveClient(user);
+    const dbDocs = await Document.find({ user: user._id, category: decodedCategory });
+
+    if (dbDocs.length === 0) {
+      return res.json({ message: 'No documents to sync', deletedCount: 0 });
+    }
+
+    const schemaFieldMap = {
+      'Government IDs': 'governmentFolderId',
+      'Education': 'educationFolderId',
+      'Medical': 'medicalFolderId',
+      'Banking': 'bankingFolderId',
+      'Property': 'propertyFolderId',
+      'Others': 'othersFolderId',
+      'Notes': 'notesFolderId',
+      'Backups': 'backupsFolderId',
+      'Encrypted': 'encryptedFolderId',
+      'KeepInMind': 'rootFolderId'
+    };
+
+    const targetField = schemaFieldMap[decodedCategory] || schemaFieldMap['Others'];
+    const folderId = user[targetField];
+
+    if (!folderId) {
+      return res.json({ message: 'Folder not found in Drive, skipping sync.', deletedCount: 0 });
+    }
+
+    let driveFileIds = new Set();
+    let pageToken = null;
+
+    do {
+      const driveRes = await drive.files.list({
+        q: `'${folderId}' in parents and trashed = false`,
+        fields: 'nextPageToken, files(id)',
+        spaces: 'drive',
+        pageToken: pageToken
+      });
+      driveRes.data.files.forEach(f => driveFileIds.add(f.id));
+      pageToken = driveRes.data.nextPageToken;
+    } while (pageToken);
+
+    let deletedCount = 0;
+    
+    for (const doc of dbDocs) {
+      if (!driveFileIds.has(doc.driveFileId)) {
+        await Document.findByIdAndDelete(doc._id);
+        deletedCount++;
+      }
+    }
+
+    res.json({ message: 'Sync complete', deletedCount });
+  } catch (error) {
+    console.error('Sync Documents Error:', error);
+    res.status(500).json({ message: 'Failed to sync documents' });
+  }
+};
+
 module.exports = {
   uploadDocument,
   getDocumentsByCategory,
   deleteDocument,
   renameDocument,
   streamDocument,
-  getDocumentCounts
+  getDocumentCounts,
+  syncDocumentsByCategory
 };
