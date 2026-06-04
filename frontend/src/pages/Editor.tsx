@@ -161,6 +161,10 @@ export default function Editor() {
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose-base focus:outline-none max-w-none text-on-surface/90 min-h-[300px] [&_ul[data-type="taskList"]]:list-none [&_ul[data-type="taskList"]]:p-0 [&_li[data-checked="true"]]:line-through [&_li[data-checked="true"]]:opacity-50',
+        autocomplete: 'off',
+        autocorrect: 'off',
+        autocapitalize: 'off',
+        spellcheck: 'false',
       },
     },
   });
@@ -399,6 +403,10 @@ export default function Editor() {
           placeholder="Note Title"
           className="text-4xl md:text-5xl font-heading font-black bg-transparent border-none outline-none placeholder:opacity-20 mb-8 w-full tracking-tight text-on-surface"
           autoFocus={!currentId}
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="off"
+          spellCheck={false}
         />
         
         <div className="flex-1">
