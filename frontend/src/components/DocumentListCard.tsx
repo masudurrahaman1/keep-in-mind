@@ -92,8 +92,9 @@ export default function DocumentListCard({
       onMouseDown={startPress}
       onMouseUp={cancelPress}
       onMouseLeave={cancelPress}
-      className={`group relative flex flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white dark:bg-[#1C1C1E] rounded-2xl sm:rounded-3xl shadow-sm border cursor-pointer hover:shadow-md transition-all duration-200 w-full mb-3 sm:mb-4 select-none
-        ${isSelected ? 'border-primary ring-2 ring-primary/20 dark:ring-primary/40' : 'border-neutral-100 dark:border-neutral-800'}`}
+      className={`group relative flex flex-row gap-3 sm:gap-4 p-3 sm:p-4 bg-white dark:bg-[#1C1C1E] sm:rounded-3xl sm:shadow-sm border-b sm:border border-neutral-100 dark:border-neutral-800 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-all duration-200 select-none
+        -mx-4 sm:mx-0 w-[calc(100%+2rem)] sm:w-full sm:mb-4
+        ${isSelected ? 'bg-indigo-50/50 dark:bg-indigo-500/10 border-primary sm:ring-2 sm:ring-primary/20 dark:ring-primary/40' : ''}`}
     >
       {/* Thumbnail Side */}
       <div className="w-28 sm:w-48 md:w-64 aspect-square sm:aspect-[3/2] shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-50 dark:bg-neutral-800/50 border border-neutral-100 dark:border-neutral-700 flex items-center justify-center relative">
