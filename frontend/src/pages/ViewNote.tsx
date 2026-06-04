@@ -198,7 +198,7 @@ export default function ViewNote() {
       </main>
 
       {/* ── Bottom Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface/80 backdrop-blur-xl border-t border-on-surface/5 p-4 flex items-center justify-between px-6 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface/80 backdrop-blur-xl border-t border-on-surface/5 py-2 flex items-center justify-between px-6 pb-[calc(0.5rem+env(safe-area-inset-bottom))]">
         <button onClick={handleDelete} className="p-2 text-primary hover:bg-primary/10 rounded-full transition-all">
           <Trash2 size={24} />
         </button>
