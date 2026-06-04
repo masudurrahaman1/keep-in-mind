@@ -110,7 +110,7 @@ export default function Archive() {
   const openNoteForEdit = (note: any) => {
     setContextMenu(null);
     if (note.type === 'drawing') navigate(`/drawing/${note.id}`);
-    else navigate(`/editor/${note.id}`);
+    else navigate(`/note/${note.id}`);
   };
 
   const getNote3DIcon = (note: any) => {

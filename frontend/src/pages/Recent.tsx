@@ -150,7 +150,7 @@ export default function Recent() {
               transition={{ duration: 0.2, ease: "easeOut" }}
               onClick={() => {
                 if (note.type === 'drawing') navigate(`/drawing/${note.id}`);
-                else navigate(`/editor/${note.id}`);
+                else navigate(`/note/${note.id}`);
               }}
               className={cn(
                 "group cursor-pointer rounded-[2rem] p-6 border backdrop-blur-xl transition-all relative break-inside-avoid shadow-sm overflow-hidden",

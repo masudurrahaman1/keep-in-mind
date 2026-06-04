@@ -322,7 +322,7 @@ export default function Notes() {
     setContextMenu(null);
     const noteId = note._id || note.id;
     if (note.type === 'drawing') navigate(`/drawing/${noteId}`);
-    else navigate(`/editor/${noteId}`);
+    else navigate(`/note/${noteId}`);
   };
 
   // Icon mapping helper based on note title and category
