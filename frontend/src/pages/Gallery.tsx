@@ -538,7 +538,7 @@ export default function Gallery() {
   }, [selectedMediaIndex]);
 
   return (
-    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-white dark:bg-neutral-900 p-4 sm:p-5 md:p-6 pb-32 sm:pb-32 md:pb-12 min-h-full">
+    <div className="max-w-7xl mx-auto w-full flex flex-col relative z-10 bg-white dark:bg-neutral-900 px-4 sm:px-5 md:px-6 pb-32 sm:pb-32 md:pb-12 min-h-full">
 
       {/* No Google Drive Connection Banner */}
       <AnimatePresence>
@@ -564,7 +564,7 @@ export default function Gallery() {
       </AnimatePresence>
 
       {/* ── Header ───────────────────────────────── */}
-      <div className="flex flex-col mb-4 sm:mb-6 mt-0 sm:mt-2">
+      <div className="sticky top-0 z-50 bg-white/90 dark:bg-neutral-900/90 backdrop-blur-xl pt-4 sm:pt-5 md:pt-6 pb-4 sm:pb-6 -mx-4 px-4 sm:-mx-5 sm:px-5 md:-mx-6 md:px-6 flex flex-col mb-4 sm:mb-6 mt-0">
         <div className="flex items-center justify-between mb-2 sm:mb-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-white leading-tight tracking-tight">Documents</h1>
