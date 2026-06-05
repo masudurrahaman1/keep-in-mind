@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { FileText, Compass, Clock, Image as ImageIcon, Users, Activity, Settings, User, X, LogOut, ChevronRight, Power } from 'lucide-react';
+import { FileText, Compass, Clock, Image as ImageIcon, Users, Activity, Settings, User, X, LogOut, ChevronRight, Power, PanelLeft, Folder, LayoutList, Lock, Trash2, Cloud, Headset } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { useAuth } from '../context/AuthContext';
@@ -28,112 +28,104 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
       signOut();
       onMobileClose?.();
       navigate('/auth');
-    }, 1200); // Wait 1.2s for the full screen animation
+    }, 1200);
   };
 
-  const links = [
-    { path: '/notes',   label: 'Notes',   icon: FileText },
-    { path: '/explore', label: 'Explore', icon: Compass  },
-    { path: '/recent',  label: 'Recent',  icon: Clock    },
+  const folderLinks = [
+    { path: '/notes', label: 'All', icon: Folder, count: 3 },
+    { path: '/documents', label: 'Uncategorized', icon: LayoutList, count: 3 },
+    { path: '/gallery', label: 'Locked', icon: Lock, count: 0 },
+    { path: '/archive', label: 'Recently Deleted', icon: Trash2, count: 0 },
   ];
 
-  const spaces = [
-    { path: '/documents', label: 'Documents', icon: FileText },
-    { path: '/gallery', label: 'Personal', icon: ImageIcon },
-    { path: '/labels',  label: 'Labels',   icon: Users    },
-    { path: '/archive', label: 'Archive',  icon: Activity },
-    { path: '/settings', label: 'Settings', icon: Settings },
+  const moreLinks = [
+    { path: '/labels', label: 'Notes Widgets', hasDot: true },
+    { path: '/cloud-sync', label: 'Local Backups', hasDot: false },
   ];
 
-  const renderLinks = (items: { path: string; label: string; icon: any }[]) => (
-    <ul className="space-y-1">
-      {items.map((item) => {
-        const isNotes = item.path === '/notes';
-        const active = location.pathname.startsWith(item.path) || (isNotes && location.pathname.startsWith('/drawing'));
+  const renderGroup = (items: any[]) => (
+    <div className="bg-white dark:bg-[#2A2D35] rounded-[24px] overflow-hidden shadow-sm">
+      {items.map((item, idx) => {
+        const active = location.pathname.startsWith(item.path);
         const Icon = item.icon;
         return (
-          <li key={item.path}>
+          <div key={item.path} className="relative">
             <Link
               to={item.path}
               onClick={onMobileClose}
               className={cn(
-                'flex items-center gap-3 px-3.5 py-2.5 rounded-2xl font-bold transition-all duration-300 min-h-[44px] group relative overflow-hidden',
-                active
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                  : 'text-on-surface hover:bg-surface-container-high/80 active:scale-[0.98]',
-                isCollapsed ? 'justify-center px-2' : ''
+                "flex items-center gap-4 px-5 py-4 transition-all hover:bg-neutral-50 dark:hover:bg-[#32363F] group",
+                active ? "bg-neutral-50 dark:bg-[#32363F]" : ""
               )}
-              title={isCollapsed ? item.label : ''}
             >
-              {active && <motion.div layoutId="sidebar-active" className="absolute inset-0 bg-primary -z-10" />}
-              <Icon 
-                size={20} 
-                className={cn(
-                  'shrink-0 transition-transform duration-300 group-hover:scale-110', 
-                  active ? 'text-white' : 'text-on-surface/60 group-hover:text-primary transition-colors'
-                )} 
-              />
-              {!isCollapsed && <span className="truncate text-sm tracking-tight font-bold">{item.label}</span>}
-              {active && !isCollapsed && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/40" />}
+              {Icon && <div className={cn("w-6 h-6 flex items-center justify-center shrink-0", active ? "text-primary" : "text-neutral-500 dark:text-neutral-400")}><Icon size={20} strokeWidth={2.5} /></div>}
+              <span className={cn("flex-1 text-[15px] font-semibold tracking-tight", active ? "text-neutral-900 dark:text-white" : "text-neutral-700 dark:text-neutral-200")}>{item.label}</span>
+              <div className="flex items-center gap-2 text-neutral-400">
+                {item.count !== undefined && <span className="text-xs font-semibold">{item.count}</span>}
+                {item.hasDot && <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-1" />}
+                <ChevronRight size={16} strokeWidth={3} className="text-neutral-300 dark:text-neutral-600" />
+              </div>
             </Link>
-          </li>
+            {idx < items.length - 1 && <div className="absolute bottom-0 left-[52px] right-0 h-px bg-neutral-100 dark:bg-white/5" />}
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
 
-  const UserSection = ({ mobile = false }: { mobile?: boolean }) => (
-    <div className={cn("mt-auto pt-6 border-t border-outline-variant/20", mobile ? "px-1 pb-[72px]" : "pb-2")}>
-      <div className={cn(
-        "flex flex-col gap-2",
-        isCollapsed && !mobile ? "items-center" : ""
-      )}>
-        {/* User Profile Summary */}
-        <div 
-          onClick={() => { navigate('/account'); onMobileClose?.(); }}
-          className={cn(
-            "flex items-center gap-3 p-2.5 rounded-2xl cursor-pointer hover:bg-surface-container-high transition-colors group",
-            isCollapsed && !mobile ? "justify-center" : ""
-          )}
-        >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary overflow-hidden shrink-0 border-2 border-white/5 group-hover:border-primary/30 transition-all flex items-center justify-center">
-            {user?.avatar ? (
-              <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
-            ) : (
-              <User size={20} className="text-white" />
-            )}
+  const DrawerContent = () => (
+    <div className="flex-1 flex flex-col h-full bg-[#F3F4F6] dark:bg-[#1C1D21] w-full rounded-r-[32px] overflow-hidden">
+      {/* Top Header */}
+      <div className="flex items-center justify-between p-6 pb-2">
+        <button onClick={onMobileClose} className="p-2 -ml-2 text-neutral-600 dark:text-neutral-300 hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors">
+          <PanelLeft size={24} strokeWidth={2} className="rotate-180" />
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-6">
+        {/* Folders Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between px-2 mb-3">
+            <h3 className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Folders</h3>
+            <button className="text-[13px] font-medium text-blue-500 hover:text-blue-600">New</button>
           </div>
-          {!isCollapsed || mobile ? (
-            <div className="flex-1 min-w-0 text-left">
-              <h4 className="text-sm font-black text-on-surface truncate tracking-tight">{user?.name || 'Guest User'}</h4>
-              <p className="text-[10px] font-black text-on-surface opacity-60 uppercase tracking-widest truncate">{user?.authProvider || 'Local'} Account</p>
-            </div>
-          ) : null}
-          {!isCollapsed || mobile ? <ChevronRight size={14} className="text-on-surface-variant opacity-0 group-hover:opacity-100 transition-opacity" /> : null}
+          {renderGroup(folderLinks)}
         </div>
 
-        {/* Action Buttons */}
-        {!isCollapsed || mobile ? (
-          <div className="mt-2 px-1">
-            <button
-              onClick={() => { signOut(); onMobileClose?.(); navigate('/auth'); }}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-error/10 border border-error/20 hover:bg-error/20 transition-colors text-error group shadow-sm"
-            >
-              <LogOut size={16} className="group-hover:-translate-x-0.5 transition-transform" />
-              <span className="text-xs font-bold tracking-tight">Logout</span>
-            </button>
+        {/* More Section */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between px-2 mb-3">
+            <h3 className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">More</h3>
           </div>
-        ) : (
-          <div className="flex flex-col gap-2 mt-2">
-            <button
-              onClick={() => { signOut(); navigate('/auth'); }}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-error/5 hover:bg-error/10 text-error transition-all"
-              title="Logout"
-            >
-              <LogOut size={18} />
-            </button>
-          </div>
-        )}
+          {renderGroup(moreLinks)}
+        </div>
+      </div>
+
+      {/* Bottom Action Row */}
+      <div className="px-6 pb-8 pt-4">
+        <div className="flex items-center justify-between px-4">
+          <button className="flex flex-col items-center gap-2 group">
+            <div className="w-12 h-12 rounded-full bg-white dark:bg-[#2A2D35] flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm group-hover:bg-neutral-50 transition-colors">
+              <Users size={20} strokeWidth={2} />
+            </div>
+            <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Fan Group</span>
+          </button>
+          
+          <button className="flex flex-col items-center gap-2 group relative">
+            <div className="w-12 h-12 rounded-full bg-white dark:bg-[#2A2D35] flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm group-hover:bg-neutral-50 transition-colors">
+              <Headset size={20} strokeWidth={2} />
+            </div>
+            <div className="absolute top-1 right-2 w-2 h-2 rounded-full bg-red-500 border-2 border-[#F3F4F6] dark:border-[#1C1D21]" />
+            <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">User Feedback</span>
+          </button>
+
+          <button onClick={() => { onMobileClose?.(); navigate('/settings'); }} className="flex flex-col items-center gap-2 group">
+            <div className="w-12 h-12 rounded-full bg-white dark:bg-[#2A2D35] flex items-center justify-center text-neutral-600 dark:text-neutral-300 shadow-sm group-hover:bg-neutral-50 transition-colors">
+              <Settings size={20} strokeWidth={2} />
+            </div>
+            <span className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">Settings</span>
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -142,111 +134,18 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
     <>
       {/* --- Desktop Sidebar (md+) --- */}
       <aside className={cn(
-        "hidden md:flex flex-col glass h-full border-r border-outline-variant/20 py-5 px-3 overflow-y-hidden z-20 transition-all duration-300 ease-in-out shrink-0",
-        isCollapsed ? "w-[80px]" : "w-64 lg:w-72"
+        "hidden md:flex flex-col h-full z-20 transition-all duration-300 ease-in-out shrink-0 bg-transparent py-4 pl-4 pr-2",
+        isCollapsed ? "w-[100px]" : "w-[300px]"
       )}>
-        {/* Logo */}
-        <div className={cn(
-          "mb-10 flex items-center gap-3 transition-all duration-300",
-          isCollapsed ? "justify-center" : "ml-2"
-        )}>
-          <div className="w-10 h-10 flex items-center justify-center shrink-0">
-            <img src="/logo.jpg" alt="KeepInMind Logo" className="w-full h-full object-contain mix-blend-multiply scale-95 drop-shadow-sm rounded-2xl" />
-          </div>
-          {!isCollapsed && (
-            <span className="truncate text-lg font-black tracking-tighter">
-              Keep <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">In Mind</span>
-            </span>
-          )}
-        </div>
-
-        <div className="flex-1 overflow-y-auto no-scrollbar space-y-8">
-          <div>
-            {!isCollapsed && <h3 className="px-4 text-[10px] font-black text-on-surface uppercase tracking-[0.2em] mb-3 opacity-80">Main Menu</h3>}
-            {renderLinks(links)}
-          </div>
-
-          <div>
-            {!isCollapsed && <h3 className="px-4 text-[10px] font-black text-on-surface uppercase tracking-[0.2em] mb-3 opacity-80">Spaces</h3>}
-            {renderLinks(spaces)}
-          </div>
-        </div>
-
-        <UserSection />
+        <DrawerContent />
       </aside>
 
       {/* --- Mobile Drawer (< md) --- */}
       <div className={cn(
-        "fixed inset-y-0 left-0 z-[60] w-[320px] max-w-[85vw] flex flex-col bg-surface overflow-hidden transition-transform duration-300 ease-in-out md:hidden shadow-2xl",
+        "fixed inset-y-0 left-0 z-[60] w-[320px] max-w-[85vw] flex flex-col overflow-hidden transition-transform duration-300 ease-in-out md:hidden",
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       )}>
-        {/* Top Wave */}
-        <svg className="absolute top-0 left-0 w-full text-primary/10 pointer-events-none" viewBox="0 0 1440 320" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0,64L48,85.3C96,107,192,149,288,144C384,139,480,85,576,64C672,43,768,53,864,80C960,107,1056,149,1152,144C1248,139,1344,85,1392,58.7L1440,32L1440,0L1392,0C1344,0,1248,0,1152,0C1056,0,960,0,864,0C768,0,672,0,576,0C480,0,384,0,288,0C192,0,96,0,48,0L0,0Z"></path>
-        </svg>
-        
-        {/* Bottom Wave */}
-        <svg className="absolute bottom-0 left-0 w-full text-primary pointer-events-none" viewBox="0 0 1440 320" fill="currentColor" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" style={{ height: '120px' }}>
-          <path d="M0,192L48,197.3C96,203,192,213,288,197.3C384,181,480,139,576,144C672,149,768,203,864,224C960,245,1056,235,1152,197.3C1248,160,1344,96,1392,64L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
-        </svg>
-
-
-
-        <div className="relative z-10 flex-1 flex flex-col pt-12 px-6 overflow-y-auto no-scrollbar pb-6">
-          {/* Logo area */}
-          <div className="flex items-center gap-4 mb-10">
-            <div className="w-14 h-14 flex items-center justify-center shrink-0">
-              <img src="/logo.jpg" alt="KeepInMind Logo" className="w-full h-full object-contain mix-blend-multiply scale-95 drop-shadow-md hover:scale-100 transition-transform rounded-2xl" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tighter text-on-surface">
-                Keep<span className="text-primary">InMind</span>
-              </span>
-              <span className="text-[9px] sm:text-[10px] text-on-surface-variant font-medium">Capture. Organize. Remember.</span>
-            </div>
-          </div>
-
-          {/* MAIN */}
-          <div className="mb-6">
-            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mb-2 px-2">Main</h3>
-            <ul className="space-y-1">
-              {links.map((item) => {
-                const active = location.pathname.startsWith(item.path) || (item.path === '/notes' && location.pathname.startsWith('/drawing'));
-                const Icon = item.icon;
-                return (
-                  <li key={item.path}>
-                    <Link to={item.path} onClick={onMobileClose} className={cn("flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all", active ? "bg-primary/10 text-primary shadow-sm" : "text-on-surface hover:bg-surface-container")}>
-                      <Icon size={18} className={cn(active ? "text-primary" : "text-on-surface-variant")} />
-                      <span className="flex-1 text-sm tracking-tight">{item.label}</span>
-                      <ChevronRight size={16} className={cn(active ? "text-primary" : "text-on-surface-variant")} />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* SPACES */}
-          <div className="mb-6">
-            <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.1em] mb-2 px-2">Spaces</h3>
-            <ul className="space-y-1">
-              {spaces.map((item) => {
-                const active = location.pathname.startsWith(item.path);
-                const Icon = item.icon;
-                return (
-                  <li key={item.path}>
-                    <Link to={item.path} onClick={onMobileClose} className={cn("flex items-center gap-4 px-4 py-3 rounded-2xl font-bold transition-all", active ? "bg-primary/10 text-primary shadow-sm" : "text-on-surface hover:bg-surface-container")}>
-                      <Icon size={18} className={cn(active ? "text-primary" : "text-on-surface-variant")} />
-                      <span className="flex-1 text-sm tracking-tight">{item.label}</span>
-                      <ChevronRight size={16} className={cn(active ? "text-primary" : "text-on-surface-variant")} />
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-        </div>
+        <DrawerContent />
       </div>
 
       {/* Full Screen Logout Animation */}

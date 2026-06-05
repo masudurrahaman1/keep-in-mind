@@ -1,4 +1,4 @@
-import { Search, Bell, Settings, User, Menu, X, ArrowLeft, FileText, Plus } from 'lucide-react';
+import { Search, Bell, Settings, User, Menu, X, ArrowLeft, FileText, Plus, PanelLeft, List } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useState, useEffect, useCallback } from 'react';
@@ -151,13 +151,14 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
   }
 
   return (
-    <header className="h-16 flex items-center justify-between px-3 sm:px-4 md:px-6 glass z-50 sticky top-0 gap-2 !bg-surface/80 backdrop-blur-2xl border-b border-white/5">
+    <header className="h-[72px] flex items-center justify-between px-4 sm:px-4 md:px-6 z-50 sticky top-0 gap-2 pt-3">
+      <div className="absolute inset-0 z-[-1] pointer-events-none bg-white/60 dark:bg-[#111318]/60 backdrop-blur-lg [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)] [-webkit-mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]" />
       {/* Left: Hamburger (mobile) / Back Button / Logo (Desktop) */}
-      <div className="flex items-center gap-1 sm:gap-2 shrink-0 w-10 sm:w-48 lg:w-64">
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0 w-12 sm:w-48 lg:w-64">
         {canGoBack ? (
           <button
             onClick={() => navigate(-1)}
-            className="p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all min-w-[40px] min-h-[40px] flex items-center justify-center -ml-1"
+            className="p-2 bg-white dark:bg-[#2C2C2C] shadow-sm text-on-surface-variant hover:bg-surface-container-high rounded-full transition-all min-w-[44px] min-h-[44px] flex items-center justify-center"
             title="Go Back"
           >
             <ArrowLeft size={22} />
@@ -167,10 +168,10 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
             {/* Mobile hamburger */}
             <button
               onClick={onOpenMobileMenu}
-              className="p-2 text-on-surface hover:bg-surface-container-high rounded-full transition-all md:hidden min-w-[40px] min-h-[40px] flex items-center justify-center"
+              className="p-2 bg-white dark:bg-[#2C2C2C] shadow-sm rounded-full transition-all md:hidden min-w-[48px] min-h-[48px] flex items-center justify-center text-neutral-800 dark:text-neutral-200"
               title="Open Menu"
             >
-              <Menu size={22} />
+              <PanelLeft size={24} strokeWidth={2} />
             </button>
             {/* Desktop sidebar toggle */}
             <button
@@ -189,6 +190,15 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
       <div className="flex-1 flex items-center justify-center min-w-0">
         {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) ? (
            <span className="md:hidden text-lg font-heading font-bold text-on-surface truncate px-2">{pageTitle}</span>
+        ) : (currentPath === '/notes' || currentPath === '/' || currentPath === '/explore' || currentPath === '/recent') ? (
+           <div className="md:hidden flex items-center bg-white dark:bg-[#2C2C2C] rounded-full p-[5px] shadow-sm mx-auto">
+             <button className="px-5 py-[6px] rounded-full bg-[#F3F4F6] dark:bg-[#1C1D21] text-blue-600 dark:text-blue-400 font-bold text-[15px] transition-colors shadow-sm">
+               Notes
+             </button>
+             <button className="px-5 py-[6px] rounded-full text-neutral-600 dark:text-neutral-400 font-medium text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-[#32363F]">
+               Tasks
+             </button>
+           </div>
         ) : (
            <span className="md:hidden text-lg font-black tracking-tighter text-[#1A1F2C] dark:text-[#FFFDF5]">
              KeepIn<span className="text-[#FFC107]">Mind</span>
@@ -215,14 +225,14 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
       </div>
 
       {/* Right: Actions */}
-      <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 w-10 sm:w-48 lg:w-64">
+      <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 w-12 sm:w-48 lg:w-64">
         {/* Mobile search icon - Hide on deep pages */}
         {!canGoBack && (
           <button
             onClick={() => setIsMobileSearchOpen(true)}
-            className="sm:hidden p-2 text-on-surface-variant hover:bg-surface-container-high rounded-full transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
+            className="sm:hidden p-2 bg-white dark:bg-[#2C2C2C] shadow-sm rounded-full transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center text-neutral-800 dark:text-neutral-200"
           >
-            <Search size={22} />
+            <List size={24} strokeWidth={2} />
           </button>
         )}
 
