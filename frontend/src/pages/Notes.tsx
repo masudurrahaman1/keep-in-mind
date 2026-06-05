@@ -232,6 +232,8 @@ export default function Notes() {
   };
 
   const handleDeleteNote = async (noteId: number | string) => {
+    setNotes(notes.map(n => (n._id || n.id) === noteId ? { ...n, trashed: true, pinned: false } : n));
+    setContextMenu(null);
     if (token) {
       try {
         await fetch(`${API_BASE}/notes/${noteId}`, {
@@ -241,8 +243,6 @@ export default function Notes() {
         });
       } catch (err) { console.error('Error deleting note:', err); }
     }
-    setNotes(notes.map(n => (n._id || n.id) === noteId ? { ...n, trashed: true, pinned: false } : n));
-    setContextMenu(null);
   };
 
   const handleDuplicate = async (note: any) => {
@@ -270,6 +270,8 @@ export default function Notes() {
 
   const handlePin = async (note: any) => {
     const updated = { ...note, pinned: !note.pinned };
+    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? updated : n));
+    setContextMenu(null);
     if (token) {
       try {
         await fetch(`${API_BASE}/notes/${note._id || note.id}`, {
@@ -279,12 +281,11 @@ export default function Notes() {
         });
       } catch (err) { console.error('Error pinning note:', err); }
     }
-    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? updated : n));
-    setContextMenu(null);
   };
 
   const handleAddLabel = async (note: any, label: string) => {
     const updated = { ...note, category: label };
+    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? updated : n));
     if (token) {
       try {
         await fetch(`${API_BASE}/notes/${note._id || note.id}`, {
@@ -294,11 +295,12 @@ export default function Notes() {
         });
       } catch (err) { console.error('Error adding label:', err); }
     }
-    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? updated : n));
   };
 
   const handleArchive = async (note: any) => {
     const nowArchived = !note.archived;
+    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? { ...n, archived: nowArchived } : n));
+    setContextMenu(null);
     if (token) {
       try {
         await fetch(`${API_BASE}/notes/${note._id || note.id}`, {
@@ -308,8 +310,6 @@ export default function Notes() {
         });
       } catch (err) { console.error('Error archiving note:', err); }
     }
-    setNotes(prev => prev.map(n => (n._id || n.id) === (note._id || note.id) ? { ...n, archived: nowArchived } : n));
-    setContextMenu(null);
   };
 
   const base64ToFile = async (base64Data: string, filename: string) => {
@@ -588,11 +588,7 @@ export default function Notes() {
                     )}
 
                     <div className="mt-auto pt-2 flex flex-col gap-2">
-                      {note.category && (
-                        <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
-                          {note.category}
-                        </span>
-                      )}
+
                       <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
                         {(() => {
                           try {
@@ -720,11 +716,7 @@ export default function Notes() {
                       )}
 
                       <div className="mt-auto pt-2 flex flex-col gap-2">
-                        {note.category && (
-                          <span className="self-start px-2.5 py-1 bg-black/5 dark:bg-white/5 rounded-lg text-[10px] font-bold text-gray-700 dark:text-gray-300">
-                            {note.category}
-                          </span>
-                        )}
+
                         <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
                           {(() => {
                             try {
