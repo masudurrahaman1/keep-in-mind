@@ -364,15 +364,70 @@ export default function Gallery() {
 
   const uploadFile = async (file: File) => {
     if (!token) return;
-    if (!isGoogleConnected) {
+    
+    // We only require Google connection for online immediate uploads
+    if (navigator.onLine && !isGoogleConnected) {
       setNoGoogleDrive(true);
       return;
     }
     setNoGoogleDrive(false);
 
     const uploadId = Math.random().toString(36).substring(7);
-    const newUpload = { id: uploadId, name: file.name, progress: 0, status: 'uploading' as UploadStatus };
     
+    if (!navigator.onLine) {
+      // Offline Flow
+      const newUpload = { id: uploadId, name: file.name, progress: 100, status: 'completed' as UploadStatus };
+      setUploadQueue(prev => [...prev, newUpload]);
+
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const docIdStr = uploadId;
+        const newDoc = {
+          _id: docIdStr,
+          title: file.name,
+          mimeType: file.type,
+          size: file.size,
+          category: 'Other', // default fallback
+          updatedAt: new Date().toISOString(),
+          syncStatus: 'pending' as const,
+          fileData: arrayBuffer
+        };
+
+        // Save to DB and Queue
+        await db.documents.put(newDoc);
+        await db.syncQueue.add({
+          action: 'create',
+          entityType: 'document',
+          entityId: docIdStr,
+          payload: { fileName: file.name, fileType: file.type }, // We rely on fileData in the db
+          timestamp: new Date().toISOString(),
+          retryCount: 0
+        });
+
+        // Add to history
+        setUploadHistory(prev => [{
+          id: uploadId,
+          name: file.name,
+          status: 'completed' as UploadStatus,
+          progress: 100,
+          timestamp: new Date()
+        }, ...prev]);
+
+        // Optimistically add to media state
+        setMedia(prev => [newDoc, ...prev]);
+
+        setTimeout(() => {
+          setUploadQueue(prev => prev.filter(item => item.id !== uploadId));
+        }, 3000);
+
+      } catch (err) {
+        console.error('Failed to queue offline upload', err);
+      }
+      return;
+    }
+
+    // Online Flow
+    const newUpload = { id: uploadId, name: file.name, progress: 0, status: 'uploading' as UploadStatus };
     setUploadQueue(prev => [...prev, newUpload]);
 
     const formData = new FormData();

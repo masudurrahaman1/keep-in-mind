@@ -53,6 +53,39 @@ export class SyncService {
   private async processItem(item: any) {
     const { action, entityType, entityId, payload } = item;
 
+    if (entityType === 'document' && action === 'create') {
+      // Offline document upload handling
+      const doc = await db.documents.get(entityId);
+      if (doc && doc.fileData) {
+        const file = new File([doc.fileData], doc.title, { type: doc.mimeType });
+        const formData = new FormData();
+        formData.append('file', file);
+        const googleToken = localStorage.getItem('googleToken');
+        if (googleToken) {
+           formData.append('googleAccessToken', googleToken);
+        }
+
+        const API_BASE = import.meta.env.VITE_API_URL || '/api';
+        const token = localStorage.getItem('token');
+        
+        const response = await fetch(`${API_BASE}/gallery/upload`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload document');
+        }
+
+        // Clean up raw binary data from IndexedDB to save space
+        await db.documents.update(entityId, { fileData: undefined, syncStatus: 'synced' });
+      }
+      return;
+    }
+
     let endpoint = '';
     
     // Map entity types to endpoints

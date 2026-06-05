@@ -97,12 +97,14 @@ const PageLoader = () => (
     </div>
   </div>
 );
+import PwaInstallPrompt from './components/PwaInstallPrompt';
 
 export default function App() {
   return (
     <BrowserRouter>
       <Heartbeat />
       <BackgroundSync />
+      <PwaInstallPrompt />
       {import.meta.env.DEV && <Agentation />}
       <ToastContainer theme="dark" position="bottom-center" />
       <Routes>
