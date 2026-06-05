@@ -7,6 +7,7 @@ import axios from 'axios';
 import NotificationPanel from './NotificationPanel';
 import { Notification } from './NotificationItem';
 import { clsx } from 'clsx';
+import { motion } from 'motion/react';
 
 interface TopBarProps {
   searchQuery: string;
@@ -193,12 +194,29 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
       <div className="flex-1 flex items-center justify-center min-w-0">
         {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) ? (
            <span className="md:hidden text-lg font-heading font-bold text-on-surface truncate px-2">{pageTitle}</span>
-        ) : (currentPath === '/notes' || currentPath === '/' || currentPath === '/explore' || currentPath === '/recent') ? (
-           <div className="flex items-center bg-white dark:bg-[#2C2C2C] rounded-full p-[5px] shadow-sm mx-auto">
-             <button className="px-5 py-[6px] rounded-full bg-[#F3F4F6] dark:bg-[#1C1D21] text-blue-600 dark:text-blue-400 font-bold text-[15px] transition-colors shadow-sm">
+        ) : (currentPath === '/notes' || currentPath === '/' || currentPath === '/explore' || currentPath === '/recent' || currentPath === '/tasks') ? (
+           <div className="flex items-center bg-white dark:bg-[#2C2C2C] rounded-full p-[5px] shadow-sm mx-auto relative">
+             {/* Animated background pill for active state */}
+             <motion.div 
+               layoutId="segment-pill"
+               className="absolute bg-[#F3F4F6] dark:bg-[#1C1D21] rounded-full shadow-sm z-0"
+               style={{ 
+                 width: 'calc(50% - 5px)', 
+                 height: 'calc(100% - 10px)',
+                 left: currentPath === '/tasks' ? 'calc(50% + 2.5px)' : '5px' 
+               }}
+               transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+             />
+             <button 
+               onClick={() => navigate('/notes')}
+               className={`px-5 py-[6px] rounded-full font-bold text-[15px] transition-colors z-10 w-24 text-center ${currentPath !== '/tasks' ? 'text-blue-600 dark:text-blue-400' : 'text-neutral-600 dark:text-neutral-400 font-medium hover:text-neutral-900 dark:hover:text-neutral-200'}`}
+             >
                Notes
              </button>
-             <button className="px-5 py-[6px] rounded-full text-neutral-600 dark:text-neutral-400 font-medium text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-[#32363F]">
+             <button 
+               onClick={() => navigate('/tasks')}
+               className={`px-5 py-[6px] rounded-full text-[15px] transition-colors z-10 w-24 text-center ${currentPath === '/tasks' ? 'text-blue-600 dark:text-blue-400 font-bold' : 'text-neutral-600 dark:text-neutral-400 font-medium hover:text-neutral-900 dark:hover:text-neutral-200'}`}
+             >
                Tasks
              </button>
            </div>

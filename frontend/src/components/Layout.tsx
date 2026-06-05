@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
@@ -49,7 +50,7 @@ export default function Layout() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0">
-        {location.pathname !== '/account' && !location.pathname.startsWith('/vault') && !location.pathname.startsWith('/documents/') && location.pathname !== '/gallery' && !location.pathname.startsWith('/tasks') && location.pathname !== '/reminders/new' && location.pathname !== '/about' && location.pathname !== '/privacy-policy' && location.pathname !== '/terms-of-service' && location.pathname !== '/cloud-sync' && location.pathname !== '/help' && (
+        {location.pathname !== '/account' && !location.pathname.startsWith('/vault') && !location.pathname.startsWith('/documents/') && location.pathname !== '/gallery' && location.pathname !== '/tasks/new' && location.pathname !== '/reminders/new' && location.pathname !== '/about' && location.pathname !== '/privacy-policy' && location.pathname !== '/terms-of-service' && location.pathname !== '/cloud-sync' && location.pathname !== '/help' && (
           <TopBar
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -57,8 +58,19 @@ export default function Layout() {
             onOpenMobileMenu={() => setIsMobileMenuOpen(true)}
           />
         )}
-        <main className={`flex-1 w-full max-w-7xl mx-auto p-3 sm:p-4 md:p-6 pb-24 md:pb-6 relative custom-scrollbar ${location.pathname === '/account' || location.pathname === '/gallery' || location.pathname.startsWith('/vault') || location.pathname.startsWith('/documents/') || location.pathname === '/about' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service' || location.pathname === '/cloud-sync' || location.pathname === '/help' || location.pathname.startsWith('/settings') || location.pathname === '/reminders/new' || location.pathname === '/tasks/new' ? '!p-0 !max-w-none' : ''}`}>
-          <Outlet context={{ searchQuery }} />
+        <main className={`flex-1 w-full max-w-7xl mx-auto p-3 sm:p-4 md:p-6 pb-24 md:pb-6 relative custom-scrollbar overflow-x-hidden ${location.pathname === '/account' || location.pathname === '/gallery' || location.pathname.startsWith('/vault') || location.pathname.startsWith('/documents/') || location.pathname === '/about' || location.pathname === '/privacy-policy' || location.pathname === '/terms-of-service' || location.pathname === '/cloud-sync' || location.pathname === '/help' || location.pathname.startsWith('/settings') || location.pathname === '/reminders/new' || location.pathname === '/tasks/new' ? '!p-0 !max-w-none' : ''}`}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, x: location.pathname === '/tasks' ? 30 : -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: location.pathname === '/tasks' ? -30 : 30 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+              className="w-full h-full"
+            >
+              <Outlet context={{ searchQuery }} />
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {/* Floating Action Button */}
