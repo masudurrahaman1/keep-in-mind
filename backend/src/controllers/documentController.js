@@ -16,13 +16,7 @@ const uploadDocument = async (req, res) => {
     const { category, title, isEncrypted } = req.body;
     const userId = req.user._id;
 
-    // Default category if not provided or invalid
-    const validCategories = [
-      'Government IDs', 'Education', 'Medical', 'Banking', 
-      'Property', 'Others', 'Notes', 'Backups', 'Encrypted', 'KeepInMind'
-    ];
-    
-    let finalCategory = category || 'Others';
+    let finalCategory = category || 'Other';
     if (isEncrypted === 'true' || isEncrypted === true) {
       finalCategory = 'Encrypted';
     }
@@ -72,12 +66,23 @@ const getDocumentsByCategory = async (req, res) => {
   try {
     const { category } = req.params;
     
-    // Convert url param like "government-ids" to "Government IDs"
-    const decodedCategory = category
-      .split('-')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ')
-      .replace('Ids', 'IDs');
+    const Folder = require('../models/Folder');
+    const folder = await Folder.findOne({ 
+      user: req.user._id, 
+      $or: [{ path: `/documents/${category}` }, { path: `/vault/${category}` }]
+    });
+
+    let decodedCategory;
+    if (folder) {
+      decodedCategory = folder.name;
+    } else {
+      // Fallback for missing folder
+      decodedCategory = category
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+        .replace('Ids', 'IDs');
+    }
 
     const documents = await Document.find({ 
       user: req.user._id,
@@ -175,6 +180,58 @@ const renameDocument = async (req, res) => {
 };
 
 /**
+ * @desc    Move a document to another category
+ * @route   PATCH /api/documents/:id/move
+ * @access  Private
+ */
+const moveDocument = async (req, res) => {
+  try {
+    const { newCategory } = req.body;
+    if (!newCategory) {
+      return res.status(400).json({ message: 'New category is required' });
+    }
+
+    const doc = await Document.findOne({ _id: req.params.id, user: req.user._id });
+    if (!doc) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    // Find the new folder in MongoDB
+    const Folder = require('../models/Folder');
+    const newFolderDoc = await Folder.findOne({ user: req.user._id, name: newCategory });
+    
+    if (!newFolderDoc || !newFolderDoc.driveFolderId) {
+      return res.status(400).json({ message: 'Destination folder not found or not synced with Drive' });
+    }
+
+    // Find the old folder to remove from
+    const oldFolderDoc = await Folder.findOne({ user: req.user._id, name: doc.category });
+    
+    if (oldFolderDoc && oldFolderDoc.driveFolderId) {
+      // 1. Move in Google Drive
+      const user = await User.findById(req.user._id);
+      const drive = getDriveClient(user);
+      
+      await drive.files.update({
+        fileId: doc.driveFileId,
+        addParents: newFolderDoc.driveFolderId,
+        removeParents: oldFolderDoc.driveFolderId,
+        fields: 'id, parents'
+      });
+    }
+
+    // 2. Move in MongoDB
+    doc.category = newCategory;
+    await doc.save();
+
+    res.json({ message: 'Document moved successfully', document: doc });
+  } catch (error) {
+    console.error('Move Document Error:', error);
+    res.status(500).json({ message: 'Failed to move document' });
+  }
+};
+
+/**
  * @desc    Stream document directly from Google Drive
  * @route   GET /api/documents/stream/:fileId
  * @access  Private (uses token in query or headers)
@@ -253,30 +310,11 @@ const syncDocumentsByCategory = async (req, res) => {
       return res.json({ message: 'No documents to sync', deletedCount: 0 });
     }
 
-    const schemaFieldMap = {
-      'Government IDs': 'governmentFolderId',
-      'Education': 'educationFolderId',
-      'Medical': 'medicalFolderId',
-      'Banking': 'bankingFolderId',
-      'Property': 'propertyFolderId',
-      'Others': 'othersFolderId',
-      'Notes': 'notesFolderId',
-      'Backups': 'backupsFolderId',
-      'Encrypted': 'encryptedFolderId',
-      'KeepInMind': 'rootFolderId'
-    };
-
-    const targetField = schemaFieldMap[decodedCategory];
-    let folderId;
-
-    if (targetField) {
-      folderId = user[targetField];
-    } else {
-      const Folder = require('../models/Folder');
-      const customFolder = await Folder.findOne({ user: user._id, name: decodedCategory });
-      if (customFolder && customFolder.driveFolderId) {
-        folderId = customFolder.driveFolderId;
-      }
+    const Folder = require('../models/Folder');
+    const customFolder = await Folder.findOne({ user: user._id, name: decodedCategory });
+    let folderId = null;
+    if (customFolder && customFolder.driveFolderId) {
+      folderId = customFolder.driveFolderId;
     }
 
     if (!folderId) {
@@ -318,6 +356,7 @@ module.exports = {
   getDocumentsByCategory,
   deleteDocument,
   renameDocument,
+  moveDocument,
   streamDocument,
   getDocumentCounts,
   syncDocumentsByCategory

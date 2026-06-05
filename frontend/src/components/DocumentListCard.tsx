@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { FileText, MoreVertical, Trash2, Pencil, Share2, Download, Image as ImageIcon, Video } from 'lucide-react';
+import { FileText, MoreVertical, Trash2, Pencil, Share2, Download, Image as ImageIcon, Video, FolderPlus } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,6 +11,7 @@ interface DocumentListCardProps {
   onSelect: () => void;
   onDelete: (id: string) => void;
   onRename: (id: string, currentName: string) => void;
+  onMove?: (id: string) => void;
   streamEndpoint?: string;
   isSelected?: boolean;
   isSelectionMode?: boolean;
@@ -19,7 +20,7 @@ interface DocumentListCardProps {
 }
 
 export default function DocumentListCard({ 
-  media, onSelect, onDelete, onRename, streamEndpoint = '/gallery/stream',
+  media, onSelect, onDelete, onRename, onMove, streamEndpoint = '/gallery/stream',
   isSelected, isSelectionMode, onToggleSelect, onLongPress
 }: DocumentListCardProps) {
   const { token } = useAuth();
@@ -145,6 +146,15 @@ export default function DocumentListCard({
                 >
                   <Share2 size={16} />
                 </button>
+                {onMove && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onMove(media._id); }}
+                    className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"
+                    title="Move"
+                  >
+                    <FolderPlus size={16} />
+                  </button>
+                )}
                 <button
                   onClick={(e) => { e.stopPropagation(); onRename(media._id, media.fileName); }}
                   className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-full text-neutral-500 dark:text-neutral-400 transition-colors"

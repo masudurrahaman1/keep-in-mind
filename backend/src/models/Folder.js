@@ -36,6 +36,10 @@ const folderSchema = new mongoose.Schema({
   isShared: {
     type: Boolean,
     default: false
+  },
+  isSystem: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true

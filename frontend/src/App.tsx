@@ -36,6 +36,7 @@ const Notes = lazy(() => import('./pages/Notes'));
 const Gallery = lazy(() => import('./pages/Gallery'));
 const Account = lazy(() => import('./pages/Account'));
 const Labels = lazy(() => import('./pages/Labels'));
+const Documents = lazy(() => import('./pages/Documents'));
 const VaultCategory = lazy(() => import('./pages/VaultCategory'));
 const Archive = lazy(() => import('./pages/Archive'));
 const Trash = lazy(() => import('./pages/Trash'));
@@ -129,6 +130,8 @@ export default function App() {
           <Route path="notes"    element={<Suspense fallback={<PageLoader />}><Notes /></Suspense>}   />
           <Route path="gallery"  element={<Suspense fallback={<PageLoader />}><Gallery /></Suspense>} />
           <Route path="labels"   element={<Suspense fallback={<PageLoader />}><Labels /></Suspense>}  />
+          <Route path="documents" element={<Suspense fallback={<PageLoader />}><Documents /></Suspense>} />
+          <Route path="documents/:categoryId" element={<Suspense fallback={<PageLoader />}><VaultCategory /></Suspense>} />
           <Route path="vault/:categoryId" element={<Suspense fallback={<PageLoader />}><VaultCategory /></Suspense>} />
           <Route path="archive"  element={<Suspense fallback={<PageLoader />}><Archive /></Suspense>} />
           <Route path="trash"    element={<Suspense fallback={<PageLoader />}><Trash /></Suspense>} />

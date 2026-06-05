@@ -38,6 +38,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
   ];
 
   const spaces = [
+    { path: '/documents', label: 'Documents', icon: FileText },
     { path: '/gallery', label: 'Personal', icon: ImageIcon },
     { path: '/labels',  label: 'Labels',   icon: Users    },
     { path: '/archive', label: 'Archive',  icon: Activity },

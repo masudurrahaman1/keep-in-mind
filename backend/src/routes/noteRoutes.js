@@ -82,23 +82,28 @@ router.patch('/:id', protect, async (req, res) => {
     
     let note;
     if (req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      note = await Note.findOneAndUpdate(
-        { _id: req.params.id, user: req.user._id },
-        updates,
-        { new: true }
-      );
+      note = await Note.findOne({ _id: req.params.id, user: req.user._id });
     }
     if (!note) {
-      note = await Note.findOneAndUpdate(
-        { id: req.params.id, user: req.user._id },
-        updates,
-        { new: true }
-      );
+      note = await Note.findOne({ id: req.params.id, user: req.user._id });
     }
 
     if (!note) {
       return res.status(404).json({ message: 'Note not found' });
     }
+
+    // Conflict resolution: Last Write Wins using updatedAt
+    if (updates.updatedAt && note.updatedAt) {
+      const clientTime = new Date(updates.updatedAt).getTime();
+      const serverTime = new Date(note.updatedAt).getTime();
+      if (clientTime < serverTime) {
+        // Client is older, return 409 Conflict or just return the latest server note
+        return res.status(409).json({ message: 'Conflict: Server has a newer version', latest: note });
+      }
+    }
+
+    Object.assign(note, updates);
+    await note.save();
 
     res.json(note);
   } catch (error) {

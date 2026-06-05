@@ -15,6 +15,7 @@ import ConfirmDeleteModal from '../modals/ConfirmDeleteModal';
 import { UploadStatus } from '../components/UploadProgressCard';
 import UploadActivityCenter from '../components/UploadActivityCenter';
 import Loader from '../components/Loader';
+import MoveDocumentModal from '../modals/MoveDocumentModal';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
@@ -26,6 +27,7 @@ export default function VaultCategory() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [accurateCategoryName, setAccurateCategoryName] = useState<string>('');
   
   const [uploadQueue, setUploadQueue] = useState<any[]>([]);
   const [uploadHistory, setUploadHistory] = useState<any[]>([]);
@@ -40,6 +42,9 @@ export default function VaultCategory() {
   // Modal States
   const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
   const [mediaToRename, setMediaToRename] = useState<{ id: string, name: string } | null>(null);
+  
+  const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+  const [documentToMove, setDocumentToMove] = useState<string | null>(null);
   
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [confirmConfig, setConfirmConfig] = useState<{ 
@@ -105,6 +110,22 @@ export default function VaultCategory() {
         uploadedAt: doc.createdAt
       }));
       setDocuments(mappedData);
+
+      // Fetch folder info to get the exact exact category name
+      const folderRes = await fetch(`${API_BASE}/folders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (folderRes.ok) {
+        const folders = await folderRes.json();
+        const currentFolder = folders.find((f: any) => f.path === `/documents/${categoryId}` || f.path === `/vault/${categoryId}`);
+        if (currentFolder) {
+          setAccurateCategoryName(currentFolder.name);
+        } else {
+          setAccurateCategoryName(formattedCategory);
+        }
+      } else {
+        setAccurateCategoryName(formattedCategory);
+      }
     } catch (err: any) {
       console.error(err);
       handleAuthError(err);
@@ -154,7 +175,7 @@ export default function VaultCategory() {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('category', formattedCategory);
+    formData.append('category', accurateCategoryName || formattedCategory);
     formData.append('title', file.name);
 
     try {
@@ -274,6 +295,16 @@ export default function VaultCategory() {
     }
   };
 
+  const handleMove = (id: string) => {
+    setDocumentToMove(id);
+    setIsMoveModalOpen(true);
+  };
+
+  const handleMoveSuccess = (id: string, newCategory: string) => {
+    // Remove it from the current view
+    setDocuments(prev => prev.filter(m => m._id !== id));
+  };
+
   const handleBulkDelete = () => {
     setConfirmConfig({
       title: `Delete ${selectedFileIds.size} Document${selectedFileIds.size > 1 ? 's' : ''}`,
@@ -382,7 +413,12 @@ export default function VaultCategory() {
                 <ArrowLeft size={24} className="text-neutral-700 dark:text-neutral-300" />
               </button>
               <div>
-                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">{formattedCategory}</h1>
+                <h1 className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">
+                  {accurateCategoryName || formattedCategory}
+                </h1>
+                <p className="text-sm font-medium text-neutral-500 mt-1">
+                  {getCategorySubtext(accurateCategoryName || formattedCategory)}
+                </p>
               </div>
               {isGoogleConnected && (
                 <button 
@@ -416,7 +452,7 @@ export default function VaultCategory() {
             <Search size={18} className="text-neutral-400 shrink-0" />
             <input 
               type="text" 
-              placeholder={`Search ${formattedCategory}...`}
+              placeholder={`Search ${accurateCategoryName || formattedCategory}...`}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-transparent border-none outline-none text-sm w-full text-neutral-800 dark:text-neutral-200 placeholder:text-neutral-400"
@@ -481,6 +517,7 @@ export default function VaultCategory() {
                 media={item} 
                 onDelete={handleDelete} 
                 onRename={handleRename}
+                onMove={handleMove}
                 onSelect={() => setSelectedMediaIndex(index)}
                 streamEndpoint="/documents/stream"
                 isSelected={selectedFileIds.has(item._id)}
@@ -583,6 +620,16 @@ export default function VaultCategory() {
         onRename={performRename}
         currentName={mediaToRename?.name || ''}
       />
+
+      {documentToMove && (
+        <MoveDocumentModal
+          isOpen={isMoveModalOpen}
+          onClose={() => setIsMoveModalOpen(false)}
+          documentId={documentToMove}
+          currentCategory={formattedCategory}
+          onMoveSuccess={handleMoveSuccess}
+        />
+      )}
 
       {confirmConfig && (
         <ConfirmDeleteModal

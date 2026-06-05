@@ -60,42 +60,15 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null
   },
-  governmentFolderId: {
+  documentsFolderId: {
     type: String,
     default: null
   },
-  educationFolderId: {
+  myFilesFolderId: {
     type: String,
     default: null
   },
-  medicalFolderId: {
-    type: String,
-    default: null
-  },
-  bankingFolderId: {
-    type: String,
-    default: null
-  },
-  propertyFolderId: {
-    type: String,
-    default: null
-  },
-  othersFolderId: {
-    type: String,
-    default: null
-  },
-  encryptedFolderId: {
-    type: String,
-    default: null
-  },
-  backupsFolderId: {
-    type: String,
-    default: null
-  },
-  notesFolderId: {
-    type: String,
-    default: null
-  },
+  // Old hardcoded folder IDs removed in favor of Folder collection
   lastActive: {
     type: Date,
     default: Date.now

@@ -7,6 +7,9 @@ import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
 import { usePreferences } from '../context/PreferencesContext';
 import SpeedDial from '../components/SpeedDial';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../db/database';
+import { apiService } from '../services/apiService';
 import NoteContextMenu from '../components/NoteContextMenu';
 
 const initialNotes = [
@@ -118,27 +121,32 @@ export default function Notes() {
   const [taskCount, setTaskCount] = useState(0);
   const [reminderCount, setReminderCount] = useState(0);
 
-  // Load notes
+  const liveNotes = useLiveQuery(() => db.notes.filter(n => n.syncStatus !== 'deleted' && !n.trashed).toArray(), []) || [];
+
+  useEffect(() => {
+    if (liveNotes.length > 0 || !navigator.onLine) {
+      // Map Dexie entities back to expected UI format
+      setNotes(liveNotes.map(n => ({...n, id: n._id || n.id})));
+    }
+  }, [liveNotes]);
+
+  // Load and sync notes
   useEffect(() => {
     const loadNotes = async () => {
-      if (token) {
+      if (token && navigator.onLine) {
         setLoading(true);
         try {
-          const res = await fetch(`${API_BASE}/notes`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (res.ok) {
-            const data = await res.json();
-            setNotes(data);
-            // Cache for BackgroundSync/Editor
-            localStorage.setItem(storageKey, JSON.stringify(data));
+          const data = await apiService.request('/notes');
+          if (data && Array.isArray(data)) {
+             await db.notes.bulkPut(data.map((n: any) => ({ ...n, syncStatus: 'synced', _id: n._id || n.id })));
+             setNotes(data);
           }
         } catch (error) {
           console.error('Error fetching notes:', error);
         } finally {
           setLoading(false);
         }
-      } else {
+      } else if (!token) {
         // Guest mode fallback
         const saved = localStorage.getItem(storageKey);
         setNotes(saved ? JSON.parse(saved) : initialNotes);
@@ -234,11 +242,8 @@ export default function Notes() {
   const handleDeleteNote = async (noteId: number | string) => {
     if (token) {
       try {
-        await fetch(`${API_BASE}/notes/${noteId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ trashed: true, pinned: false })
-        });
+        await apiService.request(`/notes/${noteId}`, 'PATCH', { trashed: true, pinned: false });
+        await db.notes.update(String(noteId), { trashed: true, pinned: false, syncStatus: 'pending', updatedAt: new Date().toISOString() });
       } catch (err) { console.error('Error deleting note:', err); }
     }
     setNotes(notes.map(n => (n._id || n.id) === noteId ? { ...n, trashed: true, pinned: false } : n));

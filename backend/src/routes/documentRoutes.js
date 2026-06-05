@@ -7,6 +7,7 @@ const {
   getDocumentsByCategory,
   deleteDocument,
   renameDocument,
+  moveDocument,
   streamDocument,
   getDocumentCounts,
   syncDocumentsByCategory
@@ -23,6 +24,7 @@ router.post('/sync/:category', protect, syncDocumentsByCategory);
 router.get('/:category', protect, getDocumentsByCategory);
 router.delete('/:id', protect, deleteDocument);
 router.patch('/:id/rename', protect, renameDocument);
+router.patch('/:id/move', protect, moveDocument);
 router.get('/stream/:fileId', protect, streamDocument);
 
 module.exports = router;

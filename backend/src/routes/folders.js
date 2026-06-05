@@ -115,6 +115,13 @@ router.patch('/:id', protect, async (req, res) => {
       );
     }
 
+    // Conflict resolution
+    if (req.body.updatedAt && folder.updatedAt) {
+      if (new Date(req.body.updatedAt).getTime() < new Date(folder.updatedAt).getTime()) {
+        return res.status(409).json({ message: 'Conflict: Server has a newer version', latest: folder });
+      }
+    }
+
     await folder.save();
     res.json(folder);
   } catch (error) {

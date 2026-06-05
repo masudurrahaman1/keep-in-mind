@@ -2,6 +2,7 @@ const User = require('../models/User');
 const generateToken = require('../utils/generateToken');
 const logActivity = require('../utils/logger');
 const bcrypt = require('bcryptjs');
+const { seedDefaultFolders } = require('../services/folderService');
 
 // @desc    Callback for Google OAuth
 // @route   GET /api/auth/google/callback
@@ -18,6 +19,9 @@ const googleCallback = async (req, res) => {
     });
 
     const token = generateToken(user._id);
+    
+    // Ensure default folders exist
+    await seedDefaultFolders(user._id);
 
     // Set cookie
     res.cookie('token', token, {
@@ -93,6 +97,8 @@ const registerLocal = async (req, res) => {
     });
 
     if (user) {
+      await seedDefaultFolders(user._id);
+      
       const token = generateToken(user._id);
       res.status(201).json({
         user: {

@@ -23,6 +23,9 @@ import Loader from '../components/Loader';
 import { FolderActionsSheet } from '../components/FolderActionsSheet';
 import { useLongPress } from '../hooks/useLongPress';
 import RenameFolderModal from '../modals/RenameFolderModal';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../db/database';
+import { apiService } from '../services/apiService';
 
 const FolderCard = ({ cf, docCount, onClick, onLongPress }: { cf: any, docCount: number, onClick: () => void, onLongPress: () => void }) => {
   const longPressProps = useLongPress(
@@ -169,17 +172,9 @@ export default function Gallery() {
   const handleRenameFolder = async (folderId: string, newName: string) => {
     if (!token) return;
     try {
-      const res = await fetch(`${API_BASE}/folders/${folderId}`, {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ name: newName })
-      });
-      if (res.ok) {
-        fetchCustomFolders();
-      }
+      await apiService.request(`/folders/${folderId}`, 'PATCH', { name: newName });
+      await db.folders.update(folderId, { name: newName, syncStatus: 'pending', updatedAt: new Date().toISOString() });
+      fetchCustomFolders();
     } catch (err) {
       console.error('Failed to rename folder:', err);
     }
@@ -188,13 +183,9 @@ export default function Gallery() {
   const handleDeleteFolder = async (folder: any) => {
     if (!token) return;
     try {
-      const res = await fetch(`${API_BASE}/folders/${folder._id}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        fetchCustomFolders();
-      }
+      await apiService.request(`/folders/${folder._id}`, 'DELETE');
+      await db.folders.update(folder._id, { syncStatus: 'deleted', updatedAt: new Date().toISOString() });
+      fetchCustomFolders();
     } catch (err) {
       console.error('Failed to delete folder:', err);
     }
@@ -304,15 +295,21 @@ export default function Gallery() {
     }
   };
 
+  const liveCustomFolders = useLiveQuery(() => db.folders.filter(f => f.syncStatus !== 'deleted' && !f.isSystem).toArray(), []) || [];
+
+  useEffect(() => {
+    if (liveCustomFolders.length > 0 || !navigator.onLine) {
+      setCustomFolders(liveCustomFolders.map(f => ({...f, id: f._id})));
+    }
+  }, [liveCustomFolders]);
+
   const fetchCustomFolders = async () => {
-    if (!token) return;
+    if (!token || !navigator.onLine) return;
     try {
-      const res = await fetch(`${API_BASE}/folders`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setCustomFolders(data);
+      const data = await apiService.request('/folders');
+      if (data && Array.isArray(data)) {
+        await db.folders.bulkPut(data.map((f: any) => ({ ...f, syncStatus: 'synced', _id: f._id })));
+        setCustomFolders(data.filter((f: any) => !f.isSystem));
       }
     } catch (err) {
       console.error('Failed to fetch custom folders:', err);
@@ -322,18 +319,11 @@ export default function Gallery() {
   const handleCreateFolder = async (name: string, colorClass: string) => {
     if (!token) return;
     try {
-      const res = await fetch(`${API_BASE}/folders`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` 
-        },
-        body: JSON.stringify({ name, colorClass })
-      });
-      if (res.ok) {
-        const newFolder = await res.json();
-        setCustomFolders(prev => [newFolder, ...prev]);
-      }
+      const folderData = { name, colorClass };
+      const res = await apiService.request('/folders', 'POST', folderData);
+      const folderIdStr = res._id || res.id;
+      await db.folders.put({ ...res, ...folderData, syncStatus: navigator.onLine ? 'synced' : 'pending', updatedAt: new Date().toISOString(), _id: folderIdStr });
+      setCustomFolders(prev => [{ ...res, ...folderData, _id: folderIdStr }, ...prev]);
     } catch (err) {
       console.error('Failed to create folder:', err);
     }
@@ -726,12 +716,12 @@ export default function Gallery() {
         <h2 className="text-base sm:text-lg font-bold text-neutral-900 dark:text-white mb-3 sm:mb-4">Categories</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
           {[
-            { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government IDs'] || 0, path: '/vault/government-ids' },
-            { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Banking'] || 0, path: '/vault/banking' },
-            { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 0, path: '/vault/insurance' },
-            { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 0, path: '/vault/education' },
-            { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Medical'] || 0, path: '/vault/medical' },
-            { icon: Layers, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Others'] || 0, path: '/vault/others' },
+            { icon: IdCard, color: 'bg-blue-50 text-blue-500 dark:bg-blue-500/10 dark:text-blue-400', name: 'Government ID', count: docCounts['Government ID'] || 0, path: '/documents/government-id' },
+            { icon: Building2, color: 'bg-emerald-50 text-emerald-500 dark:bg-emerald-500/10 dark:text-emerald-400', name: 'Bank & Finance', count: docCounts['Bank & Finance'] || 0, path: '/documents/bank-finance' },
+            { icon: ShieldCheck, color: 'bg-purple-50 text-purple-500 dark:bg-purple-500/10 dark:text-purple-400', name: 'Insurance', count: docCounts['Insurance'] || 0, path: '/documents/insurance' },
+            { icon: GraduationCap, color: 'bg-orange-50 text-orange-500 dark:bg-orange-500/10 dark:text-orange-400', name: 'Education', count: docCounts['Education'] || 0, path: '/documents/education' },
+            { icon: SquareActivity, color: 'bg-rose-50 text-rose-500 dark:bg-rose-500/10 dark:text-rose-400', name: 'Health', count: docCounts['Health'] || 0, path: '/documents/health' },
+            { icon: Layers, color: 'bg-neutral-100 text-neutral-500 dark:bg-neutral-800 dark:text-neutral-400', name: 'Other', count: docCounts['Other'] || 0, path: '/documents/other' },
           ].map((cat, i) => (
             <div 
               key={i} 
@@ -771,20 +761,20 @@ export default function Gallery() {
         </div>
       )}
 
-      {/* ── Recent Documents ───────────────────────── */}
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Recent Documents</h2>
-        <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">See all</button>
-      </div>
 
-      {/* Grid */}
       {loading ? (
         <div className="flex flex-col items-center justify-center py-10 animate-pulse">
           <Loader2 size={32} className="text-amber-500 animate-spin mb-4" />
           <p className="text-neutral-500 text-sm font-medium">Syncing vault...</p>
         </div>
       ) : filteredMedia.length > 0 ? (
-        <div className="flex flex-col gap-3 mb-8">
+        <>
+          {/* ── Recent Documents ───────────────────────── */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-neutral-900 dark:text-white">Recent Documents</h2>
+            <button className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition-colors">See all</button>
+          </div>
+          <div className="flex flex-col gap-3 mb-8">
           <AnimatePresence mode="popLayout">
             {filteredMedia.map((item, index) => (
               <DocumentListCard 
@@ -808,8 +798,9 @@ export default function Gallery() {
               />
             ))}
           </AnimatePresence>
-        </div>
-      ) : (
+          </div>
+        </>
+      ) : searchQuery ? (
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }}
           className="py-16 flex flex-col items-center justify-center text-center px-4 bg-white dark:bg-neutral-800 rounded-3xl shadow-sm border border-neutral-100 dark:border-neutral-700 mb-8"
@@ -818,15 +809,13 @@ export default function Gallery() {
             <ImagePlaceholder size={24} className="text-neutral-400" />
           </div>
           <h2 className="text-lg font-bold text-neutral-900 dark:text-white mb-2">
-            {searchQuery ? "No matches found" : "Your vault is empty"}
+            No matches found
           </h2>
           <p className="text-sm text-neutral-500">
-            {searchQuery 
-              ? "Try searching for something else."
-              : "Upload your first document. It will be encrypted and safely stored."}
+            Try searching for something else.
           </p>
         </motion.div>
-      )}
+      ) : null}
 
 
 

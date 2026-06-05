@@ -51,6 +51,8 @@ const Audio = Node.create({
 
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
+import { db } from '../db/database';
+import { apiService } from '../services/apiService';
 
 const COLORS = [
   { name: 'Default', value: 'bg-surface', text: 'text-on-surface' },
@@ -182,25 +184,45 @@ export default function Editor() {
       if (currentId) {
         if (token) {
           try {
-            const res = await fetch(`${API_BASE}/notes/${currentId}`, {
-              headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-              const existingNote = await res.json();
-              setTitle(existingNote.title || '');
-              if (editor) {
-                editor.commands.setContent(existingNote.content || '');
+            if (!navigator.onLine) {
+              const localData = await db.notes.get(currentId as string);
+              if (localData) {
+                setTitle(localData.title || '');
+                if (editor) editor.commands.setContent(localData.content || '');
+                setColor(COLORS.find(c => c.value === localData.color) || COLORS[0]);
+                setCategory(localData.category || 'Personal');
+                setIsPinned(localData.pinned || false);
+                setIsArchived(localData.archived || false);
+                return;
               }
-              const matchedColor = COLORS.find(c => c.value === existingNote.color) || COLORS[0];
+            }
+
+            const data = await apiService.request(`/notes/${currentId}`);
+            if (data) {
+              setTitle(data.title || '');
+              if (editor) {
+                editor.commands.setContent(data.content || '');
+              }
+              const matchedColor = COLORS.find(c => c.value === data.color) || COLORS[0];
               setColor(matchedColor);
-              setCategory(existingNote.category || 'Personal');
-              setIsPinned(existingNote.pinned || false);
-              setIsArchived(existingNote.archived || false);
+              setCategory(data.category || 'Personal');
+              setIsPinned(data.pinned || false);
+              setIsArchived(data.archived || false);
             } else {
               navigate('/notes');
             }
           } catch (error) {
             console.error('Error fetching note:', error);
+            const localData = await db.notes.get(currentId as string);
+            if (localData) {
+                setTitle(localData.title || '');
+                if (editor) editor.commands.setContent(localData.content || '');
+                setColor(COLORS.find(c => c.value === localData.color) || COLORS[0]);
+                setCategory(localData.category || 'Personal');
+                setIsPinned(localData.pinned || false);
+                setIsArchived(localData.archived || false);
+                return;
+            }
             navigate('/notes');
           }
         } else {
@@ -251,26 +273,16 @@ export default function Editor() {
 
     if (token) {
       try {
-        if (currentId) {
-          await fetch(`${API_BASE}/notes/${currentId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify(noteData)
-          });
+        if (currentId && typeof currentId === 'string' && !currentId.startsWith('local_')) {
+          await apiService.request(`/notes/${currentId}`, 'PATCH', noteData);
+          await db.notes.update(String(currentId), { ...noteData, syncStatus: 'pending', updatedAt: new Date().toISOString() });
         } else {
-          const res = await fetch(`${API_BASE}/notes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify(noteData)
-          });
-          if (res.ok) {
-            const newNote = await res.json();
-            setCurrentId(newNote._id);
-            window.history.replaceState(null, '', `/editor/${newNote._id}`);
-          } else {
-            const errBody = await res.json().catch(() => ({}));
-            console.error('Save note failed:', res.status, errBody);
-          }
+          // New note or locally generated ID
+          const res = await apiService.request('/notes', 'POST', noteData);
+          const noteIdStr = res._id || res.id;
+          setCurrentId(noteIdStr);
+          window.history.replaceState(null, '', `/editor/${noteIdStr}`);
+          await db.notes.put({ ...res, ...noteData, syncStatus: 'synced', updatedAt: new Date().toISOString(), _id: noteIdStr });
         }
       } catch (error) {
         console.error('Error saving note:', error);
