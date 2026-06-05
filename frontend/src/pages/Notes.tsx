@@ -1,11 +1,11 @@
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { formatDistanceToNow, parseISO, format, isToday, isYesterday } from 'date-fns';
 import { useOutletContext, useNavigate } from 'react-router-dom';
-import { Plus, CheckSquare, Settings2, MoreHorizontal, MoreVertical, Search, FileText, PenLine, Pin, Tag, Mic, Star, Menu, ChevronDown, Lock } from 'lucide-react';
+import { Plus, CheckSquare, Settings2, MoreHorizontal, MoreVertical, Search, FileText, PenLine, Pin, Tag, Mic, Star, Menu, ChevronDown, Lock, Folder, ArrowLeft, Trash2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { usePreferences } from '../context/PreferencesContext';
 import { cn } from '../components/Sidebar';
 import { useAuth } from '../context/AuthContext';
-import { usePreferences } from '../context/PreferencesContext';
 import SpeedDial from '../components/SpeedDial';
 import NoteContextMenu from '../components/NoteContextMenu';
 
@@ -115,8 +115,9 @@ export default function Notes() {
 
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [taskCount, setTaskCount] = useState(0);
-  const [reminderCount, setReminderCount] = useState(0);
+  const [isSelectionMode, setIsSelectionMode] = useState(false);
+  const [selectedNotes, setSelectedNotes] = useState<Set<string>>(new Set());
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Load notes
   useEffect(() => {
@@ -147,35 +148,6 @@ export default function Notes() {
     loadNotes();
   }, [token, storageKey]);
 
-  // Fetch Tasks and Reminders counts
-  useEffect(() => {
-    const fetchCounts = async () => {
-      if (token) {
-        try {
-          const [tasksRes, remRes] = await Promise.all([
-            fetch(`${API_BASE}/tasks`, { headers: { Authorization: `Bearer ${token}` } }),
-            fetch(`${API_BASE}/reminders`, { headers: { Authorization: `Bearer ${token}` } })
-          ]);
-          if (tasksRes.ok) {
-            const tasks = await tasksRes.json();
-            setTaskCount(tasks.length);
-          }
-          if (remRes.ok) {
-            const rems = await remRes.json();
-            setReminderCount(rems.length);
-          }
-        } catch (err) {
-          console.error('Error fetching counts:', err);
-        }
-      } else {
-        const savedTasks = localStorage.getItem(`keep-in-mind-tasks-guest`);
-        if (savedTasks) setTaskCount(JSON.parse(savedTasks).length);
-        const savedReminders = localStorage.getItem(`keep-in-mind-reminders-guest`);
-        if (savedReminders) setReminderCount(JSON.parse(savedReminders).length);
-      }
-    };
-    fetchCounts();
-  }, [token]);
 
   // Sync to localStorage only in guest mode or as cache
   useEffect(() => {
@@ -188,7 +160,15 @@ export default function Notes() {
 
   const [filterActive, setFilterActive] = useState('All');
   const [sortOrder, setSortOrder] = useState<'recent' | 'oldest'>('recent');
-  const { searchQuery } = useOutletContext<{ searchQuery: string }>();
+  const { searchQuery, onUpdateNotes } = useOutletContext<{ searchQuery: string, onUpdateNotes: (notes: any[]) => void }>();
+  const { viewMode } = usePreferences();
+
+  const getContainerClass = () => {
+    if (viewMode === 'list') return "flex flex-col gap-3 w-full";
+    if (viewMode === 'card') return "columns-1 sm:columns-2 gap-3 md:columns-3 w-full";
+    // default grid
+    return "columns-2 gap-3 sm:columns-3 md:columns-4 w-full";
+  };
 
   const filters = ['All', ...(() => {
     const saved = localStorage.getItem('keep-in-mind-labels');
@@ -243,6 +223,25 @@ export default function Notes() {
         });
       } catch (err) { console.error('Error deleting note:', err); }
     }
+  };
+
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedNotes);
+    setNotes(prev => prev.map(n => ids.includes(n._id || n.id) ? { ...n, trashed: true, pinned: false } : n));
+    
+    if (token) {
+      Promise.all(ids.map(id => 
+        fetch(`${API_BASE}/notes/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ trashed: true, pinned: false })
+        }).catch(err => console.error(err))
+      ));
+    }
+    
+    setSelectedNotes(new Set());
+    setIsSelectionMode(false);
+    setShowDeleteConfirm(false);
   };
 
   const handleDuplicate = async (note: any) => {
@@ -385,13 +384,13 @@ export default function Notes() {
 
   const startPress = (e: any, note: any) => {
     isLongPressTriggered.current = false;
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const spawnX = rect.left;
-    const spawnY = Math.min(rect.bottom + 4, window.innerHeight - 200);
     
     timerRef.current = setTimeout(() => {
       isLongPressTriggered.current = true;
-      setContextMenu({ note, x: spawnX, y: spawnY });
+      if (!isSelectionMode) {
+        setIsSelectionMode(true);
+        setSelectedNotes(new Set([note._id || note.id]));
+      }
       timerRef.current = null;
     }, 500);
   };
@@ -409,86 +408,153 @@ export default function Notes() {
       isLongPressTriggered.current = false;
       return;
     }
+    
+    if (isSelectionMode) {
+      const id = note._id || note.id;
+      const newSet = new Set(selectedNotes);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setSelectedNotes(newSet);
+      if (newSet.size === 0) {
+        setIsSelectionMode(false);
+      }
+      return;
+    }
+    
     openNoteForEdit(note);
   };
 
-  const { greeting, imageSrc } = useMemo(() => {
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return { greeting: 'Good Morning', imageSrc: '/morning-3d.png' };
-    if (hour >= 12 && hour < 17) return { greeting: 'Good Afternoon', imageSrc: '/afternoon-3d.png' };
-    if (hour >= 17 && hour < 21) return { greeting: 'Good Evening', imageSrc: '/evening-3d.png' };
-    return { greeting: 'Good Night', imageSrc: '/night-3d.png' };
-  }, []);
+  const renderNoteCard = (note: any, isPinned: boolean = false) => {
+    const isList = note.type === 'list';
+    let listItems: any[] = [];
+    if (isList && note.content) {
+      try {
+        listItems = JSON.parse(note.content);
+      } catch {
+        listItems = note.content.split('\n').filter(Boolean).map((t: any, i: number) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
+      }
+    }
+    const isDrawing = note.type === 'drawing';
+    const hasImage = isDrawing && note.content && note.content.startsWith('data:image');
+    
+    // Format date
+    let formattedDate = note.date;
+    try {
+      const date = parseISO(note.date);
+      if (!isNaN(date.getTime())) {
+        if (isToday(date)) formattedDate = format(date, 'h:mm a').toLowerCase();
+        else if (isYesterday(date)) formattedDate = 'Yesterday';
+        else formattedDate = format(date, 'MMM d, yyyy');
+      }
+    } catch {}
 
-  return (
-    <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
-      
-      {/* 1. GREETING BANNER CARD */}
-      <div className="w-full relative overflow-hidden rounded-[20px] sm:rounded-[24px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-4 sm:p-5 shadow-sm border border-black/5 dark:border-white/5 mb-4 sm:mb-6 shrink-0">
+    const textContent = note.content ? note.content.replace(/<[^>]*>?/gm, '') : '';
+    const displayTitle = note.title || textContent.slice(0, 50) || 'New Note';
 
-        {/* Background Glow */}
-        <div className="absolute right-10 top-10 h-32 w-32 sm:h-48 sm:w-48 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative z-10">
-          
-          {/* Left Content */}
-          <div>
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-white/70 dark:bg-black/20 px-3 py-1 sm:px-3 sm:py-1.5 backdrop-blur-md text-[10px] sm:text-xs">
-              <span className="text-xs sm:text-sm">{greeting.includes('Morning') ? '☀️' : greeting.includes('Night') ? '🌙' : '🌤️'}</span>
-              <span className="font-semibold text-purple-600 dark:text-purple-300">
-                {greeting.toUpperCase()}
-              </span>
-            </div>
-
-            <h1 className="mt-2 sm:mt-3 text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
-              Hello there! 👋
-            </h1>
-
-            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-300">
-              What are your thoughts today?
-            </p>
-
-            {/* Stats */}
-            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-2.5">
-              
-              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
-                <div className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-300 leading-none mb-0.5">{notes.length}</div>
-                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Notes</div>
-              </div>
-
-              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
-                <div className="text-lg sm:text-xl font-bold text-yellow-500 dark:text-yellow-400 leading-none mb-0.5">
-                  {taskCount}
-                </div>
-                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tasks</div>
-              </div>
-
-              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
-                <div className="text-lg sm:text-xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5">{reminderCount}</div>
-                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reminders</div>
-              </div>
-            </div>
+    return (
+      <motion.div
+        layoutId={`note-${note._id || note.id}`}
+        key={note._id || note.id}
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => handleNoteClick(e, note)}
+        onMouseDown={(e) => startPress(e, note)}
+        onMouseUp={cancelPress}
+        onMouseLeave={cancelPress}
+        onTouchStart={(e) => startPress(e, note)}
+        onTouchEnd={cancelPress}
+        onTouchMove={cancelPress}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          if (!isLongPressTriggered.current && !isSelectionMode) {
+            setIsSelectionMode(true);
+            setSelectedNotes(new Set([note._id || note.id]));
+            isLongPressTriggered.current = true;
+          }
+        }}
+        className={`break-inside-avoid mb-3 inline-flex w-full ${isPinned ? 'bg-[#FFF9EA] dark:bg-yellow-950/20' : 'bg-white dark:bg-[#1A1C20]'} rounded-[24px] shadow-sm border ${isSelectionMode && selectedNotes.has(note._id || note.id) ? 'border-blue-500' : 'border-black/5 dark:border-white/5'} hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex-row items-center`}
+      >
+        <div className="flex-1 p-5 flex flex-col justify-start min-w-0">
+          <span className="text-[12px] font-semibold text-black dark:text-gray-200 mb-1">
+            {formattedDate}
+          </span>
+          <div className="flex items-center gap-1.5 text-[12px] font-medium text-black dark:text-gray-300 mb-3">
+            <Folder size={14} strokeWidth={2} />
+            <span className="truncate">{note.category || 'Uncategorized'}</span>
           </div>
-
-          {/* Right Side */}
-          <div className="relative hidden md:flex justify-center">
-            <div className="absolute h-48 w-48 rounded-full border border-white/40 dark:border-white/10"></div>
-
-            <img
-              src={imageSrc}
-              alt="Greeting"
-              className="relative z-10 w-40 object-contain"
-            />
-
-            <div className="absolute left-16 bottom-10 text-3xl opacity-80">
-              ☁️
-            </div>
-
-            <div className="absolute right-12 bottom-6 text-3xl opacity-80">
-              ☁️
-            </div>
+          <div className="text-base font-bold text-black dark:text-white line-clamp-2 pr-2">
+            {displayTitle}
           </div>
         </div>
+        
+        {hasImage && (
+          <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 m-4 ml-0 rounded-[12px] overflow-hidden bg-white dark:bg-black/20">
+            <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
+          </div>
+        )}
+
+        {isSelectionMode && (
+          <div className="pr-4 flex items-center justify-center shrink-0">
+            <div className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${selectedNotes.has(note._id || note.id) ? 'bg-blue-500 border-blue-500' : 'border-gray-300 dark:border-gray-600'}`}>
+              {selectedNotes.has(note._id || note.id) && <Check size={14} className="text-white" strokeWidth={3} />}
+            </div>
+          </div>
+        )}
+      </motion.div>
+    );
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative px-4 pb-28 pt-2">
+      
+      {/* SELECTION MODE TOP BAR OVERLAY */}
+      <AnimatePresence>
+        {isSelectionMode && (
+          <motion.div 
+            initial={{ y: -100 }}
+            animate={{ y: 0 }}
+            exit={{ y: -100 }}
+            className="fixed top-0 left-0 right-0 h-[72px] bg-gray-50 dark:bg-[#111318] z-[100] flex items-center justify-between px-4 sm:px-6 border-b border-black/5 dark:border-white/5"
+          >
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => { setIsSelectionMode(false); setSelectedNotes(new Set()); }}
+                className="w-11 h-11 rounded-full bg-white dark:bg-[#2C2C2C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-black/5 dark:border-white/10 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+              >
+                <ArrowLeft size={22} strokeWidth={1.5} className="text-gray-900 dark:text-gray-100" />
+              </button>
+              <h2 className="text-[19px] font-bold text-black dark:text-white tracking-tight ml-1">
+                {selectedNotes.size} Item{selectedNotes.size !== 1 ? 's' : ''} Selected
+              </h2>
+            </div>
+            
+            <button 
+              onClick={() => {
+                if (selectedNotes.size === allNotes.length + pinnedNotes.length) {
+                  setSelectedNotes(new Set());
+                  setIsSelectionMode(false);
+                } else {
+                  const allIds = [...allNotes, ...pinnedNotes].map(n => n._id || n.id);
+                  setSelectedNotes(new Set(allIds));
+                }
+              }}
+              className="w-11 h-11 rounded-full bg-white dark:bg-[#2C2C2C] shadow-[0_2px_8px_rgba(0,0,0,0.06)] dark:shadow-none border border-black/5 dark:border-white/10 flex items-center justify-center hover:bg-gray-50 dark:hover:bg-white/10 transition-colors"
+            >
+              <div className={`w-[20px] h-[20px] rounded-[6px] border flex items-center justify-center transition-colors ${selectedNotes.size === allNotes.length + pinnedNotes.length && selectedNotes.size > 0 ? 'bg-blue-500 border-blue-500' : 'border-gray-300 dark:border-gray-500'}`}>
+                {selectedNotes.size === allNotes.length + pinnedNotes.length && selectedNotes.size > 0 && <Check size={14} className="text-white" strokeWidth={3} />}
+              </div>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="mb-4 px-1">
+        <h1 className="text-4xl font-black text-black dark:text-white tracking-tight">All</h1>
       </div>
 
       {/* 2. PINNED NOTES SECTION */}
@@ -504,107 +570,8 @@ export default function Notes() {
             </button>
           </div>
 
-          <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
-            {pinnedNotes.map((note) => {
-              const isList = note.type === 'list';
-              let listItems: any[] = [];
-              if (isList && note.content) {
-                try {
-                  listItems = JSON.parse(note.content);
-                } catch {
-                  listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
-                }
-              }
-              const isDrawing = note.type === 'drawing';
-
-              return (
-                <div
-                  key={note._id || note.id}
-                  onClick={(e) => handleNoteClick(e, note)}
-                  onMouseDown={(e) => startPress(e, note)}
-                  onMouseUp={cancelPress}
-                  onMouseLeave={cancelPress}
-                  onTouchStart={(e) => startPress(e, note)}
-                  onTouchEnd={cancelPress}
-                  onTouchMove={cancelPress}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    if (!isLongPressTriggered.current) {
-                      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                      setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
-                      isLongPressTriggered.current = true;
-                    }
-                  }}
-                  className="break-inside-avoid mb-3 inline-block w-full bg-[#FFF9EA] dark:bg-yellow-950/20 rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
-                >
-                  {isDrawing && note.content && note.content.startsWith('data:image') && (
-                    <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
-                      <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
-                    </div>
-                  )}
-                  
-                  <div className="p-4 flex flex-col flex-1">
-                    <div className="flex items-start justify-between mb-2 gap-2">
-                      <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
-                        {note.title}
-                      </h4>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePin(note);
-                        }}
-                        className="p-1 -mt-1 -mr-1 text-[#FFC107] rounded-full transition-colors shrink-0"
-                      >
-                        <Pin size={16} className="fill-[#FFC107]" />
-                      </button>
-                    </div>
-
-                    {isList ? (
-                      <div className="space-y-1.5 mb-3">
-                        {listItems.slice(0, 3).map((item: any) => (
-                          <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
-                            <div className={cn(
-                              "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
-                              item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
-                            )}>
-                              {item.checked && (
-                                <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                                  <polyline points="20 6 9 17 4 12"></polyline>
-                                </svg>
-                              )}
-                            </div>
-                            <span className={cn("truncate", item.checked && "line-through opacity-50")}>
-                              {item.text}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      !isDrawing && (
-                        <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
-                          {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
-                        </p>
-                      )
-                    )}
-
-                    <div className="mt-auto pt-2 flex flex-col gap-2">
-
-                      <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                        {(() => {
-                          try {
-                            const date = parseISO(note.date);
-                            if (isNaN(date.getTime())) return note.date;
-                            if (isToday(date)) return format(date, 'h:mm a');
-                            if (isYesterday(date)) return 'Yesterday';
-                            return format(date, 'MMM d, yyyy');
-                          } catch { return note.date; }
-                        })()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div className={getContainerClass()}>
+            {pinnedNotes.map((note) => renderNoteCard(note, true))}
           </div>
         </div>
       )}
@@ -612,127 +579,13 @@ export default function Notes() {
       {/* 3. ALL NOTES SECTION */}
       <div>
         <div className="flex justify-between items-center mb-4 px-1">
-          <div className="flex items-center gap-2">
-            <FileText size={14} className="text-gray-400" />
-            <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">All Notes</h3>
-          </div>
-          <button 
-            onClick={() => setSortOrder(prev => prev === 'recent' ? 'oldest' : 'recent')}
-            className="flex items-center gap-1 text-xs font-medium text-gray-500 hover:text-gray-700 transition-colors"
-          >
-            {sortOrder === 'recent' ? 'Recent' : 'Oldest'} <ChevronDown size={12} strokeWidth={2.5} className={`transition-transform ${sortOrder === 'oldest' ? 'rotate-180' : ''}`} />
-          </button>
+          <h2 className="text-xl font-bold text-black dark:text-white">Today</h2>
         </div>
 
         {allNotes.length > 0 && (
-          <div className="columns-2 gap-3 sm:columns-3 md:columns-4 w-full">
+          <div className={getContainerClass()}>
             <AnimatePresence>
-              {allNotes.map((note) => {
-                const isList = note.type === 'list';
-                let listItems: any[] = [];
-                if (isList && note.content) {
-                  try {
-                    listItems = JSON.parse(note.content);
-                  } catch {
-                    listItems = note.content.split('\n').filter(Boolean).map((t, i) => ({ id: i, text: t.replace(/^-\s*/, ''), checked: false }));
-                  }
-                }
-                const isDrawing = note.type === 'drawing';
-
-                return (
-                  <motion.div
-                    layoutId={`note-${note._id || note.id}`}
-                    key={note._id || note.id}
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    onClick={(e) => handleNoteClick(e, note)}
-                    onMouseDown={(e) => startPress(e, note)}
-                    onMouseUp={cancelPress}
-                    onMouseLeave={cancelPress}
-                    onTouchStart={(e) => startPress(e, note)}
-                    onTouchEnd={cancelPress}
-                    onTouchMove={cancelPress}
-                    onContextMenu={(e) => {
-                      e.preventDefault();
-                      if (!isLongPressTriggered.current) {
-                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                        setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
-                        isLongPressTriggered.current = true;
-                      }
-                    }}
-                    className="break-inside-avoid mb-3 inline-block w-full bg-white dark:bg-[#1A1C20] rounded-[20px] shadow-sm border border-black/5 dark:border-white/5 hover:shadow-md transition-all duration-300 relative cursor-pointer group overflow-hidden flex flex-col"
-                  >
-                    {isDrawing && note.content && note.content.startsWith('data:image') && (
-                      <div className="w-full h-32 bg-gray-100 dark:bg-black/20 shrink-0">
-                        <img src={note.content} alt="Drawing" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-
-                    <div className="p-4 flex flex-col flex-1">
-                      <div className="flex items-start justify-between mb-2 gap-2">
-                        <h4 className="text-sm font-black text-gray-900 dark:text-gray-100 leading-snug">
-                          {note.title}
-                        </h4>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                            setContextMenu({ note, x: rect.left, y: Math.min(rect.bottom + 4, window.innerHeight - 200) });
-                          }}
-                          className="p-1 -mt-1 -mr-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full transition-colors shrink-0"
-                        >
-                          <MoreVertical size={16} />
-                        </button>
-                      </div>
-
-                      {isList ? (
-                        <div className="space-y-1.5 mb-3">
-                          {listItems.slice(0, 3).map((item: any) => (
-                            <div key={item.id} className="flex items-center gap-2 text-[11px] text-gray-700 dark:text-gray-300 font-semibold">
-                              <div className={cn(
-                                "w-3.5 h-3.5 rounded-full border shrink-0 flex items-center justify-center transition-all",
-                                item.checked ? "border-[#FFC107] bg-[#FFC107]" : "border-gray-300 dark:border-white/30"
-                              )}>
-                                {item.checked && (
-                                  <svg width="7" height="7" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round">
-                                    <polyline points="20 6 9 17 4 12"></polyline>
-                                  </svg>
-                                )}
-                              </div>
-                              <span className={cn("truncate", item.checked && "line-through opacity-50")}>
-                                {item.text}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        !isDrawing && (
-                          <p className="text-[11px] text-gray-500 dark:text-gray-400 font-semibold line-clamp-3 mb-3 whitespace-pre-wrap">
-                            {note.content ? note.content.replace(/<[^>]*>?/gm, '') : ''}
-                          </p>
-                        )
-                      )}
-
-                      <div className="mt-auto pt-2 flex flex-col gap-2">
-
-                        <span className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tight">
-                          {(() => {
-                            try {
-                              const date = parseISO(note.date);
-                              if (isNaN(date.getTime())) return note.date;
-                              if (isToday(date)) return format(date, 'h:mm a');
-                              if (isYesterday(date)) return 'Yesterday';
-                              return format(date, 'MMM d, yyyy');
-                            } catch { return note.date; }
-                          })()}
-                        </span>
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
+              {allNotes.map((note) => renderNoteCard(note, false))}
             </AnimatePresence>
           </div>
         )}
@@ -761,7 +614,7 @@ export default function Notes() {
 
       {/* Note Context Menu */}
       <AnimatePresence>
-        {contextMenu && (
+        {!isSelectionMode && contextMenu && (
           <NoteContextMenu
             note={contextMenu.note}
             position={{ x: contextMenu.x, y: contextMenu.y }}
@@ -777,6 +630,74 @@ export default function Notes() {
           />
         )}
       </AnimatePresence>
+
+      {/* SELECTION MODE BOTTOM ACTION BAR */}
+      <AnimatePresence>
+        {isSelectionMode && (
+          <motion.div 
+            initial={{ y: 100 }}
+            animate={{ y: 0 }}
+            exit={{ y: 100 }}
+            className="fixed bottom-0 left-0 right-0 h-[60px] bg-white dark:bg-[#1A1C20] z-[100] flex items-center justify-around px-2 border-t border-gray-100 dark:border-white/5 pb-1"
+          >
+            <button className="flex flex-col items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors p-1">
+              <Pin size={20} strokeWidth={1.5} />
+              <span className="text-[10px] font-semibold tracking-wide">Pin</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors p-1">
+              <Lock size={20} strokeWidth={1.5} />
+              <span className="text-[10px] font-semibold tracking-wide">Lock</span>
+            </button>
+            <button className="flex flex-col items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors p-1">
+              <Folder size={20} strokeWidth={1.5} />
+              <span className="text-[10px] font-semibold tracking-wide">Move</span>
+            </button>
+            <button 
+              onClick={() => setShowDeleteConfirm(true)}
+              className="flex flex-col items-center gap-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-colors p-1"
+            >
+              <Trash2 size={20} strokeWidth={1.5} />
+              <span className="text-[10px] font-semibold tracking-wide">Delete</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      {/* DELETE CONFIRMATION MODAL */}
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-[110] flex items-end justify-center sm:items-center p-4 bg-black/40">
+            <motion.div
+              initial={{ opacity: 0, y: 100, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 100, scale: 0.95 }}
+              className="bg-white dark:bg-[#1A1C20] w-full max-w-[340px] rounded-[32px] p-6 text-center shadow-2xl mb-4 sm:mb-0"
+            >
+              <h3 className="text-xl font-bold text-black dark:text-white mb-3 tracking-tight">
+                Delete Note{selectedNotes.size !== 1 ? 's' : ''}
+              </h3>
+              <p className="text-[15px] leading-snug text-gray-600 dark:text-gray-400 mb-8 px-2 font-medium">
+                {selectedNotes.size === 1 ? 'This file' : 'These files'} will be moved to Recently Deleted and kept there for 30 days.
+              </p>
+              <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/10 pt-4 px-2">
+                <button 
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 text-[17px] font-semibold text-black dark:text-white active:opacity-70 transition-opacity py-1"
+                >
+                  Cancel
+                </button>
+                <div className="w-[1px] h-6 bg-gray-200 dark:bg-white/10 mx-2" />
+                <button 
+                  onClick={handleBulkDelete}
+                  className="flex-1 text-[17px] font-semibold text-[#FF3B30] active:opacity-70 transition-opacity py-1"
+                >
+                  Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

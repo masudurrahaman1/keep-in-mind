@@ -54,7 +54,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
               to={item.path}
               onClick={onMobileClose}
               className={cn(
-                "flex items-center gap-4 px-5 py-4 transition-all hover:bg-neutral-50 dark:hover:bg-[#32363F] group",
+                "flex items-center gap-4 px-5 py-[10px] transition-all hover:bg-neutral-50 dark:hover:bg-[#32363F] group",
                 active ? "bg-neutral-50 dark:bg-[#32363F]" : ""
               )}
             >
@@ -84,7 +84,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
 
       <div className="flex-1 overflow-y-auto no-scrollbar px-4 pb-6">
         {/* Folders Section */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between px-2 mb-3">
             <h3 className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">Folders</h3>
             <button className="text-[13px] font-medium text-blue-500 hover:text-blue-600">New</button>
@@ -93,7 +93,7 @@ export default function Sidebar({ isCollapsed, isMobileOpen, onMobileClose }: Si
         </div>
 
         {/* More Section */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between px-2 mb-3">
             <h3 className="text-[13px] font-medium text-neutral-500 dark:text-neutral-400">More</h3>
           </div>

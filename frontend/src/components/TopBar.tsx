@@ -1,6 +1,7 @@
-import { Search, Bell, Settings, User, Menu, X, ArrowLeft, FileText, Plus, PanelLeft, List } from 'lucide-react';
+import { Search, Bell, Settings, User, Menu, X, ArrowLeft, FileText, Plus, PanelLeft, List, LayoutGrid, Rows } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { usePreferences } from '../context/PreferencesContext';
 import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import NotificationPanel from './NotificationPanel';
@@ -25,6 +26,8 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isViewMenuOpen, setIsViewMenuOpen] = useState(false);
+  const { viewMode, setViewMode } = usePreferences();
 
   // Define sub-pages that need a back button and specific title
   const PAGE_TITLES: Record<string, string> = {
@@ -191,7 +194,7 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
         {pageTitle && (currentPath === '/settings' || currentPath.startsWith('/drawing')) ? (
            <span className="md:hidden text-lg font-heading font-bold text-on-surface truncate px-2">{pageTitle}</span>
         ) : (currentPath === '/notes' || currentPath === '/' || currentPath === '/explore' || currentPath === '/recent') ? (
-           <div className="md:hidden flex items-center bg-white dark:bg-[#2C2C2C] rounded-full p-[5px] shadow-sm mx-auto">
+           <div className="flex items-center bg-white dark:bg-[#2C2C2C] rounded-full p-[5px] shadow-sm mx-auto">
              <button className="px-5 py-[6px] rounded-full bg-[#F3F4F6] dark:bg-[#1C1D21] text-blue-600 dark:text-blue-400 font-bold text-[15px] transition-colors shadow-sm">
                Notes
              </button>
@@ -200,40 +203,64 @@ export default function TopBar({ searchQuery, setSearchQuery, onToggleSidebar, o
              </button>
            </div>
         ) : (
-           <span className="md:hidden text-lg font-black tracking-tighter text-[#1A1F2C] dark:text-[#FFFDF5]">
+           <span className="text-lg font-black tracking-tighter text-[#1A1F2C] dark:text-[#FFFDF5]">
              KeepIn<span className="text-[#FFC107]">Mind</span>
            </span>
         )}
 
-        <div className={clsx(
-          "w-full max-w-2xl hidden sm:block",
-          (currentPath === '/settings' || currentPath.startsWith('/drawing')) && "sm:hidden md:block"
-        )}>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
-              <Search size={18} />
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2.5 rounded-full bg-surface-container-high text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary focus:bg-surface transition-all text-sm"
-              placeholder="Search notes, labels, spaces..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Right: Actions */}
       <div className="flex items-center justify-end gap-1 sm:gap-2 shrink-0 w-12 sm:w-48 lg:w-64">
-        {/* Mobile search icon - Hide on deep pages */}
+        {/* View Toggle Menu */}
         {!canGoBack && (
-          <button
-            onClick={() => setIsMobileSearchOpen(true)}
-            className="sm:hidden p-2 bg-white dark:bg-[#2C2C2C] shadow-sm rounded-full transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center text-neutral-800 dark:text-neutral-200"
-          >
-            <List size={24} strokeWidth={2} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => setIsViewMenuOpen(!isViewMenuOpen)}
+              className="p-2 bg-white dark:bg-[#2C2C2C] shadow-sm rounded-full transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center text-neutral-800 dark:text-neutral-200"
+            >
+              <List size={24} strokeWidth={2} />
+            </button>
+            
+            {/* Dropdown Menu */}
+            {isViewMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setIsViewMenuOpen(false)} />
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-[#2A2D35] rounded-2xl shadow-xl border border-neutral-100 dark:border-neutral-800 py-2 z-50 animate-in fade-in zoom-in duration-200">
+                  <button 
+                    onClick={() => { setViewMode('list'); setIsViewMenuOpen(false); }}
+                    className={clsx(
+                      "w-full px-4 py-3 flex items-center gap-3 text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-[#32363F]",
+                      viewMode === 'list' ? "text-blue-600 dark:text-blue-400 font-semibold" : "text-neutral-700 dark:text-neutral-300 font-medium"
+                    )}
+                  >
+                    <List size={20} strokeWidth={viewMode === 'list' ? 2.5 : 2} />
+                    List View
+                  </button>
+                  <button 
+                    onClick={() => { setViewMode('card'); setIsViewMenuOpen(false); }}
+                    className={clsx(
+                      "w-full px-4 py-3 flex items-center gap-3 text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-[#32363F]",
+                      viewMode === 'card' ? "text-blue-600 dark:text-blue-400 font-semibold" : "text-neutral-700 dark:text-neutral-300 font-medium"
+                    )}
+                  >
+                    <Rows size={20} strokeWidth={viewMode === 'card' ? 2.5 : 2} />
+                    Card View
+                  </button>
+                  <button 
+                    onClick={() => { setViewMode('grid'); setIsViewMenuOpen(false); }}
+                    className={clsx(
+                      "w-full px-4 py-3 flex items-center gap-3 text-[15px] transition-colors hover:bg-neutral-50 dark:hover:bg-[#32363F]",
+                      viewMode === 'grid' ? "text-blue-600 dark:text-blue-400 font-semibold" : "text-neutral-700 dark:text-neutral-300 font-medium"
+                    )}
+                  >
+                    <LayoutGrid size={20} strokeWidth={viewMode === 'grid' ? 2.5 : 2} />
+                    Grid View
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         )}
 
         {/* Notifications */}

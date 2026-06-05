@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useState, ReactNode } from
 export type ThemeColor = 'yellow' | 'blue' | 'green' | 'purple' | 'rose' | 'orange';
 export type FontStyle = 'inter' | 'outfit' | 'roboto' | 'opensans';
 export type TextSize = 'small' | 'medium' | 'large';
+export type ViewMode = 'list' | 'card' | 'grid';
 
 interface PreferencesContextType {
   themeColor: ThemeColor;
@@ -14,6 +15,8 @@ interface PreferencesContextType {
   hapticFeedback: boolean;
   setHapticFeedback: (enabled: boolean) => void;
   triggerHaptic: () => void;
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
 }
 
 const PreferencesContext = createContext<PreferencesContextType | undefined>(undefined);
@@ -36,6 +39,10 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
     return saved !== null ? saved === 'true' : true;
   });
 
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    return (localStorage.getItem('keep-in-mind-view-mode') as ViewMode) || 'card';
+  });
+
   const setThemeColor = (color: ThemeColor) => {
     setThemeColorState(color);
     localStorage.setItem('keep-in-mind-color', color);
@@ -54,6 +61,11 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   const setHapticFeedback = (enabled: boolean) => {
     setHapticFeedbackState(enabled);
     localStorage.setItem('keep-in-mind-haptic', String(enabled));
+  };
+
+  const setViewMode = (mode: ViewMode) => {
+    setViewModeState(mode);
+    localStorage.setItem('keep-in-mind-view-mode', mode);
   };
 
   const triggerHaptic = () => {
@@ -99,7 +111,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         fontStyle, setFontStyle,
         textSize, setTextSize,
         hapticFeedback, setHapticFeedback,
-        triggerHaptic
+        triggerHaptic,
+        viewMode, setViewMode
       }}
     >
       {children}
