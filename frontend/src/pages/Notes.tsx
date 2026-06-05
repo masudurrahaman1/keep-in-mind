@@ -424,67 +424,67 @@ export default function Notes() {
     <div className="max-w-4xl mx-auto w-full flex flex-col min-h-full relative z-10 px-4 pb-28 pt-2">
       
       {/* 1. GREETING BANNER CARD */}
-      <div className="w-full relative overflow-hidden rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-4 sm:p-6 shadow-lg mb-6 sm:mb-8 shrink-0">
+      <div className="w-full relative overflow-hidden rounded-[20px] sm:rounded-[24px] bg-gradient-to-r from-purple-50 via-pink-50 to-yellow-50 dark:from-purple-900/40 dark:via-pink-900/40 dark:to-yellow-900/40 p-4 sm:p-5 shadow-sm border border-black/5 dark:border-white/5 mb-4 sm:mb-6 shrink-0">
 
         {/* Background Glow */}
-        <div className="absolute right-10 top-10 h-32 w-32 sm:h-64 sm:w-64 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
+        <div className="absolute right-10 top-10 h-32 w-32 sm:h-48 sm:w-48 rounded-full bg-white/30 dark:bg-white/5 blur-3xl"></div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center relative z-10">
           
           {/* Left Content */}
           <div>
-            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-white/70 dark:bg-black/20 px-3 py-1.5 sm:px-4 sm:py-2 backdrop-blur-md text-[10px] sm:text-xs">
+            <div className="inline-flex items-center gap-1.5 sm:gap-2 rounded-full bg-white/70 dark:bg-black/20 px-3 py-1 sm:px-3 sm:py-1.5 backdrop-blur-md text-[10px] sm:text-xs">
               <span className="text-xs sm:text-sm">{greeting.includes('Morning') ? '☀️' : greeting.includes('Night') ? '🌙' : '🌤️'}</span>
               <span className="font-semibold text-purple-600 dark:text-purple-300">
                 {greeting.toUpperCase()}
               </span>
             </div>
 
-            <h1 className="mt-3 sm:mt-5 text-3xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight">
+            <h1 className="mt-2 sm:mt-3 text-2xl sm:text-4xl font-extrabold text-slate-900 dark:text-white leading-tight">
               Hello there! 👋
             </h1>
 
-            <p className="mt-1.5 sm:mt-3 text-sm sm:text-xl text-slate-500 dark:text-slate-300">
+            <p className="mt-1 sm:mt-2 text-sm sm:text-base text-slate-500 dark:text-slate-300">
               What are your thoughts today?
             </p>
 
             {/* Stats */}
-            <div className="mt-5 sm:mt-8 flex flex-wrap gap-2 sm:gap-4">
+            <div className="mt-3 sm:mt-4 flex flex-wrap gap-2 sm:gap-2.5">
               
-              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
-                <div className="text-xl sm:text-3xl font-bold text-purple-600 dark:text-purple-300 leading-none mb-0.5 sm:mb-1">{notes.length}</div>
-                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Notes</div>
+              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
+                <div className="text-lg sm:text-xl font-bold text-purple-600 dark:text-purple-300 leading-none mb-0.5">{notes.length}</div>
+                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Notes</div>
               </div>
 
-              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
-                <div className="text-xl sm:text-3xl font-bold text-yellow-500 dark:text-yellow-400 leading-none mb-0.5 sm:mb-1">
+              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
+                <div className="text-lg sm:text-xl font-bold text-yellow-500 dark:text-yellow-400 leading-none mb-0.5">
                   {taskCount}
                 </div>
-                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Tasks</div>
+                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tasks</div>
               </div>
 
-              <div className="rounded-2xl sm:rounded-3xl bg-white/70 dark:bg-black/20 px-4 py-2.5 sm:px-6 sm:py-4 backdrop-blur-md flex-1 min-w-[80px]">
-                <div className="text-xl sm:text-3xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5 sm:mb-1">{reminderCount}</div>
-                <div className="text-[10px] sm:text-base font-medium text-gray-600 dark:text-gray-300 uppercase sm:capitalize tracking-wider sm:tracking-normal">Reminders</div>
+              <div className="rounded-[12px] sm:rounded-[16px] bg-white/70 dark:bg-black/20 px-3 py-2 sm:px-4 sm:py-2 backdrop-blur-md flex-1 min-w-[70px]">
+                <div className="text-lg sm:text-xl font-bold text-violet-500 dark:text-violet-300 leading-none mb-0.5">{reminderCount}</div>
+                <div className="text-[9px] sm:text-[10px] font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Reminders</div>
               </div>
             </div>
           </div>
 
           {/* Right Side */}
           <div className="relative hidden md:flex justify-center">
-            <div className="absolute h-80 w-80 rounded-full border border-white/40 dark:border-white/10"></div>
+            <div className="absolute h-48 w-48 rounded-full border border-white/40 dark:border-white/10"></div>
 
             <img
               src={imageSrc}
               alt="Greeting"
-              className="relative z-10 w-64 object-contain"
+              className="relative z-10 w-40 object-contain"
             />
 
-            <div className="absolute left-10 bottom-24 text-5xl opacity-80">
+            <div className="absolute left-16 bottom-10 text-3xl opacity-80">
               ☁️
             </div>
 
-            <div className="absolute right-6 bottom-8 text-5xl opacity-80">
+            <div className="absolute right-12 bottom-6 text-3xl opacity-80">
               ☁️
             </div>
           </div>
