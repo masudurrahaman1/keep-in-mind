@@ -32,7 +32,7 @@ export default function Layout() {
   const fabTarget = location.pathname === '/tasks' ? '/tasks/new' : '/reminders/new';
 
   return (
-    <div className="flex h-screen bg-white dark:bg-[#111318]">
+    <div className="flex h-screen bg-[#F2F2F2] dark:bg-[#111318]">
       {/* Mobile Backdrop */}
       {isMobileMenuOpen && (
         <div
