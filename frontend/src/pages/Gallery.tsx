@@ -23,9 +23,6 @@ import Loader from '../components/Loader';
 import { FolderActionsSheet } from '../components/FolderActionsSheet';
 import { useLongPress } from '../hooks/useLongPress';
 import RenameFolderModal from '../modals/RenameFolderModal';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/database';
-import { apiService } from '../services/apiService';
 
 const FolderCard = ({ cf, docCount, onClick, onLongPress }: { cf: any, docCount: number, onClick: () => void, onLongPress: () => void }) => {
   const longPressProps = useLongPress(
@@ -172,9 +169,17 @@ export default function Gallery() {
   const handleRenameFolder = async (folderId: string, newName: string) => {
     if (!token) return;
     try {
-      await apiService.request(`/folders/${folderId}`, 'PATCH', { name: newName });
-      await db.folders.update(folderId, { name: newName, syncStatus: 'pending', updatedAt: new Date().toISOString() });
-      fetchCustomFolders();
+      const res = await fetch(`${API_BASE}/folders/${folderId}`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ name: newName })
+      });
+      if (res.ok) {
+        fetchCustomFolders();
+      }
     } catch (err) {
       console.error('Failed to rename folder:', err);
     }
@@ -183,9 +188,13 @@ export default function Gallery() {
   const handleDeleteFolder = async (folder: any) => {
     if (!token) return;
     try {
-      await apiService.request(`/folders/${folder._id}`, 'DELETE');
-      await db.folders.update(folder._id, { syncStatus: 'deleted', updatedAt: new Date().toISOString() });
-      fetchCustomFolders();
+      const res = await fetch(`${API_BASE}/folders/${folder._id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        fetchCustomFolders();
+      }
     } catch (err) {
       console.error('Failed to delete folder:', err);
     }
@@ -295,20 +304,14 @@ export default function Gallery() {
     }
   };
 
-  const liveCustomFolders = useLiveQuery(() => db.folders.filter(f => f.syncStatus !== 'deleted' && !f.isSystem).toArray(), []) || [];
-
-  useEffect(() => {
-    if (liveCustomFolders.length > 0 || !navigator.onLine) {
-      setCustomFolders(liveCustomFolders.map(f => ({...f, id: f._id})));
-    }
-  }, [liveCustomFolders]);
-
   const fetchCustomFolders = async () => {
-    if (!token || !navigator.onLine) return;
+    if (!token) return;
     try {
-      const data = await apiService.request('/folders');
-      if (data && Array.isArray(data)) {
-        await db.folders.bulkPut(data.map((f: any) => ({ ...f, syncStatus: 'synced', _id: f._id })));
+      const res = await fetch(`${API_BASE}/folders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
         setCustomFolders(data.filter((f: any) => !f.isSystem));
       }
     } catch (err) {
@@ -319,11 +322,18 @@ export default function Gallery() {
   const handleCreateFolder = async (name: string, colorClass: string) => {
     if (!token) return;
     try {
-      const folderData = { name, colorClass };
-      const res = await apiService.request('/folders', 'POST', folderData);
-      const folderIdStr = res._id || res.id;
-      await db.folders.put({ ...res, ...folderData, syncStatus: navigator.onLine ? 'synced' : 'pending', updatedAt: new Date().toISOString(), _id: folderIdStr });
-      setCustomFolders(prev => [{ ...res, ...folderData, _id: folderIdStr }, ...prev]);
+      const res = await fetch(`${API_BASE}/folders`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` 
+        },
+        body: JSON.stringify({ name, colorClass })
+      });
+      if (res.ok) {
+        const newFolder = await res.json();
+        setCustomFolders(prev => [newFolder, ...prev]);
+      }
     } catch (err) {
       console.error('Failed to create folder:', err);
     }
@@ -364,70 +374,15 @@ export default function Gallery() {
 
   const uploadFile = async (file: File) => {
     if (!token) return;
-    
-    // We only require Google connection for online immediate uploads
-    if (navigator.onLine && !isGoogleConnected) {
+    if (!isGoogleConnected) {
       setNoGoogleDrive(true);
       return;
     }
     setNoGoogleDrive(false);
 
     const uploadId = Math.random().toString(36).substring(7);
-    
-    if (!navigator.onLine) {
-      // Offline Flow
-      const newUpload = { id: uploadId, name: file.name, progress: 100, status: 'completed' as UploadStatus };
-      setUploadQueue(prev => [...prev, newUpload]);
-
-      try {
-        const arrayBuffer = await file.arrayBuffer();
-        const docIdStr = uploadId;
-        const newDoc = {
-          _id: docIdStr,
-          title: file.name,
-          mimeType: file.type,
-          size: file.size,
-          category: 'Other', // default fallback
-          updatedAt: new Date().toISOString(),
-          syncStatus: 'pending' as const,
-          fileData: arrayBuffer
-        };
-
-        // Save to DB and Queue
-        await db.documents.put(newDoc);
-        await db.syncQueue.add({
-          action: 'create',
-          entityType: 'document',
-          entityId: docIdStr,
-          payload: { fileName: file.name, fileType: file.type }, // We rely on fileData in the db
-          timestamp: new Date().toISOString(),
-          retryCount: 0
-        });
-
-        // Add to history
-        setUploadHistory(prev => [{
-          id: uploadId,
-          name: file.name,
-          status: 'completed' as UploadStatus,
-          progress: 100,
-          timestamp: new Date()
-        }, ...prev]);
-
-        // Optimistically add to media state
-        setMedia(prev => [newDoc, ...prev]);
-
-        setTimeout(() => {
-          setUploadQueue(prev => prev.filter(item => item.id !== uploadId));
-        }, 3000);
-
-      } catch (err) {
-        console.error('Failed to queue offline upload', err);
-      }
-      return;
-    }
-
-    // Online Flow
     const newUpload = { id: uploadId, name: file.name, progress: 0, status: 'uploading' as UploadStatus };
+    
     setUploadQueue(prev => [...prev, newUpload]);
 
     const formData = new FormData();

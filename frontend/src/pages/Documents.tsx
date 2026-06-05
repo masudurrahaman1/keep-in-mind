@@ -8,10 +8,6 @@ import { useAuth } from '../context/AuthContext';
 import Loader from '../components/Loader';
 import CreateFolderModal from '../modals/CreateFolderModal';
 
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db/database';
-import { apiService } from '../services/apiService';
-
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 
 export default function Documents() {
@@ -33,26 +29,19 @@ export default function Documents() {
     'Folder': Folder
   };
 
-  const liveFolders = useLiveQuery(() => db.folders.filter(f => f.syncStatus !== 'deleted').toArray(), []) || [];
-
-  useEffect(() => {
-    if (liveFolders.length > 0 || !navigator.onLine) {
-      setFolders(liveFolders.map(f => ({...f, id: f._id})));
-      setLoading(false);
-    }
-  }, [liveFolders]);
-
   useEffect(() => {
     fetchFolders();
     fetchCounts();
   }, [token]);
 
   const fetchFolders = async () => {
-    if (!token || !navigator.onLine) return;
+    if (!token) return;
     try {
-      const data = await apiService.request('/folders');
-      if (data && Array.isArray(data)) {
-        await db.folders.bulkPut(data.map((f: any) => ({ ...f, syncStatus: 'synced', _id: f._id })));
+      const res = await fetch(`${API_BASE}/folders`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
         setFolders(data);
       }
     } catch (err) {
@@ -79,12 +68,19 @@ export default function Documents() {
 
   const handleCreateFolder = async (name: string, colorClass: string) => {
     try {
-      const folderData = { name, colorClass, iconName: 'Folder' };
-      const res = await apiService.request('/folders', 'POST', folderData);
-      const folderIdStr = res._id || res.id;
-      await db.folders.put({ ...res, ...folderData, syncStatus: navigator.onLine ? 'synced' : 'pending', updatedAt: new Date().toISOString(), _id: folderIdStr });
-      setFolders(prev => [{ ...res, ...folderData, _id: folderIdStr }, ...prev]);
-      setIsCreateModalOpen(false);
+      const res = await fetch(`${API_BASE}/folders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ name, colorClass, iconName: 'Folder' })
+      });
+      if (res.ok) {
+        const newFolder = await res.json();
+        setFolders(prev => [newFolder, ...prev]);
+        setIsCreateModalOpen(false);
+      }
     } catch (err) {
       console.error('Failed to create folder', err);
     }
